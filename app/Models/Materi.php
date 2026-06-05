@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Master\Guru;
+use App\Models\Master\Mapel;
+
+class Materi extends Model
+{
+    use HasFactory;
+
+    protected $table = 'materi';
+
+    protected $fillable = [
+        'guru_id',
+        'mapel_id',
+        'judul',
+        'deskripsi',
+        'kelas',
+        'file',
+        'youtube',
+    ];
+
+    protected $casts = [
+        'kelas' => 'array',
+        'file' => 'array',
+    ];
+
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class);
+    }
+
+    public function mapel()
+    {
+        return $this->belongsTo(Mapel::class);
+    }
+}

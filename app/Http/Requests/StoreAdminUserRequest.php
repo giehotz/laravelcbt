@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreAdminUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()->hasRole('superadmin');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'username' => 'nullable|string|max:255|unique:users,username',
+            'password' => 'required|string|min:8',
+            'role' => 'required|string|in:superadmin,operator,proktor,kepsek',
+        ];
+    }
+}
