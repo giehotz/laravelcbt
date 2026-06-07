@@ -8,6 +8,7 @@ use App\Models\CbtKopAbsensi;
 use App\Models\CbtKopBerita;
 use App\Models\CbtKopKartu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -15,7 +16,7 @@ class GuruCetakController extends Controller
 {
     public function index()
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwals = Jadwal::with('bankSoal')
@@ -120,7 +121,7 @@ class GuruCetakController extends Controller
 
     private function resolveJadwal(Request $request): Jadwal
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwal = Jadwal::with('bankSoal')

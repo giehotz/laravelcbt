@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\Nilai;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class GuruHasilUjianController extends Controller
 {
     public function index()
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwals = Jadwal::with('bankSoal')
@@ -27,7 +28,7 @@ class GuruHasilUjianController extends Controller
 
     public function nilai(Jadwal $jadwal)
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwal->load('bankSoal');

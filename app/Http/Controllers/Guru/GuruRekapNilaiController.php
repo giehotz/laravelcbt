@@ -9,6 +9,7 @@ use App\Models\Master\GuruMapelKelas;
 use App\Models\Master\Kelas;
 use App\Models\Master\Mapel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -16,7 +17,7 @@ class GuruRekapNilaiController extends Controller
 {
     public function index()
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $assignmentIds = GuruMapelKelas::where('guru_id', $guru->id)->get();
@@ -37,7 +38,7 @@ class GuruRekapNilaiController extends Controller
 
     public function data(Request $request)
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $validated = $request->validate([

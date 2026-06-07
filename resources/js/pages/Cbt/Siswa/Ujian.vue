@@ -27,6 +27,9 @@
                     <p class="text-sm text-gray-500">
                         {{ jadwal.bank_soal?.nama }}
                     </p>
+                    <p class="text-xs text-gray-400">
+                        Soal {{ currentQuestionPosition }} / {{ totalQuestionCount }}
+                    </p>
                 </div>
             </div>
 
@@ -47,7 +50,6 @@
                     Menyimpan...
                 </div>
 
-                <!-- Sisa Waktu (Placeholder, need actual implementation based on DurasiSiswa) -->
                 <div
                     class="rounded-lg bg-gray-900 px-4 py-2 font-mono text-lg font-bold text-white"
                 >
@@ -95,7 +97,7 @@
 
                     <div
                         class="prose mb-8 max-w-none flex-1 text-gray-800"
-                        v-html="activeSoal.soal.soal"
+                        v-html="activeSoal.soal?.soal || ''"
                     ></div>
 
                     <!-- Opsi Jawaban (Jika PG) -->
@@ -129,14 +131,7 @@
                             </div>
                             <div
                                 class="prose max-w-none flex-1 text-gray-700"
-                                v-html="
-                                    activeSoal.soal[
-                                        `file_${originalOpsi.toLowerCase()}`
-                                    ] ||
-                                    activeSoal.soal[
-                                        `opsi_${originalOpsi.toLowerCase()}`
-                                    ]
-                                "
+                                v-html="getOptionHtml(originalOpsi)"
                             ></div>
                         </label>
                     </div>
@@ -178,14 +173,7 @@
                             </div>
                             <div
                                 class="prose max-w-none flex-1 text-gray-700"
-                                v-html="
-                                    activeSoal.soal[
-                                        `file_${originalOpsi.toLowerCase()}`
-                                    ] ||
-                                    activeSoal.soal[
-                                        `opsi_${originalOpsi.toLowerCase()}`
-                                    ]
-                                "
+                                v-html="getOptionHtml(originalOpsi)"
                             ></div>
                         </label>
                     </div>
@@ -454,11 +442,9 @@
     </Dialog>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { useExamStore } from '@/stores/exam';
-import { mulai, soal, selesai } from '@/routes/ujian';
+<script setup lang="ts">
 import { router } from '@inertiajs/vue3';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import {
     Dialog,
     DialogClose,
@@ -468,6 +454,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { mulai, soal, selesai } from '@/routes/ujian';
+import { useExamStore } from '@/stores/exam';
 
 const props = defineProps({
     jadwal: Object,
@@ -487,9 +475,13 @@ const activeSoal = computed(() => examStore.activeSoal);
 
 // Helper to safely parse JSON answers for Ganda Kompleks and Menjodohkan
 const parseJawaban = (raw) => {
-    if (!raw) return [];
+    if (!raw) {
+        return [];
+    }
+
     try {
         const parsed = JSON.parse(raw);
+
         return Array.isArray(parsed) ? parsed : [];
     } catch {
         return [];
@@ -498,25 +490,72 @@ const parseJawaban = (raw) => {
 
 // Mapping original A,B,C,D,E to what user sees (alias)
 const pgOptionsMapping = computed(() => {
-    if (!activeSoal.value) return {};
+    if (!activeSoal.value) {
+        return {};
+    }
+
     const s = activeSoal.value;
     const map = {};
-    if (s.opsi_alias_a) map['A'] = s.opsi_alias_a;
-    if (s.opsi_alias_b) map['B'] = s.opsi_alias_b;
-    if (s.opsi_alias_c) map['C'] = s.opsi_alias_c;
-    if (s.opsi_alias_d) map['D'] = s.opsi_alias_d;
-    if (s.opsi_alias_e) map['E'] = s.opsi_alias_e;
 
-    // Sort keys by alias value (A, B, C, D, E)
+    if (s.opsi_alias_a) {
+        map['A'] = s.opsi_alias_a;
+    }
+
+    if (s.opsi_alias_b) {
+        map['B'] = s.opsi_alias_b;
+    }
+
+    if (s.opsi_alias_c) {
+        map['C'] = s.opsi_alias_c;
+    }
+
+    if (s.opsi_alias_d) {
+        map['D'] = s.opsi_alias_d;
+    }
+
+    if (s.opsi_alias_e) {
+        map['E'] = s.opsi_alias_e;
+    }
+
     return Object.fromEntries(
         Object.entries(map).sort(([, a], [, b]) => a.localeCompare(b)),
     );
 });
 
+const currentQuestionPosition = computed(() => {
+    if (!activeSoal.value || examStore.soalList.length === 0) {
+        return 0;
+    }
+
+    return (
+        examStore.soalList.findIndex((s) => s.id === activeSoal.value.id) + 1
+    );
+});
+
+const totalQuestionCount = computed(() => examStore.soalList.length);
+
+const getOptionHtml = (originalOpsi) => {
+    if (!activeSoal.value) {
+        return '';
+    }
+
+    const key = originalOpsi.toLowerCase();
+    const soalData = activeSoal.value.soal || {};
+
+    return (
+        soalData[`file_${key}`] ||
+        soalData[`file${originalOpsi}`] ||
+        soalData[`opsi_${key}`] ||
+        soalData[`opsi${originalOpsi}`] ||
+        ''
+    );
+};
+
 // Reset local v-model whenever active soal changes
 watch(activeSoal, (newSoal) => {
     if (newSoal) {
         isRaguRagu.value = newSoal.ragu_ragu;
+
         if (newSoal.jenis_soal === 2) {
             selectedComplexAnswers.value = parseJawaban(newSoal.jawaban_siswa);
             selectedAnswer.value =
@@ -533,12 +572,14 @@ watch(activeSoal, (newSoal) => {
 const toggleStudentComplexAnswer = (aliasOpsi) => {
     const current = [...selectedComplexAnswers.value];
     const idx = current.indexOf(aliasOpsi);
+
     if (idx > -1) {
         current.splice(idx, 1);
     } else {
         current.push(aliasOpsi);
         current.sort();
     }
+
     selectedComplexAnswers.value = current;
     // Serialize to JSON string for saving, or null if nothing is selected
     selectedAnswer.value = current.length > 0 ? JSON.stringify(current) : null;
@@ -552,18 +593,24 @@ const studentContainerRef = ref(null);
 const studentLines = ref([]);
 
 const matchingLeftItems = computed(() => {
-    if (!activeSoal.value || activeSoal.value.jenis_soal !== 3) return [];
+    if (!activeSoal.value || activeSoal.value.jenis_soal !== 3) {
+        return [];
+    }
+
     return activeSoal.value.soal?.matching_left || [];
 });
 
 const matchingRightItems = computed(() => {
-    if (!activeSoal.value || activeSoal.value.jenis_soal !== 3) return [];
+    if (!activeSoal.value || activeSoal.value.jenis_soal !== 3) {
+        return [];
+    }
+
     return activeSoal.value.soal?.matching_right || [];
 });
 
 watch(
     () => activeSoal.value?.id,
-    (newId) => {
+    () => {
         selectedLeftId.value = null;
         studentConnections.value = {};
         studentLines.value = [];
@@ -575,17 +622,19 @@ watch(
         ) {
             try {
                 const savedAns = JSON.parse(activeSoal.value.jawaban_siswa);
+
                 if (Array.isArray(savedAns)) {
                     savedAns.forEach((conn) => {
                         const kiriId = conn.kiri_id;
                         const kananId = conn.kanan_id;
+
                         if (kiriId !== undefined && kananId !== undefined) {
                             studentConnections.value[kiriId] = kananId;
                         }
                     });
                 }
-            } catch (e) {
-                console.error('Gagal memuat jawaban menjodohkan', e);
+            } catch (error) {
+                console.error('Gagal memuat jawaban menjodohkan', error);
             }
         }
     },
@@ -593,7 +642,10 @@ watch(
 );
 
 const updateStudentLines = () => {
-    if (!studentContainerRef.value) return;
+    if (!studentContainerRef.value) {
+        return;
+    }
+
     const containerRect = studentContainerRef.value.getBoundingClientRect();
     const tempLines = [];
 
@@ -658,7 +710,10 @@ watch(
 let studentObserver = null;
 watch(studentContainerRef, (newRef) => {
     if (newRef) {
-        if (studentObserver) studentObserver.disconnect();
+        if (studentObserver) {
+            studentObserver.disconnect();
+        }
+
         studentObserver = new MutationObserver(updateStudentLines);
         studentObserver.observe(newRef, {
             childList: true,
@@ -683,7 +738,9 @@ const handleLeftItemClick = (leftId) => {
 };
 
 const handleRightItemClick = (rightId) => {
-    if (selectedLeftId.value === null) return;
+    if (selectedLeftId.value === null) {
+        return;
+    }
 
     const leftId = selectedLeftId.value;
     studentConnections.value[leftId] = rightId;
@@ -740,10 +797,10 @@ onMounted(async () => {
         examStore.setSoalList(data.data);
         isLoading.value = false;
 
-        // TODO: Start timer calculation based on props.jadwal and DurasiSiswa
-        startTimer(props.jadwal.durasi_ujian * 60);
-    } catch (e) {
-        console.error('Gagal memuat ujian', e);
+        // Start timer using available duration from jadwal
+        startTimer(Number(props.jadwal.durasi_ujian || 0) * 60);
+    } catch (error) {
+        console.error('Gagal memuat ujian', error);
         alert('Gagal memuat soal ujian. Harap periksa koneksi internet.');
     }
 });
@@ -754,13 +811,15 @@ onUnmounted(() => {
 });
 
 const saveAnswer = () => {
-    if (activeSoal.value && selectedAnswer.value) {
-        examStore.simpanJawaban(
-            activeSoal.value.id,
-            selectedAnswer.value,
-            isRaguRagu.value,
-        );
+    if (!activeSoal.value) {
+        return;
     }
+
+    examStore.simpanJawaban(
+        activeSoal.value.id,
+        selectedAnswer.value,
+        isRaguRagu.value,
+    );
 };
 
 const confirmSelesai = () => {
@@ -774,6 +833,7 @@ const confirmSelesai = () => {
 
 const handleSelesai = async () => {
     showConfirmDialog.value = false;
+
 
     try {
         const csrfToken = document
@@ -793,12 +853,18 @@ const handleSelesai = async () => {
             const data = await response.json();
             alert(data.message || 'Gagal mengakhiri ujian.');
         }
-    } catch (e) {
+    } catch {
         alert('Gagal mengakhiri ujian. Periksa koneksi internet Anda.');
     }
 };
 
 const startTimer = (durationSeconds) => {
+    if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+        remainingTimeDisplay.value = '00:00:00';
+        return;
+    }
+
+
     let timer = durationSeconds;
     setInterval(() => {
         let h = parseInt(timer / 3600, 10);

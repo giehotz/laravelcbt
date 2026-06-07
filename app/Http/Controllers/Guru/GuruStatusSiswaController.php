@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Cbt\DurasiSiswa;
 use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\SoalSiswa;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class GuruStatusSiswaController extends Controller
 {
     public function index()
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwals = Jadwal::with('bankSoal')
@@ -28,7 +29,7 @@ class GuruStatusSiswaController extends Controller
 
     public function data(Jadwal $jadwal)
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwal->load(['bankSoal' => fn ($q) => $q->where('guru_id', $guru->id)]);

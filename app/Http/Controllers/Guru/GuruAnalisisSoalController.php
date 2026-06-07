@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cbt\Jadwal;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -11,7 +12,7 @@ class GuruAnalisisSoalController extends Controller
 {
     public function index()
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwals = Jadwal::with('bankSoal')
@@ -29,7 +30,7 @@ class GuruAnalisisSoalController extends Controller
 
     public function data(Jadwal $jadwal)
     {
-        $guru = auth()->user()->guru;
+        $guru = Auth::user()->guru;
         abort_unless($guru, 403);
 
         $jadwal->load('bankSoal');
