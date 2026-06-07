@@ -357,6 +357,50 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Navigation Buttons -->
+                <div class="mt-8 flex gap-3 border-t border-gray-100 pt-6">
+                    <button
+                        @click="goToPreviousQuestion"
+                        :disabled="isFirstQuestion"
+                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-gray-200 px-4 py-3 font-bold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-400"
+                    >
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 19l-7-7 7-7"
+                            ></path>
+                        </svg>
+                        Sebelumnya
+                    </button>
+                    <button
+                        @click="goToNextQuestion"
+                        :disabled="isLastQuestion"
+                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-blue-600 bg-blue-600 px-4 py-3 font-bold text-white transition-all hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-200 disabled:text-gray-400"
+                    >
+                        Selanjutnya
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5l7 7-7 7"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -848,6 +892,51 @@ const confirmSelesai = () => {
     }
     showConfirmDialog.value = true;
 };
+
+const goToPreviousQuestion = () => {
+    if (!activeSoal.value || examStore.soalList.length === 0) {
+        return;
+    }
+
+    const currentIndex = examStore.soalList.findIndex(
+        (s) => s.id === activeSoal.value.id,
+    );
+    if (currentIndex > 0) {
+        examStore.setActiveSoal(examStore.soalList[currentIndex - 1].id);
+    }
+};
+
+const goToNextQuestion = () => {
+    if (!activeSoal.value || examStore.soalList.length === 0) {
+        return;
+    }
+
+    const currentIndex = examStore.soalList.findIndex(
+        (s) => s.id === activeSoal.value.id,
+    );
+    if (currentIndex < examStore.soalList.length - 1) {
+        examStore.setActiveSoal(examStore.soalList[currentIndex + 1].id);
+    }
+};
+
+const isFirstQuestion = computed(() => {
+    if (!activeSoal.value || examStore.soalList.length === 0) {
+        return true;
+    }
+
+    return examStore.soalList[0].id === activeSoal.value.id;
+});
+
+const isLastQuestion = computed(() => {
+    if (!activeSoal.value || examStore.soalList.length === 0) {
+        return true;
+    }
+
+    return (
+        examStore.soalList[examStore.soalList.length - 1].id ===
+        activeSoal.value.id
+    );
+});
 
 const handleSelesai = async () => {
     showConfirmDialog.value = false;
