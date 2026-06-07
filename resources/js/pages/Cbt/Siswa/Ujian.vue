@@ -50,6 +50,16 @@
                     Menyimpan...
                 </div>
 
+                <button
+                    @click="showNavigationModal = true"
+                    class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-400"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Navigasi</span>
+                </button>
+
                 <div
                     class="rounded-lg bg-gray-900 px-4 py-2 font-mono text-lg font-bold text-white"
                 >
@@ -59,7 +69,7 @@
         </header>
 
         <div
-            class="relative mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:p-8"
+            class="relative mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 p-4 sm:p-6 lg:p-8"
         >
             <!-- Area Soal -->
             <div
@@ -348,73 +358,80 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Navigasi Soal Sidebar -->
-            <div class="w-full shrink-0 lg:w-80">
-                <div
-                    class="sticky top-24 rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
-                >
-                    <h3
-                        class="mb-4 flex items-center justify-between font-bold text-gray-800"
-                    >
-                        Navigasi Soal
-                        <span
-                            class="rounded-full bg-gray-100 px-2 py-1 text-xs font-normal text-gray-600"
-                            >{{ examStore.unansweredCount }} belum dijawab</span
-                        >
-                    </h3>
-
-                    <div class="grid grid-cols-5 gap-2">
-                        <button
-                            v-for="soal in examStore.soalList"
-                            :key="soal.id"
-                            @click="examStore.setActiveSoal(soal.id)"
-                            class="relative flex aspect-square items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors"
-                            :class="[
-                                soal.id === examStore.activeSoalId
-                                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                    : 'border-gray-200 text-gray-600 hover:border-gray-300',
-                                soal.jawaban_siswa && !soal.ragu_ragu
-                                    ? 'border-blue-600 bg-blue-600 text-white'
-                                    : '',
-                                soal.jawaban_siswa && soal.ragu_ragu
-                                    ? 'border-amber-400 bg-amber-400 text-white'
-                                    : '',
-                            ]"
-                        >
-                            {{ soal.no_soal_alias }}
-                            <div
-                                v-if="soal.ragu_ragu"
-                                class="absolute -top-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-amber-500"
-                            ></div>
-                        </button>
-                    </div>
-
-                    <div class="mt-8 border-t border-gray-100 pt-6">
-                        <button
-                            @click="confirmSelesai"
-                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 font-bold text-white shadow-sm transition-all hover:bg-red-700"
-                        >
-                            <svg
-                                class="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                ></path>
-                            </svg>
-                            Selesai Ujian
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
+
+    <!-- Navigasi Soal Modal -->
+    <Dialog v-model:open="showNavigationModal">
+        <DialogContent class="max-h-[80vh] max-w-2xl overflow-y-auto">
+            <DialogHeader>
+                <DialogTitle>Navigasi Soal</DialogTitle>
+                <DialogDescription>
+                    <span class="rounded-full bg-gray-100 px-2 py-1 text-xs font-normal text-gray-600">
+                        {{ examStore.unansweredCount }} belum dijawab
+                    </span>
+                </DialogDescription>
+            </DialogHeader>
+
+            <div class="space-y-6">
+                <div class="grid grid-cols-6 gap-3 sm:grid-cols-8">
+                    <button
+                        v-for="soal in examStore.soalList"
+                        :key="soal.id"
+                        @click="examStore.setActiveSoal(soal.id); showNavigationModal = false"
+                        class="relative flex aspect-square items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors"
+                        :class="[
+                            soal.id === examStore.activeSoalId
+                                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                : 'border-gray-200 text-gray-600 hover:border-gray-300',
+                            soal.jawaban_siswa && !soal.ragu_ragu
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : '',
+                            soal.jawaban_siswa && soal.ragu_ragu
+                                ? 'border-amber-400 bg-amber-400 text-white'
+                                : '',
+                        ]"
+                    >
+                        {{ soal.no_soal_alias }}
+                        <div
+                            v-if="soal.ragu_ragu"
+                            class="absolute -top-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-amber-500"
+                        ></div>
+                    </button>
+                </div>
+
+                <div class="border-t border-gray-100 pt-6">
+                    <button
+                        @click="confirmSelesai; showNavigationModal = false"
+                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 font-bold text-white shadow-sm transition-all hover:bg-red-700"
+                    >
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                        Selesai Ujian
+                    </button>
+                </div>
+            </div>
+
+            <DialogFooter>
+                <DialogClose as-child>
+                    <button class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Tutup
+                    </button>
+                </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 
     <!-- Confirm Selesai Dialog -->
     <Dialog v-model:open="showConfirmDialog">
@@ -468,6 +485,7 @@ const selectedComplexAnswers = ref([]);
 const isRaguRagu = ref(false);
 const showConfirmDialog = ref(false);
 const confirmMessage = ref('');
+const showNavigationModal = ref(false);
 
 const remainingTimeDisplay = ref('00:00:00');
 
