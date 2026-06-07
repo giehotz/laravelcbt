@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Setting;
 
-use App\Actions\CreateSiswaAction;
 use App\Models\BukuInduk;
 use App\Models\Master\Siswa;
 use App\Models\User;
@@ -10,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Spatie\Permission\Models\Role;
@@ -36,19 +36,19 @@ class SiswaImportTest extends TestCase
 
     private function makeExcelFile(array $rows, string $filename = 'siswa.xlsx'): UploadedFile
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         foreach ($rows as $rowIdx => $row) {
             foreach ($row as $colIdx => $value) {
                 $sheet->setCellValue(
-                    \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1) . ($rowIdx + 1),
+                    Coordinate::stringFromColumnIndex($colIdx + 1).($rowIdx + 1),
                     $value
                 );
             }
         }
 
-        $tempPath = tempnam(sys_get_temp_dir(), 'siswa_test_') . '.xlsx';
+        $tempPath = tempnam(sys_get_temp_dir(), 'siswa_test_').'.xlsx';
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempPath);
 

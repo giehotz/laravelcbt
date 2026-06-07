@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -33,7 +33,7 @@ return new class extends Migration
                         $row = $decoded[$i]; // ["kiri", "0", "1", ...]
                         if (is_array($row) && count($row) >= 2) {
                             $kiri = $row[0];
-                            $matchIdx = array_search("1", array_slice($row, 1));
+                            $matchIdx = array_search('1', array_slice($row, 1));
                             if ($matchIdx !== false && isset($headers[$matchIdx + 1])) {
                                 $kanan = $headers[$matchIdx + 1];
                                 DB::table('cbt_soal_pairs')->insert([

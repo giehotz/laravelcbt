@@ -2,16 +2,18 @@
 
 namespace Tests\Feature\Setting;
 
-use App\Actions\CreateGuruAction;
 use App\Models\Master\Guru;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\ViewErrorBag;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class GuruImportTest extends TestCase
@@ -25,7 +27,7 @@ class GuruImportTest extends TestCase
         parent::setUp();
 
         // Reset Spatie permission cache
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create roles
         Role::create(['name' => 'superadmin']);
@@ -43,19 +45,19 @@ class GuruImportTest extends TestCase
      */
     private function makeExcelFile(array $rows, string $filename = 'guru.xlsx'): UploadedFile
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         foreach ($rows as $rowIdx => $row) {
             foreach ($row as $colIdx => $value) {
                 $sheet->setCellValue(
-                    \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1) . ($rowIdx + 1),
+                    Coordinate::stringFromColumnIndex($colIdx + 1).($rowIdx + 1),
                     $value
                 );
             }
         }
 
-        $tempPath = tempnam(sys_get_temp_dir(), 'guru_test_') . '.xlsx';
+        $tempPath = tempnam(sys_get_temp_dir(), 'guru_test_').'.xlsx';
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempPath);
 
@@ -121,7 +123,7 @@ class GuruImportTest extends TestCase
         // Laravel/Inertia converts AuthorizationException to redirect or 403
         $this->assertTrue(
             in_array($response->getStatusCode(), [302, 403]),
-            'Expected 302 or 403, got ' . $response->getStatusCode()
+            'Expected 302 or 403, got '.$response->getStatusCode()
         );
         // Ensure no data was imported
         $this->assertDatabaseCount('guru', 0);
@@ -137,7 +139,7 @@ class GuruImportTest extends TestCase
 
         $this->assertTrue(
             in_array($response->getStatusCode(), [302, 403]),
-            'Expected 302 or 403, got ' . $response->getStatusCode()
+            'Expected 302 or 403, got '.$response->getStatusCode()
         );
     }
 
@@ -201,10 +203,10 @@ class GuruImportTest extends TestCase
         $session = $response->getSession();
         if ($session && $session->has('errors')) {
             $errors = $session->get('errors');
-            if ($errors instanceof \Illuminate\Support\ViewErrorBag) {
-                fwrite(STDERR, "\nSESSION ERRORS (ViewErrorBag): " . json_encode($errors->toArray()) . "\n");
+            if ($errors instanceof ViewErrorBag) {
+                fwrite(STDERR, "\nSESSION ERRORS (ViewErrorBag): ".json_encode($errors->toArray())."\n");
             } else {
-                fwrite(STDERR, "\nSESSION ERRORS (raw): " . json_encode($errors) . "\n");
+                fwrite(STDERR, "\nSESSION ERRORS (raw): ".json_encode($errors)."\n");
             }
         }
 

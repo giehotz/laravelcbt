@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Setting;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Http\Requests\StoreAdminUserRequest;
 use App\Http\Requests\UpdateAdminUserRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class AdminUserController extends Controller
 {
@@ -42,7 +42,7 @@ class AdminUserController extends Controller
         Gate::authorize('create', User::class);
 
         $data = $request->validated();
-        
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -69,7 +69,7 @@ class AdminUserController extends Controller
         $admin->email = $data['email'];
         $admin->username = $data['username'] ?? null;
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $admin->password = Hash::make($data['password']);
         }
 

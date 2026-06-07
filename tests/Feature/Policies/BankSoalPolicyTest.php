@@ -25,7 +25,7 @@ class BankSoalPolicyTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('guru');
         $guru = Guru::factory()->create(['user_id' => $user->id]);
-        
+
         $bankSoal = BankSoal::factory()->create(['guru_id' => $guru->id]);
 
         $this->assertTrue($user->can('update', $bankSoal));
@@ -40,7 +40,7 @@ class BankSoalPolicyTest extends TestCase
         $user2 = User::factory()->create();
         $user2->assignRole('guru');
         $guru2 = Guru::factory()->create(['user_id' => $user2->id]);
-        
+
         $bankSoal = BankSoal::factory()->create(['guru_id' => $guru2->id]);
 
         $this->assertFalse($user1->can('update', $bankSoal));
@@ -50,7 +50,7 @@ class BankSoalPolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $user->assignRole('superadmin');
-        
+
         $bankSoal = BankSoal::factory()->create();
 
         $this->assertTrue($user->can('update', $bankSoal));

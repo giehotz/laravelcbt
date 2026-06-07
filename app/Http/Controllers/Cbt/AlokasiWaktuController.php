@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Cbt;
 use App\Http\Controllers\Controller;
 use App\Models\Cbt\DurasiSiswa;
 use App\Models\Cbt\Jadwal;
-use App\Models\Master\Kelas;
-use App\Models\Master\Siswa;
+use App\Models\Master\KelasSiswa;
 use App\Models\Semester;
 use App\Models\TahunPelajaran;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class AlokasiWaktuController extends Controller
@@ -38,7 +36,7 @@ class AlokasiWaktuController extends Controller
                 'jadwals' => $items->map(function ($j) use ($tpAktif, $smtAktif) {
                     $kelasBank = $j->bankSoal->kelas ?? [];
                     // Get total students for this jadwal
-                    $totalSiswa = \App\Models\Master\KelasSiswa::whereIn('kelas_id', $kelasBank)
+                    $totalSiswa = KelasSiswa::whereIn('kelas_id', $kelasBank)
                         ->where('tahun_pelajaran_id', $tpAktif->id)
                         ->where('semester_id', $smtAktif->id)
                         ->count();
@@ -50,12 +48,12 @@ class AlokasiWaktuController extends Controller
                         'id' => $j->id,
                         'mapel' => $j->bankSoal->mapel->nama_mapel ?? '-',
                         'jenis' => $j->bankSoal->jenis->nama_jenis ?? '-',
-                        'waktu' => substr($j->tgl_mulai, 11, 5) . ' - ' . substr($j->tgl_selesai, 11, 5),
+                        'waktu' => substr($j->tgl_mulai, 11, 5).' - '.substr($j->tgl_selesai, 11, 5),
                         'total_siswa' => $totalSiswa,
                         'total_alokasi' => $totalDurasi,
                         'status' => $j->status,
                     ];
-                })
+                }),
             ];
         }
 
@@ -70,7 +68,7 @@ class AlokasiWaktuController extends Controller
         $kelasIds = $jadwal->bankSoal->kelas ?? [];
 
         // Get all students for the classes
-        $siswas = \App\Models\Master\KelasSiswa::whereIn('kelas_id', $kelasIds)
+        $siswas = KelasSiswa::whereIn('kelas_id', $kelasIds)
             ->where('tahun_pelajaran_id', $jadwal->tahun_pelajaran_id)
             ->where('semester_id', $jadwal->semester_id)
             ->get(['siswa_id']);
@@ -81,7 +79,7 @@ class AlokasiWaktuController extends Controller
                 ->where('siswa_id', $kelasSiswa->siswa_id)
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 DurasiSiswa::create([
                     'jadwal_id' => $jadwal->id,
                     'siswa_id' => $kelasSiswa->siswa_id,

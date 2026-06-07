@@ -21,6 +21,7 @@ class UpdateRuangRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route('ruang') ? $this->route('ruang')->id : null;
+
         return [
             'nama_ruang' => ['required', 'string', 'max:80'],
             'kode_ruang' => ['required', 'string', 'max:15', Rule::unique('cbt_ruang', 'kode_ruang')->ignore($id)],

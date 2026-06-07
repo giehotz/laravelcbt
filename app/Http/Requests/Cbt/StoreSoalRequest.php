@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Cbt;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Cbt\BankSoal;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSoalRequest extends FormRequest
@@ -15,24 +15,25 @@ class StoreSoalRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $jenis = (int) $this->input('jenis');
+
+        $bank = $this->route('bank');
+        if (is_numeric($bank)) {
+            $bank = BankSoal::find($bank);
+        }
+        $opsiCount = $bank instanceof BankSoal ? $bank->opsi : 5;
 
         $rules = [
             'jenis' => 'required|in:1,2,3,4,5',
             'nomor_soal' => 'required|integer|min:0',
             'soal' => 'required|string',
-            'opsi_a' => 'required_if:jenis,1|nullable|string',
-            'opsi_b' => 'required_if:jenis,1|nullable|string',
-            'opsi_c' => 'required_if:jenis,1|nullable|string',
-            'opsi_d' => 'required_if:jenis,1|nullable|string',
-            'opsi_e' => 'required_if:jenis,1|nullable|string',
+            'opsi_a' => ($jenis === 1 && $opsiCount >= 1) ? 'required|string' : 'nullable|string',
+            'opsi_b' => ($jenis === 1 && $opsiCount >= 2) ? 'required|string' : 'nullable|string',
+            'opsi_c' => ($jenis === 1 && $opsiCount >= 3) ? 'required|string' : 'nullable|string',
+            'opsi_d' => ($jenis === 1 && $opsiCount >= 4) ? 'required|string' : 'nullable|string',
+            'opsi_e' => ($jenis === 1 && $opsiCount >= 5) ? 'required|string' : 'nullable|string',
             'kesulitan' => 'required|integer|min:1|max:10',
             'timer' => 'required|boolean',
             'timer_menit' => 'required_if:timer,true|integer|min:0',

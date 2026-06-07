@@ -10,7 +10,11 @@ const toasts = ref<ToastMessage[]>([]);
 let nextId = 0;
 
 export function useToast() {
-    const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success', duration = 3000) => {
+    const addToast = (
+        message: string,
+        type: 'success' | 'error' | 'info' = 'success',
+        duration = 3000,
+    ) => {
         const id = nextId++;
         toasts.value.push({ id, message, type });
 

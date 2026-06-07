@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cbt\Ruang;
 use App\Http\Requests\Cbt\StoreRuangRequest;
 use App\Http\Requests\Cbt\UpdateRuangRequest;
 use App\Http\Resources\Cbt\RuangResource;
+use App\Models\Cbt\Ruang;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class RuangController extends Controller
 {
@@ -57,8 +58,9 @@ class RuangController extends Controller
 
         try {
             $ruang->delete();
+
             return redirect()->back()->with('success', 'Ruang Ujian berhasil dihapus.');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return redirect()->back()->with('error', 'Ruang tidak dapat dihapus karena sudah memiliki relasi data.');
         }
     }

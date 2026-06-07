@@ -17,7 +17,7 @@ class UpdateTahunPelajaranRequest extends FormRequest
         $id = is_object($tahunPelajaran) ? $tahunPelajaran->id : $tahunPelajaran;
 
         return [
-            'tahun' => 'required|string|max:20|unique:tahun_pelajaran,tahun,' . $id,
+            'tahun' => 'required|string|max:20|unique:tahun_pelajaran,tahun,'.$id,
             'active' => 'sometimes|boolean',
         ];
     }

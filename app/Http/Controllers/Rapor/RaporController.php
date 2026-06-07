@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Rapor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Models\Master\Kelas;
-use App\Models\Master\Mapel;
-use App\Models\Master\Siswa;
-use App\Models\Cbt\CbtJenis;
+use App\Http\Requests\Rapor\ImportCbtRequest;
+use App\Http\Requests\Rapor\UpdateNilaiRequest;
 use App\Models\Akademik\RaporConfig;
 use App\Models\Akademik\RaporKkm;
 use App\Models\Akademik\RaporNilaiAkhir;
+use App\Models\Cbt\CbtJenis;
+use App\Models\Master\Kelas;
+use App\Models\Master\Mapel;
+use App\Models\Master\Setting;
+use App\Models\Master\Siswa;
 use App\Services\RaporService;
-use App\Http\Requests\Rapor\ImportCbtRequest;
-use App\Http\Requests\Rapor\UpdateNilaiRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RaporController extends Controller
 {
@@ -33,7 +33,7 @@ class RaporController extends Controller
         $tp = $request->get('tp_aktif');
         $smt = $request->get('smt_aktif');
 
-        if (!$tp || !$smt) {
+        if (! $tp || ! $smt) {
             return redirect()->back()->with('error', 'Tahun pelajaran atau semester aktif belum diset.');
         }
 
@@ -90,10 +90,10 @@ class RaporController extends Controller
         foreach ($request->kkm as $k) {
             RaporKkm::updateOrCreate(
                 [
-                    'tp_id' => $tp->id, 
-                    'smt_id' => $smt->id, 
-                    'kelas_id' => $k['kelas_id'], 
-                    'mapel_id' => $k['mapel_id']
+                    'tp_id' => $tp->id,
+                    'smt_id' => $smt->id,
+                    'kelas_id' => $k['kelas_id'],
+                    'mapel_id' => $k['mapel_id'],
                 ],
                 [
                     'kkm' => $k['kkm'],
@@ -111,7 +111,7 @@ class RaporController extends Controller
     {
         $tp = $request->get('tp_aktif');
         $smt = $request->get('smt_aktif');
-        
+
         $kelas = Kelas::all();
         $mapel = Mapel::all();
 
@@ -132,7 +132,7 @@ class RaporController extends Controller
             // Di sini kita anggap menggunakan field 'kelas_id' dari tabel siswa untuk kesederhanaan,
             // atau jika Anda memakai kelas_siswa, sesuaikan join-nya.
             // Sesuai sistem sebelumnya: Siswa memiliki relasi ke BukuInduk/kelas
-            $siswaQuery = Siswa::whereHas('kelasAktif', function($q) use ($selectedKelasId) {
+            $siswaQuery = Siswa::whereHas('kelasAktif', function ($q) use ($selectedKelasId) {
                 $q->where('kelas_id', $selectedKelasId);
             })->get();
 
@@ -143,7 +143,7 @@ class RaporController extends Controller
                         'smt_id' => $smt->id,
                         'kelas_id' => $selectedKelasId,
                         'mapel_id' => $selectedMapelId,
-                        'siswa_id' => $siswa->id
+                        'siswa_id' => $siswa->id,
                     ],
                     [
                         'nilai_ph' => 0,
@@ -158,7 +158,7 @@ class RaporController extends Controller
 
                 $siswaList[] = [
                     'siswa' => $siswa,
-                    'nilai' => $nilai
+                    'nilai' => $nilai,
                 ];
             }
         }
@@ -177,14 +177,14 @@ class RaporController extends Controller
     {
         $tp = $request->get('tp_aktif');
         $smt = $request->get('smt_aktif');
-        
+
         $kelasId = $request->kelas_id;
         $mapelId = $request->mapel_id;
         $komponen = $request->komponen; // ph, pts, pas
 
         $mapel = Mapel::findOrFail($mapelId);
-        
-        $siswaQuery = Siswa::whereHas('kelasAktif', function($q) use ($kelasId) {
+
+        $siswaQuery = Siswa::whereHas('kelasAktif', function ($q) use ($kelasId) {
             $q->where('kelas_id', $kelasId);
         })->get();
 
@@ -196,12 +196,12 @@ class RaporController extends Controller
                 'smt_id' => $smt->id,
                 'kelas_id' => $kelasId,
                 'mapel_id' => $mapelId,
-                'siswa_id' => $siswa->id
+                'siswa_id' => $siswa->id,
             ])->first();
 
-            if ($nilai && !$nilai->final) {
-                $nilai->{'nilai_' . $komponen} = $nilaiCbt;
-                $nilai->{'sumber_' . $komponen} = 'cbt';
+            if ($nilai && ! $nilai->final) {
+                $nilai->{'nilai_'.$komponen} = $nilaiCbt;
+                $nilai->{'sumber_'.$komponen} = 'cbt';
                 $nilai->save();
             }
         }
@@ -217,12 +217,12 @@ class RaporController extends Controller
         $mapelId = $request->mapel_id;
 
         $kkm = RaporKkm::where('tp_id', $tp->id)
-                ->where('smt_id', $smt->id)
-                ->where('kelas_id', $kelasId)
-                ->where('mapel_id', $mapelId)
-                ->first();
+            ->where('smt_id', $smt->id)
+            ->where('kelas_id', $kelasId)
+            ->where('mapel_id', $mapelId)
+            ->first();
 
-        if (!$kkm) {
+        if (! $kkm) {
             return redirect()->back()->with('error', 'KKM belum disetting untuk kelas dan mapel ini.');
         }
 
@@ -232,10 +232,10 @@ class RaporController extends Controller
                 'smt_id' => $smt->id,
                 'kelas_id' => $kelasId,
                 'mapel_id' => $mapelId,
-                'siswa_id' => $n['siswa_id']
+                'siswa_id' => $n['siswa_id'],
             ])->first();
 
-            if ($nilaiRecord && !$nilaiRecord->final) {
+            if ($nilaiRecord && ! $nilaiRecord->final) {
                 $nilaiRecord->nilai_ph = $n['nilai_ph'];
                 $nilaiRecord->nilai_pts = $n['nilai_pts'];
                 $nilaiRecord->nilai_pas = $n['nilai_pas'];
@@ -281,7 +281,7 @@ class RaporController extends Controller
             ->where('siswa_id', $siswa->id)
             ->get();
 
-        $sekolah = \App\Models\Master\Setting::first();
+        $sekolah = Setting::first();
 
         // In production, we usually use view that renders html and converts to pdf
         $pdf = Pdf::loadView('pdf.rapor_siswa', [
@@ -292,7 +292,7 @@ class RaporController extends Controller
             'sekolah' => $sekolah,
         ]);
 
-        return $pdf->stream('Rapor_' . $siswa->nis . '.pdf');
+        return $pdf->stream('Rapor_'.$siswa->nis.'.pdf');
     }
 
     public function cetakKelas(Request $request, Kelas $kelas)
@@ -300,11 +300,11 @@ class RaporController extends Controller
         $tp = $request->get('tp_aktif');
         $smt = $request->get('smt_aktif');
 
-        $siswaList = Siswa::whereHas('kelasAktif', function($q) use ($kelas) {
+        $siswaList = Siswa::whereHas('kelasAktif', function ($q) use ($kelas) {
             $q->where('kelas_id', $kelas->id);
         })->get();
 
-        $sekolah = \App\Models\Master\Setting::first();
+        $sekolah = Setting::first();
 
         $data = [];
         foreach ($siswaList as $siswa) {
@@ -313,10 +313,10 @@ class RaporController extends Controller
                 ->where('smt_id', $smt->id)
                 ->where('siswa_id', $siswa->id)
                 ->get();
-                
+
             $data[] = [
                 'siswa' => $siswa,
-                'nilai' => $nilai
+                'nilai' => $nilai,
             ];
         }
 
@@ -328,6 +328,6 @@ class RaporController extends Controller
             'sekolah' => $sekolah,
         ]);
 
-        return $pdf->stream('Rapor_Kelas_' . $kelas->nama . '.pdf');
+        return $pdf->stream('Rapor_Kelas_'.$kelas->nama.'.pdf');
     }
 }

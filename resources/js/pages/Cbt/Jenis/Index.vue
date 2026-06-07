@@ -7,7 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, X, Edit2, Trash2 } from 'lucide-vue-next';
-import { store as storeJenis, update as updateJenis, destroy as destroyJenis } from '@/routes/cbt/jenis';
+import {
+    store as storeJenis,
+    update as updateJenis,
+    destroy as destroyJenis,
+} from '@/routes/cbt/jenis';
 
 defineOptions({
     layout: {
@@ -37,7 +41,11 @@ const props = defineProps<{
 
 const isAddModalOpen = ref(false);
 const isEditModalOpen = ref(false);
-const selectedItem = ref<{ id: number; nama_jenis: string; kode_jenis: string } | null>(null);
+const selectedItem = ref<{
+    id: number;
+    nama_jenis: string;
+    kode_jenis: string;
+} | null>(null);
 
 const addForm = useForm({
     nama_jenis: '',
@@ -50,17 +58,23 @@ const editForm = useForm({
 });
 
 // Auto-generate code from name
-watch(() => addForm.nama_jenis, (newVal) => {
-    if (newVal && !addForm.kode_jenis) {
-        // e.g. "Penilaian Tengah Semester" -> "PTS"
-        const words = newVal.trim().split(/\s+/);
-        if (words.length > 1) {
-            addForm.kode_jenis = words.map(w => w.charAt(0)).join('').toUpperCase();
-        } else {
-            addForm.kode_jenis = newVal.substring(0, 5).toUpperCase();
+watch(
+    () => addForm.nama_jenis,
+    (newVal) => {
+        if (newVal && !addForm.kode_jenis) {
+            // e.g. "Penilaian Tengah Semester" -> "PTS"
+            const words = newVal.trim().split(/\s+/);
+            if (words.length > 1) {
+                addForm.kode_jenis = words
+                    .map((w) => w.charAt(0))
+                    .join('')
+                    .toUpperCase();
+            } else {
+                addForm.kode_jenis = newVal.substring(0, 5).toUpperCase();
+            }
         }
-    }
-});
+    },
+);
 
 const submitAdd = () => {
     addForm.post(storeJenis.url(), {
@@ -100,56 +114,86 @@ const handleDelete = (id: number) => {
 <template>
     <Head title="Jenis Ujian CBT" />
 
-    <div class="px-6 py-6 max-w-7xl mx-auto space-y-6">
-        <div class="flex justify-between items-center">
+    <div class="mx-auto max-w-7xl space-y-6 px-6 py-6">
+        <div class="flex items-center justify-between">
             <Heading
                 title="Jenis Ujian"
                 description="Kelola referensi jenis ujian CBT (contoh: Penilaian Harian, PTS, PAS)."
             />
-            <Button @click="isAddModalOpen = true" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white font-semibold flex items-center gap-1 shadow-sm transition-colors">
-                <Plus class="w-4 h-4" />
+            <Button
+                @click="isAddModalOpen = true"
+                class="flex items-center gap-1 bg-zinc-900 font-semibold text-white shadow-sm transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+            >
+                <Plus class="h-4 w-4" />
                 <span>Tambah Jenis</span>
             </Button>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">
+        <div
+            class="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+        >
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full border-collapse text-left">
                     <thead>
-                        <tr class="bg-neutral-50/30 dark:bg-zinc-900/50 border-b border-neutral-200 dark:border-zinc-800 text-[11px] font-bold uppercase text-neutral-500 tracking-wider">
-                            <th class="px-6 py-3 w-16 text-center">No</th>
+                        <tr
+                            class="border-b border-neutral-200 bg-neutral-50/30 text-[11px] font-bold tracking-wider text-neutral-500 uppercase dark:border-zinc-800 dark:bg-zinc-900/50"
+                        >
+                            <th class="w-16 px-6 py-3 text-center">No</th>
                             <th class="px-6 py-3">Nama Jenis Ujian</th>
                             <th class="px-6 py-3">Kode</th>
-                            <th class="px-6 py-3 text-right w-48">Aksi</th>
+                            <th class="w-48 px-6 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-200 dark:divide-zinc-800 text-sm">
-                        <tr v-for="(item, idx) in jenis.data" :key="item.id" class="hover:bg-neutral-50/30 dark:hover:bg-zinc-800/20 transition-colors">
-                            <td class="px-6 py-3.5 text-center font-medium text-neutral-400 dark:text-neutral-500">{{ idx + 1 }}</td>
-                            <td class="px-6 py-3.5 font-bold text-neutral-800 dark:text-neutral-200">{{ item.nama_jenis }}</td>
-                            <td class="px-6 py-3.5 font-mono text-xs font-semibold text-neutral-500 dark:text-neutral-405">{{ item.kode_jenis }}</td>
-                            <td class="px-6 py-3.5 text-right space-x-1.5 whitespace-nowrap">
+                    <tbody
+                        class="divide-y divide-neutral-200 text-sm dark:divide-zinc-800"
+                    >
+                        <tr
+                            v-for="(item, idx) in jenis.data"
+                            :key="item.id"
+                            class="transition-colors hover:bg-neutral-50/30 dark:hover:bg-zinc-800/20"
+                        >
+                            <td
+                                class="px-6 py-3.5 text-center font-medium text-neutral-400 dark:text-neutral-500"
+                            >
+                                {{ idx + 1 }}
+                            </td>
+                            <td
+                                class="px-6 py-3.5 font-bold text-neutral-800 dark:text-neutral-200"
+                            >
+                                {{ item.nama_jenis }}
+                            </td>
+                            <td
+                                class="dark:text-neutral-405 px-6 py-3.5 font-mono text-xs font-semibold text-neutral-500"
+                            >
+                                {{ item.kode_jenis }}
+                            </td>
+                            <td
+                                class="space-x-1.5 px-6 py-3.5 text-right whitespace-nowrap"
+                            >
                                 <Button
                                     size="sm"
                                     @click="openEditModal(item)"
-                                    class="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700 font-semibold text-xs px-2.5 py-1.5 h-8 rounded shadow-sm transition-colors"
+                                    class="h-8 rounded bg-amber-500 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
                                 >
-                                    <Edit2 class="w-3.5 h-3.5 mr-1" />
+                                    <Edit2 class="mr-1 h-3.5 w-3.5" />
                                     Edit
                                 </Button>
                                 <Button
                                     size="sm"
                                     variant="destructive"
                                     @click="handleDelete(item.id)"
-                                    class="bg-rose-600 hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800 text-white font-semibold text-xs px-2.5 py-1.5 h-8 rounded shadow-sm transition-colors"
+                                    class="h-8 rounded bg-rose-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800"
                                 >
-                                    <Trash2 class="w-3.5 h-3.5 mr-1" />
+                                    <Trash2 class="mr-1 h-3.5 w-3.5" />
                                     Hapus
                                 </Button>
                             </td>
                         </tr>
                         <tr v-if="jenis.data.length === 0">
-                            <td colspan="4" class="px-6 py-8 text-center text-neutral-500">
+                            <td
+                                colspan="4"
+                                class="px-6 py-8 text-center text-neutral-500"
+                            >
                                 Belum ada data jenis ujian.
                             </td>
                         </tr>
@@ -160,30 +204,69 @@ const handleDelete = (id: number) => {
     </div>
 
     <!-- Modal Form: Tambah -->
-    <div v-if="isAddModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 w-full max-w-md rounded-xl shadow-xl overflow-hidden flex flex-col">
-            <div class="px-6 py-4 border-b border-neutral-200 dark:border-zinc-800 flex justify-between items-center">
-                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">Tambah Jenis Ujian</h3>
-                <button type="button" @click="isAddModalOpen = false" class="text-neutral-400 hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer p-1 rounded-lg">
-                    <X class="w-5 h-5" />
+    <div
+        v-if="isAddModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity"
+    >
+        <div
+            class="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <div
+                class="flex items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-zinc-800"
+            >
+                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
+                    Tambah Jenis Ujian
+                </h3>
+                <button
+                    type="button"
+                    @click="isAddModalOpen = false"
+                    class="hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer rounded-lg p-1 text-neutral-400"
+                >
+                    <X class="h-5 w-5" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitAdd" class="p-6 space-y-4">
+            <form @submit.prevent="submitAdd" class="space-y-4 p-6">
                 <div class="grid gap-2">
-                    <Label for="nama_jenis">Nama Jenis Ujian <span class="text-rose-500">*</span></Label>
-                    <Input id="nama_jenis" v-model="addForm.nama_jenis" required placeholder="Contoh: Penilaian Akhir Semester" />
+                    <Label for="nama_jenis"
+                        >Nama Jenis Ujian
+                        <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="nama_jenis"
+                        v-model="addForm.nama_jenis"
+                        required
+                        placeholder="Contoh: Penilaian Akhir Semester"
+                    />
                     <InputError :message="addForm.errors.nama_jenis" />
                 </div>
                 <div class="grid gap-2">
-                    <Label for="kode_jenis">Kode Jenis <span class="text-rose-500">*</span></Label>
-                    <Input id="kode_jenis" v-model="addForm.kode_jenis" required placeholder="Contoh: PAS" />
+                    <Label for="kode_jenis"
+                        >Kode Jenis <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="kode_jenis"
+                        v-model="addForm.kode_jenis"
+                        required
+                        placeholder="Contoh: PAS"
+                    />
                     <InputError :message="addForm.errors.kode_jenis" />
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-zinc-800">
-                    <Button type="button" variant="outline" @click="isAddModalOpen = false">Batal</Button>
-                    <Button type="submit" :disabled="addForm.processing" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white font-semibold">
+                <div
+                    class="flex justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-zinc-800"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="isAddModalOpen = false"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        :disabled="addForm.processing"
+                        class="bg-zinc-900 font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                    >
                         Simpan
                     </Button>
                 </div>
@@ -192,30 +275,69 @@ const handleDelete = (id: number) => {
     </div>
 
     <!-- Modal Form: Edit -->
-    <div v-if="isEditModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 w-full max-w-md rounded-xl shadow-xl overflow-hidden flex flex-col">
-            <div class="px-6 py-4 border-b border-neutral-200 dark:border-zinc-800 flex justify-between items-center">
-                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">Edit Jenis Ujian</h3>
-                <button type="button" @click="isEditModalOpen = false" class="text-neutral-400 hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer p-1 rounded-lg">
-                    <X class="w-5 h-5" />
+    <div
+        v-if="isEditModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity"
+    >
+        <div
+            class="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <div
+                class="flex items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-zinc-800"
+            >
+                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
+                    Edit Jenis Ujian
+                </h3>
+                <button
+                    type="button"
+                    @click="isEditModalOpen = false"
+                    class="hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer rounded-lg p-1 text-neutral-400"
+                >
+                    <X class="h-5 w-5" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitEdit" class="p-6 space-y-4">
+            <form @submit.prevent="submitEdit" class="space-y-4 p-6">
                 <div class="grid gap-2">
-                    <Label for="edit_nama_jenis">Nama Jenis Ujian <span class="text-rose-500">*</span></Label>
-                    <Input id="edit_nama_jenis" v-model="editForm.nama_jenis" required placeholder="Contoh: Penilaian Akhir Semester" />
+                    <Label for="edit_nama_jenis"
+                        >Nama Jenis Ujian
+                        <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="edit_nama_jenis"
+                        v-model="editForm.nama_jenis"
+                        required
+                        placeholder="Contoh: Penilaian Akhir Semester"
+                    />
                     <InputError :message="editForm.errors.nama_jenis" />
                 </div>
                 <div class="grid gap-2">
-                    <Label for="edit_kode_jenis">Kode Jenis <span class="text-rose-500">*</span></Label>
-                    <Input id="edit_kode_jenis" v-model="editForm.kode_jenis" required placeholder="Contoh: PAS" />
+                    <Label for="edit_kode_jenis"
+                        >Kode Jenis <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="edit_kode_jenis"
+                        v-model="editForm.kode_jenis"
+                        required
+                        placeholder="Contoh: PAS"
+                    />
                     <InputError :message="editForm.errors.kode_jenis" />
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-zinc-800">
-                    <Button type="button" variant="outline" @click="isEditModalOpen = false">Batal</Button>
-                    <Button type="submit" :disabled="editForm.processing" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white font-semibold">
+                <div
+                    class="flex justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-zinc-800"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="isEditModalOpen = false"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        :disabled="editForm.processing"
+                        class="bg-zinc-900 font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                    >
                         Simpan Perubahan
                     </Button>
                 </div>

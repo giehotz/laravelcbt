@@ -33,7 +33,7 @@ watch(
             addToast(flash.info, 'info');
         }
     },
-    { deep: true, immediate: true }
+    { deep: true, immediate: true },
 );
 </script>
 

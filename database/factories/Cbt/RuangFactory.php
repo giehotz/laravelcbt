@@ -2,10 +2,11 @@
 
 namespace Database\Factories\Cbt;
 
+use App\Models\Cbt\Ruang;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cbt\Ruang>
+ * @extends Factory<Ruang>
  */
 class RuangFactory extends Factory
 {
@@ -17,8 +18,8 @@ class RuangFactory extends Factory
     public function definition(): array
     {
         return [
-            'nama_ruang' => 'Ruang ' . $this->faker->unique()->numberBetween(1, 100),
-            'kode_ruang' => 'R' . $this->faker->unique()->numberBetween(1, 100),
+            'nama_ruang' => 'Ruang '.$this->faker->unique()->numberBetween(1, 100),
+            'kode_ruang' => 'R'.$this->faker->unique()->numberBetween(1, 100),
         ];
     }
 }

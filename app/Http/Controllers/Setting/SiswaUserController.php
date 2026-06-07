@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers\Setting;
 
+use App\Actions\CreateSiswaAction;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Master\Siswa;
 use App\Http\Requests\StoreSiswaUserRequest;
 use App\Http\Requests\UpdateSiswaUserRequest;
-use App\Actions\CreateSiswaAction;
+use App\Models\Master\Siswa;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use Illuminate\Database\QueryException;
 
 class SiswaUserController extends Controller
 {
@@ -47,7 +48,7 @@ class SiswaUserController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Siswa');
 
@@ -65,12 +66,12 @@ class SiswaUserController extends Controller
             'Agama',
             'No HP',
             'NIK',
-            'Warga Negara'
+            'Warga Negara',
         ];
 
         foreach ($headers as $colIdx => $header) {
-            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
-            $sheet->setCellValue($colLetter . '1', $header);
+            $colLetter = Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet->setCellValue($colLetter.'1', $header);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
@@ -80,7 +81,7 @@ class SiswaUserController extends Controller
                 'color' => ['rgb' => '000000'],
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => 'E5E7EB'],
             ],
         ];
@@ -100,11 +101,11 @@ class SiswaUserController extends Controller
             'Islam',
             '085678901234',
             '3201021508100001',
-            'WNI'
+            'WNI',
         ];
         foreach ($example as $colIdx => $val) {
-            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
-            $sheet->setCellValue($colLetter . '2', $val);
+            $colLetter = Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet->setCellValue($colLetter.'2', $val);
         }
 
         return new StreamedResponse(function () use ($spreadsheet) {
@@ -160,71 +161,75 @@ class SiswaUserController extends Controller
         foreach ($dataRows as $index => $row) {
             $rowNum = $index + 2;
 
-            $nama = isset($row[0]) ? trim(strip_tags((string)$row[0])) : '';
-            $nisn = isset($row[1]) ? trim(strip_tags((string)$row[1])) : '';
-            $nis = isset($row[2]) ? trim(strip_tags((string)$row[2])) : '';
-            $username = isset($row[3]) ? trim(strip_tags((string)$row[3])) : '';
-            $email = isset($row[4]) ? trim(strip_tags((string)$row[4])) : '';
-            $jenis_kelamin = isset($row[5]) ? trim(strip_tags((string)$row[5])) : '';
-            $tahun_masuk = isset($row[6]) ? trim(strip_tags((string)$row[6])) : '';
-            $sekolah_asal = isset($row[7]) ? trim(strip_tags((string)$row[7])) : '';
-            $tempat_lahir = isset($row[8]) ? trim(strip_tags((string)$row[8])) : '';
-            $tanggal_lahir_raw = isset($row[9]) ? trim(strip_tags((string)$row[9])) : '';
-            $agama = isset($row[10]) ? trim(strip_tags((string)$row[10])) : '';
-            $hp = isset($row[11]) ? trim(strip_tags((string)$row[11])) : '';
-            $nik = isset($row[12]) ? trim(strip_tags((string)$row[12])) : '';
-            $warga_negara = isset($row[13]) ? trim(strip_tags((string)$row[13])) : 'WNI';
+            $nama = isset($row[0]) ? trim(strip_tags((string) $row[0])) : '';
+            $nisn = isset($row[1]) ? trim(strip_tags((string) $row[1])) : '';
+            $nis = isset($row[2]) ? trim(strip_tags((string) $row[2])) : '';
+            $username = isset($row[3]) ? trim(strip_tags((string) $row[3])) : '';
+            $email = isset($row[4]) ? trim(strip_tags((string) $row[4])) : '';
+            $jenis_kelamin = isset($row[5]) ? trim(strip_tags((string) $row[5])) : '';
+            $tahun_masuk = isset($row[6]) ? trim(strip_tags((string) $row[6])) : '';
+            $sekolah_asal = isset($row[7]) ? trim(strip_tags((string) $row[7])) : '';
+            $tempat_lahir = isset($row[8]) ? trim(strip_tags((string) $row[8])) : '';
+            $tanggal_lahir_raw = isset($row[9]) ? trim(strip_tags((string) $row[9])) : '';
+            $agama = isset($row[10]) ? trim(strip_tags((string) $row[10])) : '';
+            $hp = isset($row[11]) ? trim(strip_tags((string) $row[11])) : '';
+            $nik = isset($row[12]) ? trim(strip_tags((string) $row[12])) : '';
+            $warga_negara = isset($row[13]) ? trim(strip_tags((string) $row[13])) : 'WNI';
 
             if (empty($nama)) {
                 $errors[] = "Baris {$rowNum}: Nama Siswa tidak boleh kosong.";
+
                 continue;
             }
             if (empty($nisn)) {
                 $errors[] = "Baris {$rowNum}: NISN tidak boleh kosong.";
+
                 continue;
             }
             if (empty($nis)) {
                 $errors[] = "Baris {$rowNum}: NIS tidak boleh kosong.";
+
                 continue;
             }
             if (empty($username)) {
                 $errors[] = "Baris {$rowNum}: Username tidak boleh kosong.";
+
                 continue;
             }
 
-            if (!preg_match("/^[a-zA-Z\s\.,'\(\)]+$/", $nama)) {
+            if (! preg_match("/^[a-zA-Z\s\.,'\(\)]+$/", $nama)) {
                 $errors[] = "Baris {$rowNum}: Nama Siswa mengandung karakter tidak valid.";
             }
             if (strlen($nama) > 100) {
                 $errors[] = "Baris {$rowNum}: Nama Siswa maksimal 100 karakter.";
             }
 
-            if (!preg_match("/^[0-9]{10}$/", $nisn)) {
+            if (! preg_match('/^[0-9]{10}$/', $nisn)) {
                 $errors[] = "Baris {$rowNum}: NISN harus berupa 10 digit angka.";
             }
 
-            if (!preg_match("/^[0-9a-zA-Z\-\/]+$/", $nis)) {
+            if (! preg_match("/^[0-9a-zA-Z\-\/]+$/", $nis)) {
                 $errors[] = "Baris {$rowNum}: NIS hanya boleh berisi huruf, angka, strip, dan garis miring.";
             }
             if (strlen($nis) > 20) {
                 $errors[] = "Baris {$rowNum}: NIS maksimal 20 karakter.";
             }
 
-            if (!preg_match("/^[a-zA-Z0-9_\-\.]+$/", $username)) {
+            if (! preg_match("/^[a-zA-Z0-9_\-\.]+$/", $username)) {
                 $errors[] = "Baris {$rowNum}: Username hanya boleh mengandung huruf, angka, underscore, strip, dan titik.";
             }
             if (strlen($username) > 50) {
                 $errors[] = "Baris {$rowNum}: Username maksimal 50 karakter.";
             }
 
-            if (!empty($email)) {
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
+            if (! empty($email)) {
+                if (! filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
                     $errors[] = "Baris {$rowNum}: Format email tidak valid.";
                 }
             }
 
             $tanggal_lahir = null;
-            if (!empty($tanggal_lahir_raw)) {
+            if (! empty($tanggal_lahir_raw)) {
                 try {
                     $tanggal_lahir = Carbon::createFromFormat('Y-m-d', $tanggal_lahir_raw)->format('Y-m-d');
                 } catch (\Exception $e) {
@@ -232,7 +237,7 @@ class SiswaUserController extends Controller
                 }
             }
 
-            if (!empty($jenis_kelamin)) {
+            if (! empty($jenis_kelamin)) {
                 $jenis_kelamin = strtoupper($jenis_kelamin);
                 if ($jenis_kelamin !== 'L' && $jenis_kelamin !== 'P') {
                     $errors[] = "Baris {$rowNum}: Jenis kelamin harus 'L' atau 'P'.";
@@ -245,7 +250,7 @@ class SiswaUserController extends Controller
                 $excelUsernames[] = $username;
             }
 
-            if (!empty($email)) {
+            if (! empty($email)) {
                 if (in_array($email, $excelEmails)) {
                     $errors[] = "Baris {$rowNum}: Email '{$email}' terduplikat di dalam file.";
                 } else {
@@ -328,7 +333,7 @@ class SiswaUserController extends Controller
                 'group_name' => 'User Management',
                 'log_type' => 1,
                 'log_desc' => json_encode([
-                    'message' => 'Imported ' . count($importedUsernames) . ' siswa accounts.',
+                    'message' => 'Imported '.count($importedUsernames).' siswa accounts.',
                     'file' => $file->getClientOriginalName(),
                     'count' => count($importedUsernames),
                     'usernames' => array_slice($importedUsernames, 0, 5),
@@ -344,16 +349,18 @@ class SiswaUserController extends Controller
         } catch (QueryException $e) {
             DB::rollBack();
             if ($e->getCode() == '23000') {
-                return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan duplikasi data di database: ' . $e->getMessage()]);
+                return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan duplikasi data di database: '.$e->getMessage()]);
             }
-            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan database: ' . $e->getMessage()]);
+
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan database: '.$e->getMessage()]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses data: ' . $e->getMessage()]);
+
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses data: '.$e->getMessage()]);
         }
 
         return redirect()->route('setting.user.siswa.index')
-            ->with('success', 'Berhasil mengimpor ' . count($importedUsernames) . ' siswa.')
+            ->with('success', 'Berhasil mengimpor '.count($importedUsernames).' siswa.')
             ->with('imported_users', $validatedData);
     }
 
@@ -386,7 +393,7 @@ class SiswaUserController extends Controller
             $user->email = $data['email'] ?? null;
             $user->username = $data['username'];
 
-            if (!empty($data['password'])) {
+            if (! empty($data['password'])) {
                 $user->password = Hash::make($data['password']);
             }
 

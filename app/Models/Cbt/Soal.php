@@ -2,9 +2,9 @@
 
 namespace App\Models\Cbt;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Master\Mapel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Soal extends Model
 {
@@ -17,7 +17,7 @@ class Soal extends Model
         'file', 'tipe_file', 'soal',
         'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'opsi_e',
         'file_a', 'file_b', 'file_c', 'file_d', 'file_e',
-        'jawaban', 'deskripsi', 'kesulitan', 'timer', 'timer_menit', 'tampilkan'
+        'jawaban', 'deskripsi', 'kesulitan', 'timer', 'timer_menit', 'tampilkan',
     ];
 
     public function bank()
@@ -61,13 +61,13 @@ class Soal extends Model
     protected static function booted()
     {
         static::saved(function (Soal $soal) {
-            if (!$soal->bank->skipSyncJumlah) {
+            if (! $soal->bank->skipSyncJumlah) {
                 $soal->bank->syncJumlahSoal();
             }
         });
 
         static::deleted(function (Soal $soal) {
-            if (!$soal->bank->skipSyncJumlah) {
+            if (! $soal->bank->skipSyncJumlah) {
                 $soal->bank->syncJumlahSoal();
             }
         });

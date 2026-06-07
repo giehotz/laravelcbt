@@ -34,7 +34,7 @@ watch(
             addToast(flash.info, 'info');
         }
     },
-    { deep: true, immediate: true }
+    { deep: true, immediate: true },
 );
 </script>
 
@@ -43,7 +43,9 @@ watch(
         <AppSidebar />
         <AppContent variant="sidebar" class="overflow-x-hidden">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
-            <slot />
+            <div class="p-4 lg:p-6">
+                <slot />
+            </div>
         </AppContent>
         <Toast />
     </AppShell>

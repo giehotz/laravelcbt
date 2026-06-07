@@ -2,6 +2,7 @@
 
 namespace App\Models\Cbt;
 
+use App\Models\Master\Siswa;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,7 +24,7 @@ class DurasiSiswa extends Model
 
     public function siswa()
     {
-        return $this->belongsTo(\App\Models\Master\Siswa::class, 'siswa_id');
+        return $this->belongsTo(Siswa::class, 'siswa_id');
     }
 
     public function jadwal()

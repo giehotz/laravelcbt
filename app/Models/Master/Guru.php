@@ -3,15 +3,15 @@
 namespace App\Models\Master;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Master\JabatanGuru;
-use App\Models\Master\GuruMapelKelas;
-use App\Models\Master\EkstraPembina;
 
 class Guru extends Model
 {
+    use HasFactory;
+
     protected $table = 'guru';
 
     protected $fillable = [

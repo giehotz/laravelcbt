@@ -58,7 +58,9 @@ const form = useForm({
     running_text: props.settings.running_text ?? '',
 });
 
-const logoPreview = ref<string | null>(props.settings.logo ? `/storage/${props.settings.logo}` : null);
+const logoPreview = ref<string | null>(
+    props.settings.logo ? `/storage/${props.settings.logo}` : null,
+);
 
 const onLogoChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -79,51 +81,83 @@ const submit = () => {
 <template>
     <Head title="Profil Sekolah" />
 
-    <div class="px-6 py-6 max-w-4xl mx-auto space-y-6">
+    <div class="mx-auto max-w-4xl space-y-6 px-6 py-6">
         <Heading
             title="Profil Sekolah"
             description="Lengkapi informasi dasar sekolah Anda untuk digunakan pada kop surat, laporan, dan dokumen cetak lainnya."
         />
 
-        <form @submit.prevent="submit" class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
+        <form
+            @submit.prevent="submit"
+            class="space-y-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+        >
             <!-- Grid Layout -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <!-- Left Side: Basic School Information -->
                 <div class="space-y-4">
                     <div class="grid gap-2">
-                        <Label for="nama_sekolah">Nama Sekolah <span class="text-rose-500">*</span></Label>
-                        <Input id="nama_sekolah" v-model="form.nama_sekolah" required placeholder="Contoh: SMA Negeri 1 Garuda" />
+                        <Label for="nama_sekolah"
+                            >Nama Sekolah
+                            <span class="text-rose-500">*</span></Label
+                        >
+                        <Input
+                            id="nama_sekolah"
+                            v-model="form.nama_sekolah"
+                            required
+                            placeholder="Contoh: SMA Negeri 1 Garuda"
+                        />
                         <InputError :message="form.errors.nama_sekolah" />
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="grid gap-2">
                             <Label for="npsn">NPSN</Label>
-                            <Input id="npsn" v-model="form.npsn" placeholder="Nomor NPSN" />
+                            <Input
+                                id="npsn"
+                                v-model="form.npsn"
+                                placeholder="Nomor NPSN"
+                            />
                             <InputError :message="form.errors.npsn" />
                         </div>
                         <div class="grid gap-2">
                             <Label for="nss">NSS / NDS</Label>
-                            <Input id="nss" v-model="form.nss" placeholder="Nomor NSS" />
+                            <Input
+                                id="nss"
+                                v-model="form.nss"
+                                placeholder="Nomor NSS"
+                            />
                             <InputError :message="form.errors.nss" />
                         </div>
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="telp">Telepon</Label>
-                        <Input id="telp" v-model="form.telp" placeholder="Telepon Sekolah" />
+                        <Input
+                            id="telp"
+                            v-model="form.telp"
+                            placeholder="Telepon Sekolah"
+                        />
                         <InputError :message="form.errors.telp" />
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="email">Email</Label>
-                        <Input id="email" type="email" v-model="form.email" placeholder="email@sekolah.sch.id" />
+                        <Input
+                            id="email"
+                            type="email"
+                            v-model="form.email"
+                            placeholder="email@sekolah.sch.id"
+                        />
                         <InputError :message="form.errors.email" />
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="website">Website</Label>
-                        <Input id="website" v-model="form.website" placeholder="www.sekolah.sch.id" />
+                        <Input
+                            id="website"
+                            v-model="form.website"
+                            placeholder="www.sekolah.sch.id"
+                        />
                         <InputError :message="form.errors.website" />
                     </div>
                 </div>
@@ -133,17 +167,40 @@ const submit = () => {
                     <!-- Logo Upload Section -->
                     <div class="grid gap-2">
                         <Label>Logo Sekolah</Label>
-                        <div class="flex items-center gap-4 p-4 border border-dashed border-neutral-300 dark:border-zinc-700 rounded-lg">
-                            <div class="w-20 h-20 bg-neutral-50 dark:bg-zinc-800 rounded-lg overflow-hidden border border-neutral-200 dark:border-zinc-700 flex items-center justify-center flex-shrink-0">
-                                <img v-if="logoPreview" :src="logoPreview" class="w-full h-full object-contain" />
-                                <span v-else class="text-xs text-neutral-400">No Logo</span>
+                        <div
+                            class="flex items-center gap-4 rounded-lg border border-dashed border-neutral-300 p-4 dark:border-zinc-700"
+                        >
+                            <div
+                                class="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 dark:border-zinc-700 dark:bg-zinc-800"
+                            >
+                                <img
+                                    v-if="logoPreview"
+                                    :src="logoPreview"
+                                    class="h-full w-full object-contain"
+                                />
+                                <span v-else class="text-xs text-neutral-400"
+                                    >No Logo</span
+                                >
                             </div>
                             <div class="space-y-2">
-                                <input id="logo" type="file" @change="onLogoChange" accept="image/*" class="hidden" />
-                                <Label for="logo" class="inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 cursor-pointer">
+                                <input
+                                    id="logo"
+                                    type="file"
+                                    @change="onLogoChange"
+                                    accept="image/*"
+                                    class="hidden"
+                                />
+                                <Label
+                                    for="logo"
+                                    class="inline-flex h-9 cursor-pointer items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                                >
                                     Pilih Gambar
                                 </Label>
-                                <p class="text-xs text-neutral-500 dark:text-neutral-400">JPG, PNG, WebP (Maks. 2MB). Min 100x100px.</p>
+                                <p
+                                    class="text-xs text-neutral-500 dark:text-neutral-400"
+                                >
+                                    JPG, PNG, WebP (Maks. 2MB). Min 100x100px.
+                                </p>
                             </div>
                         </div>
                         <InputError :message="form.errors.logo" />
@@ -151,13 +208,21 @@ const submit = () => {
 
                     <div class="grid gap-2">
                         <Label for="kepala_sekolah">Nama Kepala Sekolah</Label>
-                        <Input id="kepala_sekolah" v-model="form.kepala_sekolah" placeholder="Nama Lengkap & Gelar" />
+                        <Input
+                            id="kepala_sekolah"
+                            v-model="form.kepala_sekolah"
+                            placeholder="Nama Lengkap & Gelar"
+                        />
                         <InputError :message="form.errors.kepala_sekolah" />
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="nip_kepsek">NIP Kepala Sekolah</Label>
-                        <Input id="nip_kepsek" v-model="form.nip_kepsek" placeholder="NIP Kepala Sekolah" />
+                        <Input
+                            id="nip_kepsek"
+                            v-model="form.nip_kepsek"
+                            placeholder="NIP Kepala Sekolah"
+                        />
                         <InputError :message="form.errors.nip_kepsek" />
                     </div>
                 </div>
@@ -169,43 +234,75 @@ const submit = () => {
             <div class="space-y-4">
                 <div class="grid gap-2">
                     <Label for="alamat">Alamat Lengkap</Label>
-                    <Input id="alamat" v-model="form.alamat" placeholder="Jalan, RT/RW, Dusun" />
+                    <Input
+                        id="alamat"
+                        v-model="form.alamat"
+                        placeholder="Jalan, RT/RW, Dusun"
+                    />
                     <InputError :message="form.errors.alamat" />
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div class="grid gap-2">
                         <Label for="kecamatan">Kecamatan</Label>
-                        <Input id="kecamatan" v-model="form.kecamatan" placeholder="Kecamatan" />
+                        <Input
+                            id="kecamatan"
+                            v-model="form.kecamatan"
+                            placeholder="Kecamatan"
+                        />
                         <InputError :message="form.errors.kecamatan" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="kabupaten">Kabupaten/Kota</Label>
-                        <Input id="kabupaten" v-model="form.kabupaten" placeholder="Kabupaten" />
+                        <Input
+                            id="kabupaten"
+                            v-model="form.kabupaten"
+                            placeholder="Kabupaten"
+                        />
                         <InputError :message="form.errors.kabupaten" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="provinsi">Provinsi</Label>
-                        <Input id="provinsi" v-model="form.provinsi" placeholder="Provinsi" />
+                        <Input
+                            id="provinsi"
+                            v-model="form.provinsi"
+                            placeholder="Provinsi"
+                        />
                         <InputError :message="form.errors.provinsi" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="kode_pos">Kode Pos</Label>
-                        <Input id="kode_pos" v-model="form.kode_pos" placeholder="Kode Pos" />
+                        <Input
+                            id="kode_pos"
+                            v-model="form.kode_pos"
+                            placeholder="Kode Pos"
+                        />
                         <InputError :message="form.errors.kode_pos" />
                     </div>
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="running_text">Teks Berjalan Pengumuman (Running Text)</Label>
-                    <Input id="running_text" v-model="form.running_text" placeholder="Pesan pengumuman yang akan berjalan di dashboard siswa..." />
+                    <Label for="running_text"
+                        >Teks Berjalan Pengumuman (Running Text)</Label
+                    >
+                    <Input
+                        id="running_text"
+                        v-model="form.running_text"
+                        placeholder="Pesan pengumuman yang akan berjalan di dashboard siswa..."
+                    />
                     <InputError :message="form.errors.running_text" />
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end gap-4 pt-4 border-t border-neutral-200 dark:border-zinc-800">
-                <Button type="submit" :disabled="form.processing" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
+            <div
+                class="flex justify-end gap-4 border-t border-neutral-200 pt-4 dark:border-zinc-800"
+            >
+                <Button
+                    type="submit"
+                    :disabled="form.processing"
+                    class="bg-emerald-600 font-semibold text-white hover:bg-emerald-500"
+                >
                     <span v-if="form.processing">Menyimpan...</span>
                     <span v-else>Simpan Perubahan</span>
                 </Button>

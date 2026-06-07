@@ -21,6 +21,7 @@ class UpdateJenisRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route('jenis') ? $this->route('jenis')->id : null;
+
         return [
             'nama_jenis' => ['required', 'string', 'max:80'],
             'kode_jenis' => ['required', 'string', 'max:15', Rule::unique('cbt_jenis', 'kode_jenis')->ignore($id)],

@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\RoleHierarchy;
+use App\Models\Master\Guru;
+use App\Models\Master\Siswa;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -17,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -37,7 +40,7 @@ class User extends Authenticatable
      */
     public function guru(): HasOne
     {
-        return $this->hasOne(\App\Models\Master\Guru::class);
+        return $this->hasOne(Guru::class);
     }
 
     /**
@@ -45,7 +48,7 @@ class User extends Authenticatable
      */
     public function siswa(): HasOne
     {
-        return $this->hasOne(\App\Models\Master\Siswa::class);
+        return $this->hasOne(Siswa::class);
     }
 
     /**
@@ -62,5 +65,21 @@ class User extends Authenticatable
     public function scopeWithSiswa($query)
     {
         return $query->with('siswa');
+    }
+
+    /**
+     * Get the weight level of the highest role for the user.
+     */
+    public function getRoleLevel(): int
+    {
+        return $this->roles->max(fn ($role) => RoleHierarchy::getLevel($role->name)) ?? 0;
+    }
+
+    /**
+     * Check if the user has at least the minimum role level weight.
+     */
+    public function hasMinRoleLevel(int $minLevel): bool
+    {
+        return $this->getRoleLevel() >= $minLevel;
     }
 }

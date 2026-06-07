@@ -21,7 +21,7 @@ class SoalSiswaResource extends JsonResource
             // atau lewat relasi tambahan. Anggap saja kita load relasi durasi jika ini endpoint siswa.
             // Jika guru yang koreksi, bisa load khusus atau tidak pakai resource ini.
             $durasi = $this->siswa ? $this->siswa->durasi()->where('jadwal_id', $this->jadwal_id)->first() : null;
-            
+
             // Aturan kondisional sesuai review user:
             if ($durasi && $durasi->status === 2 && $this->jadwal->hasil_tampil) {
                 return true;
@@ -30,7 +30,7 @@ class SoalSiswaResource extends JsonResource
             if (auth()->check() && (auth()->user()->hasRole('guru') || auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('admin'))) {
                 return true;
             }
-            
+
             return false;
         }, false);
 
@@ -63,14 +63,14 @@ class SoalSiswaResource extends JsonResource
                     'fileE' => $this->soal->fileE,
                 ];
 
-                if ((int)$this->soal->jenis === 3) {
+                if ((int) $this->soal->jenis === 3) {
                     $this->soal->loadMissing('pairs');
-                    
+
                     // Shuffle left items with original IDs
                     $data['matching_left'] = $this->soal->pairs->map(function ($p) {
                         return [
                             'id' => $p->id,
-                            'text' => strip_tags(html_entity_decode($p->kiri))
+                            'text' => strip_tags(html_entity_decode($p->kiri)),
                         ];
                     })->shuffle()->values()->toArray();
 
@@ -78,7 +78,7 @@ class SoalSiswaResource extends JsonResource
                     $data['matching_right'] = $this->soal->pairs->map(function ($p) {
                         return [
                             'id' => $p->id,
-                            'text' => strip_tags(html_entity_decode($p->kanan))
+                            'text' => strip_tags(html_entity_decode($p->kanan)),
                         ];
                     })->shuffle()->values()->toArray();
                 }

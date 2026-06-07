@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('selesai', 25)->nullable();
             $table->tinyInteger('reset')->default(0); // 0=tidak, 1=reset 0, 2=reset sisa, 3=ulang semua
             $table->timestamps();
-            
+
             $table->unique(['siswa_id', 'jadwal_id']);
         });
     }

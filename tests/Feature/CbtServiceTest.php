@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\Master\Siswa;
-use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\BankSoal;
+use App\Models\Cbt\Jadwal;
+use App\Models\Cbt\Nilai;
 use App\Models\Cbt\Soal;
-use App\Models\CbtSoalSiswa;
-use App\Models\CbtNilai;
+use App\Models\Cbt\SoalSiswa;
+use App\Models\Master\Siswa;
 use App\Services\CbtService;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
 
 class CbtServiceTest extends TestCase
 {
@@ -22,7 +22,7 @@ class CbtServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         Config::set('database.connections.sqlite.foreign_key_constraints', false);
         Schema::disableForeignKeyConstraints();
 
@@ -37,7 +37,7 @@ class CbtServiceTest extends TestCase
         $siswa = Siswa::forceCreate([
             'nisn' => '111',
             'nis' => '111',
-            'nama' => 'Test Siswa 1'
+            'nama' => 'Test Siswa 1',
         ]);
 
         $bank = BankSoal::forceCreate([
@@ -75,13 +75,13 @@ class CbtServiceTest extends TestCase
             'tgl_selesai' => now()->addHour()->toISOString(),
             'durasi_ujian' => 120,
             'status' => 1,
-            'hasil_tampil' => true
+            'hasil_tampil' => true,
         ]);
 
-        $service = new CbtService();
+        $service = new CbtService;
         $service->distribusiSoal($siswa, $jadwal);
 
-        $soalSiswas = CbtSoalSiswa::where('siswa_id', $siswa->id)
+        $soalSiswas = SoalSiswa::where('siswa_id', $siswa->id)
             ->where('jadwal_id', $jadwal->id)
             ->get();
 
@@ -94,7 +94,7 @@ class CbtServiceTest extends TestCase
         foreach ($soalSiswas as $ss) {
             $this->assertNotNull($ss->opsi_alias_a, 'Opsi A alias must be generated');
             $this->assertNotNull($ss->jawaban_alias, 'Jawaban alias must be generated');
-            
+
             // Verifikasi logika alias
             $this->assertTrue(in_array($ss->jawaban_alias, ['A', 'B', 'C', 'D', 'E']));
         }
@@ -105,7 +105,7 @@ class CbtServiceTest extends TestCase
         $siswa = Siswa::forceCreate([
             'nisn' => '222',
             'nis' => '222',
-            'nama' => 'Test Siswa 2'
+            'nama' => 'Test Siswa 2',
         ]);
 
         $bank = BankSoal::forceCreate([
@@ -142,7 +142,7 @@ class CbtServiceTest extends TestCase
         ]);
 
         // Mock 2 soal siswa (1 benar, 1 salah)
-        CbtSoalSiswa::forceCreate([
+        SoalSiswa::forceCreate([
             'id' => 'u1',
             'bank_id' => $bank->id,
             'jadwal_id' => $jadwal->id,
@@ -155,7 +155,7 @@ class CbtServiceTest extends TestCase
             'jawaban_siswa' => 'C', // Benar
         ]);
 
-        CbtSoalSiswa::forceCreate([
+        SoalSiswa::forceCreate([
             'id' => 'u2',
             'bank_id' => $bank->id,
             'jadwal_id' => $jadwal->id,
@@ -168,10 +168,10 @@ class CbtServiceTest extends TestCase
             'jawaban_siswa' => 'A', // Salah (harusnya D)
         ]);
 
-        $service = new CbtService();
+        $service = new CbtService;
         $service->hitungNilai($siswa, $jadwal);
 
-        $nilai = CbtNilai::where('siswa_id', $siswa->id)
+        $nilai = Nilai::where('siswa_id', $siswa->id)
             ->where('jadwal_id', $jadwal->id)
             ->first();
 

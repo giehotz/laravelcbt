@@ -18,7 +18,7 @@ class UpdateMapelRequest extends FormRequest
 
         return [
             'nama_mapel' => 'required|string|max:100',
-            'kode' => 'required|string|max:20|unique:mapel,kode,' . $id,
+            'kode' => 'required|string|max:20|unique:mapel,kode,'.$id,
             'kelompok' => 'required|string|max:10',
             'bobot_p' => 'required|integer|min:0|max:100',
             'bobot_k' => 'required|integer|min:0|max:100',

@@ -2,18 +2,19 @@
 
 namespace Tests\Feature\Cbt;
 
+use App\Jobs\Cbt\SyncSesiSiswaJob;
+use App\Models\Cbt\KelasRuang;
+use App\Models\Cbt\Ruang;
+use App\Models\Cbt\Sesi;
 use App\Models\Master\Kelas;
 use App\Models\Master\KelasSiswa;
 use App\Models\Master\Siswa;
-use App\Models\Cbt\Ruang;
-use App\Models\Cbt\Sesi;
-use App\Models\Cbt\KelasRuang;
-use App\Models\TahunPelajaran;
 use App\Models\Semester;
+use App\Models\TahunPelajaran;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use App\Jobs\Cbt\SyncSesiSiswaJob;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AturRuangSesiTest extends TestCase
@@ -21,15 +22,17 @@ class AturRuangSesiTest extends TestCase
     use RefreshDatabase;
 
     protected User $superadmin;
+
     protected TahunPelajaran $tp;
+
     protected Semester $smt;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->superadmin = User::factory()->create();
-        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
         $this->superadmin->assignRole('superadmin');
 
         $this->tp = TahunPelajaran::factory()->create(['active' => true]);
@@ -72,7 +75,7 @@ class AturRuangSesiTest extends TestCase
     {
         $kelas = Kelas::factory()->create();
         $siswa = Siswa::factory()->create();
-        KelasSiswa::create(['kelas_id' => $kelas->id, 'siswa_id' => $siswa->id, 'tp_id' => $this->tp->id, 'smt_id' => $this->smt->id]);
+        KelasSiswa::create(['kelas_id' => $kelas->id, 'siswa_id' => $siswa->id, 'tahun_pelajaran_id' => $this->tp->id, 'semester_id' => $this->smt->id]);
 
         $ruang = Ruang::factory()->create();
         $sesi = Sesi::factory()->create();

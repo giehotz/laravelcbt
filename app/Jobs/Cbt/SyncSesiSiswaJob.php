@@ -2,14 +2,14 @@
 
 namespace App\Jobs\Cbt;
 
+use App\Models\Cbt\KelasRuang;
+use App\Models\Cbt\SesiSiswa;
+use App\Models\Master\KelasSiswa;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Cbt\KelasRuang;
-use App\Models\Cbt\SesiSiswa;
-use App\Models\Master\KelasSiswa;
 use Illuminate\Support\Facades\DB;
 
 class SyncSesiSiswaJob implements ShouldQueue
@@ -47,6 +47,7 @@ class SyncSesiSiswaJob implements ShouldQueue
                     ->where('smt_id', $smtId)
                     ->where('is_manual', false)
                     ->delete();
+
                 return;
             }
 

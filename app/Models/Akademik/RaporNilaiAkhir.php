@@ -2,13 +2,13 @@
 
 namespace App\Models\Akademik;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Master\TahunPelajaran;
-use App\Models\Master\Semester;
 use App\Models\Master\Kelas;
 use App\Models\Master\Mapel;
+use App\Models\Master\Semester;
 use App\Models\Master\Siswa;
+use App\Models\Master\TahunPelajaran;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class RaporNilaiAkhir extends Model
 {

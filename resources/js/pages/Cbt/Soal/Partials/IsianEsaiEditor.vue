@@ -9,11 +9,20 @@ defineProps<{
 </script>
 
 <template>
-    <div class="flex flex-col flex-1">
+    <div class="flex flex-1 flex-col">
         <div class="mb-2">
-            <Label class="text-sm font-bold text-gray-700 uppercase tracking-wider">Kunci Jawaban / Pedoman Penilaian</Label>
+            <Label
+                class="text-sm font-bold tracking-wider text-gray-700 uppercase dark:text-zinc-300"
+                >Kunci Jawaban / Pedoman Penilaian</Label
+            >
         </div>
-        <textarea v-model="form.jawaban" class="flex-1 w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 min-h-[300px]" placeholder="Ketik pedoman jawaban di sini..."></textarea>
-        <div v-if="form.errors.jawaban" class="text-xs text-red-500 mt-1">{{ form.errors.jawaban }}</div>
+        <textarea
+            v-model="form.jawaban"
+            class="min-h-[300px] w-full flex-1 rounded-lg border border-gray-300 bg-white p-4 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
+            placeholder="Ketik pedoman jawaban di sini..."
+        ></textarea>
+        <div v-if="form.errors.jawaban" class="mt-1 text-xs text-red-500">
+            {{ form.errors.jawaban }}
+        </div>
     </div>
 </template>

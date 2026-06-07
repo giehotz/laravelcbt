@@ -6,7 +6,9 @@ const { toasts, removeToast } = useToast();
 </script>
 
 <template>
-    <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none">
+    <div
+        class="pointer-events-none fixed right-4 bottom-4 z-50 flex w-full max-w-sm flex-col gap-2"
+    >
         <TransitionGroup
             name="toast"
             enter-active-class="transition duration-300 ease-out transform"
@@ -19,26 +21,34 @@ const { toasts, removeToast } = useToast();
             <div
                 v-for="toast in toasts"
                 :key="toast.id"
-                class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg pointer-events-auto transition-all"
+                class="pointer-events-auto flex items-center gap-3 rounded-lg border border-neutral-200 bg-white px-4 py-3 shadow-lg transition-all dark:border-zinc-800 dark:bg-zinc-900"
             >
                 <!-- Icon mapping -->
                 <div class="flex-shrink-0">
-                    <CheckCircle2 v-if="toast.type === 'success'" class="w-5 h-5 text-emerald-500" />
-                    <AlertCircle v-else-if="toast.type === 'error'" class="w-5 h-5 text-rose-500" />
-                    <Info v-else class="w-5 h-5 text-blue-500" />
+                    <CheckCircle2
+                        v-if="toast.type === 'success'"
+                        class="h-5 w-5 text-emerald-500"
+                    />
+                    <AlertCircle
+                        v-else-if="toast.type === 'error'"
+                        class="h-5 w-5 text-rose-500"
+                    />
+                    <Info v-else class="h-5 w-5 text-blue-500" />
                 </div>
 
                 <!-- Message -->
-                <div class="flex-1 text-sm font-medium text-neutral-800 dark:text-neutral-200">
+                <div
+                    class="flex-1 text-sm font-medium text-neutral-800 dark:text-neutral-200"
+                >
                     {{ toast.message }}
                 </div>
 
                 <!-- Dismiss Button -->
                 <button
                     @click="removeToast(toast.id)"
-                    class="flex-shrink-0 p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 rounded-full transition-colors cursor-pointer"
+                    class="flex-shrink-0 cursor-pointer rounded-full p-1 text-neutral-400 transition-colors hover:text-neutral-600 dark:hover:text-neutral-200"
                 >
-                    <X class="w-4 h-4" />
+                    <X class="h-4 w-4" />
                 </button>
             </div>
         </TransitionGroup>

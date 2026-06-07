@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\Jurusan;
-use App\Models\Master\Mapel;
 use App\Http\Requests\StoreJurusanRequest;
 use App\Http\Requests\UpdateJurusanRequest;
+use App\Models\Master\Jurusan;
+use App\Models\Master\Mapel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -52,7 +52,7 @@ class JurusanController extends Controller
         Gate::authorize('delete', $jurusan);
 
         // Deletability check
-        if (!$jurusan->deletable) {
+        if (! $jurusan->deletable) {
             return redirect()->route('master.jurusan.index')
                 ->with('error', 'Jurusan ini tidak dapat dihapus.');
         }

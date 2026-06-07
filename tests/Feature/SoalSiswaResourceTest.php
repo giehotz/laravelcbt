@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\CbtSoalSiswa;
-use App\Models\Master\Siswa;
-use App\Models\Cbt\Jadwal;
-use App\Models\CbtDurasiSiswa;
 use App\Http\Resources\SoalSiswaResource;
+use App\Models\Cbt\DurasiSiswa;
+use App\Models\Cbt\Jadwal;
+use App\Models\Cbt\SoalSiswa;
+use App\Models\Master\Siswa;
 use Illuminate\Http\Request;
 use Mockery;
+use Tests\TestCase;
 
 class SoalSiswaResourceTest extends TestCase
 {
@@ -21,7 +21,7 @@ class SoalSiswaResourceTest extends TestCase
 
     private function createMockSiswa($status)
     {
-        $durasi = new CbtDurasiSiswa(['status' => $status]);
+        $durasi = new DurasiSiswa(['status' => $status]);
         $durasi->jadwal_id = 1;
 
         // Mock builder
@@ -44,13 +44,13 @@ class SoalSiswaResourceTest extends TestCase
 
         $siswa = $this->createMockSiswa(1); // Sedang ujian
 
-        $soalSiswa = new CbtSoalSiswa([
+        $soalSiswa = new SoalSiswa([
             'id' => 'ulid-test-1',
             'jadwal_id' => 1,
             'jawaban_benar' => 'A',
             'jawaban_alias' => 'C',
         ]);
-        
+
         $soalSiswa->setRelation('jadwal', $jadwal);
         $soalSiswa->setRelation('siswa', $siswa);
 
@@ -68,13 +68,13 @@ class SoalSiswaResourceTest extends TestCase
 
         $siswa = $this->createMockSiswa(2); // Selesai
 
-        $soalSiswa = new CbtSoalSiswa([
+        $soalSiswa = new SoalSiswa([
             'id' => 'ulid-test-2',
             'jadwal_id' => 1,
             'jawaban_benar' => 'A',
             'jawaban_alias' => 'C',
         ]);
-        
+
         $soalSiswa->setRelation('jadwal', $jadwal);
         $soalSiswa->setRelation('siswa', $siswa);
 
@@ -92,13 +92,13 @@ class SoalSiswaResourceTest extends TestCase
 
         $siswa = $this->createMockSiswa(2); // Selesai
 
-        $soalSiswa = new CbtSoalSiswa([
+        $soalSiswa = new SoalSiswa([
             'id' => 'ulid-test-3',
             'jadwal_id' => 1,
             'jawaban_benar' => 'A',
             'jawaban_alias' => 'C',
         ]);
-        
+
         $soalSiswa->setRelation('jadwal', $jadwal);
         $soalSiswa->setRelation('siswa', $siswa);
 

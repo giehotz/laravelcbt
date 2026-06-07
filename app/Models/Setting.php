@@ -53,9 +53,10 @@ class Setting extends Model
     {
         $attributes = Cache::remember('setting_attributes', 3600, function () {
             $setting = self::first();
+
             return $setting ? $setting->getAttributes() : [];
         });
 
-        return (new self())->forceFill($attributes);
+        return (new self)->forceFill($attributes);
     }
 }

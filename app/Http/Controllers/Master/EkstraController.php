@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\Ekstra;
 use App\Http\Requests\StoreEkstraRequest;
 use App\Http\Requests\UpdateEkstraRequest;
+use App\Models\Master\Ekstra;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;

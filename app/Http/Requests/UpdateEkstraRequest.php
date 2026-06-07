@@ -18,7 +18,7 @@ class UpdateEkstraRequest extends FormRequest
 
         return [
             'nama_ekstra' => 'required|string|max:150',
-            'kode_ekstra' => 'required|string|max:25|unique:ekstra,kode_ekstra,' . $id,
+            'kode_ekstra' => 'required|string|max:25|unique:ekstra,kode_ekstra,'.$id,
         ];
     }
 }

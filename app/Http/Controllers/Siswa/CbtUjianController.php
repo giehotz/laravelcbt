@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cbt\Jadwal;
-use App\Models\CbtSoalSiswa;
-use App\Models\Cbt\DurasiSiswa;
-use App\Services\CbtService;
 use App\Http\Resources\SoalSiswaResource;
+use App\Models\Cbt\DurasiSiswa;
+use App\Models\Cbt\Jadwal;
+use App\Models\Cbt\SoalSiswa;
+use App\Services\CbtService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -39,8 +39,8 @@ class CbtUjianController extends Controller
     public function mulaiUjian(Request $request, Jadwal $jadwal)
     {
         $siswa = auth()->user()->siswa;
-        
-        if (!$siswa) {
+
+        if (! $siswa) {
             return response()->json(['message' => 'Akses ditolak.'], 403);
         }
 
@@ -69,7 +69,7 @@ class CbtUjianController extends Controller
     {
         $siswa = auth()->user()->siswa;
 
-        $soalSiswas = CbtSoalSiswa::with(['soal.pairs', 'jadwal'])
+        $soalSiswas = SoalSiswa::with(['soal.pairs', 'jadwal'])
             ->where('siswa_id', $siswa->id)
             ->where('jadwal_id', $jadwal->id)
             ->orderBy('no_soal_alias', 'asc')
@@ -81,7 +81,7 @@ class CbtUjianController extends Controller
     /**
      * Menyimpan jawaban per nomor.
      */
-    public function simpanJawaban(Request $request, CbtSoalSiswa $soalSiswa)
+    public function simpanJawaban(Request $request, SoalSiswa $soalSiswa)
     {
         $request->validate([
             'jawaban' => 'nullable|string',
@@ -89,7 +89,7 @@ class CbtUjianController extends Controller
         ]);
 
         $siswa = auth()->user()->siswa;
-        
+
         // Pastikan milik siswa yang sedang login
         if ($soalSiswa->siswa_id !== $siswa->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -100,7 +100,7 @@ class CbtUjianController extends Controller
             ->where('jadwal_id', $soalSiswa->jadwal_id)
             ->first();
 
-        if (!$durasi || $durasi->status !== 1) {
+        if (! $durasi || $durasi->status !== 1) {
             return response()->json(['message' => 'Waktu ujian telah habis atau belum dimulai.'], 403);
         }
 

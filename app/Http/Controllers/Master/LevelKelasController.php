@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\LevelKelas;
 use App\Http\Requests\StoreLevelKelasRequest;
 use App\Http\Requests\UpdateLevelKelasRequest;
+use App\Models\Master\Guru;
+use App\Models\Master\Jurusan;
+use App\Models\Master\LevelKelas;
+use App\Models\Semester;
+use App\Models\TahunPelajaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,14 +25,14 @@ class LevelKelasController extends Controller
         $levels = LevelKelas::with([
             'kelas' => function ($query) {
                 $query->with(['waliKelas', 'tahunPelajaran', 'semester'])
-                      ->withCount('siswa');
-            }
+                    ->withCount('siswa');
+            },
         ])->latest()->get();
 
-        $years = \App\Models\TahunPelajaran::latest()->get();
-        $semesters = \App\Models\Semester::latest()->get();
-        $jurusans = \App\Models\Master\Jurusan::active()->get();
-        $gurus = \App\Models\Master\Guru::latest()->get();
+        $years = TahunPelajaran::latest()->get();
+        $semesters = Semester::latest()->get();
+        $jurusans = Jurusan::active()->get();
+        $gurus = Guru::latest()->get();
 
         return Inertia::render('Master/LevelKelas/Index', [
             'levels' => $levels,

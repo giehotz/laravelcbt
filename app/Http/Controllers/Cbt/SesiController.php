@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cbt\Sesi;
 use App\Http\Requests\Cbt\StoreSesiRequest;
 use App\Http\Requests\Cbt\UpdateSesiRequest;
 use App\Http\Resources\Cbt\SesiResource;
-use Illuminate\Support\Facades\Gate;
+use App\Models\Cbt\Sesi;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class SesiController extends Controller
 {
@@ -47,8 +49,8 @@ class SesiController extends Controller
         // Prevent disabling if it's currently used in cbt_kelas_ruang or cbt_sesi_siswa (if those exist)
         // Since we are building 3.1, those tables might not have models yet, but we can query them directly if they exist, or just rely on foreign key constraints.
         // Actually, aktif = false doesn't violate FK, so we should check manually.
-        if ($sesi->aktif && !$request->boolean('aktif')) {
-            if (\Illuminate\Support\Facades\Schema::hasTable('cbt_sesi_siswa')) {
+        if ($sesi->aktif && ! $request->boolean('aktif')) {
+            if (Schema::hasTable('cbt_sesi_siswa')) {
                 $isUsed = DB::table('cbt_sesi_siswa')->where('sesi_id', $sesi->id)->exists();
                 if ($isUsed) {
                     return redirect()->back()->with('error', 'Sesi tidak dapat dinonaktifkan karena sedang digunakan oleh peserta ujian.');
@@ -72,8 +74,9 @@ class SesiController extends Controller
 
         try {
             $sesi->delete();
+
             return redirect()->back()->with('success', 'Sesi Ujian berhasil dihapus.');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return redirect()->back()->with('error', 'Sesi tidak dapat dihapus karena sudah memiliki relasi data (jadwal/peserta).');
         }
     }

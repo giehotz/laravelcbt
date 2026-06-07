@@ -2,6 +2,7 @@
 
 namespace App\Models\Cbt;
 
+use App\Models\Master\Kelas;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class KelasRuang extends Model
 
     public function kelas()
     {
-        return $this->belongsTo(\App\Models\Master\Kelas::class, 'kelas_id');
+        return $this->belongsTo(Kelas::class, 'kelas_id');
     }
 
     public function ruang()

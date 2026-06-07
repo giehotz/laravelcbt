@@ -2,10 +2,11 @@
 
 namespace Database\Factories\Cbt;
 
+use App\Models\Cbt\Jenis;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cbt\Jenis>
+ * @extends Factory<Jenis>
  */
 class JenisFactory extends Factory
 {

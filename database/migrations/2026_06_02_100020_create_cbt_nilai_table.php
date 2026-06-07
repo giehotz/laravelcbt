@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('isian_nilai', 10)->default('0');
             $table->boolean('dikoreksi')->default(false);
             $table->timestamps();
-            
+
             $table->unique(['siswa_id', 'jadwal_id']);
         });
     }

@@ -2,7 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Semester;
+use App\Models\Setting;
+use App\Models\TahunPelajaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,13 +39,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $setting = \App\Models\Setting::get();
-        $tpActive = \Illuminate\Support\Facades\Cache::remember('tp_active_array', 3600, function () {
-            $tp = \App\Models\TahunPelajaran::where('active', true)->first();
+        $setting = Setting::get();
+        $tpActive = Cache::remember('tp_active_array', 3600, function () {
+            $tp = TahunPelajaran::where('active', true)->first();
+
             return $tp ? $tp->only(['id', 'tahun']) : null;
         });
-        $semesterActive = \Illuminate\Support\Facades\Cache::remember('semester_active_array', 3600, function () {
-            $semester = \App\Models\Semester::where('active', true)->first();
+        $semesterActive = Cache::remember('semester_active_array', 3600, function () {
+            $semester = Semester::where('active', true)->first();
+
             return $semester ? $semester->only(['id', 'nama_smt', 'smt']) : null;
         });
 
@@ -59,7 +65,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'setting_sekolah' => [
                 'nama_sekolah' => $setting->nama_sekolah ?? 'GarudaCBT',
-                'logo' => $setting->logo ? asset('storage/' . $setting->logo) : null,
+                'logo' => $setting->logo ? asset('storage/'.$setting->logo) : null,
             ],
             'tp_aktif' => $tpActive,
             'smt_aktif' => $semesterActive,

@@ -31,7 +31,7 @@ class ServeCommand extends BaseServeCommand
         // Start npm run dev in the background
         $viteProcess = Process::fromShellCommandline('npm run dev');
         $viteProcess->setTimeout(null);
-        
+
         // Pass the output of Vite to the artisan console
         $viteProcess->start(function ($type, $buffer) {
             $this->output->write($buffer);

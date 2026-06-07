@@ -49,7 +49,7 @@ class PengawasController extends Controller
         $sesis = $kelasRuangs->pluck('sesi')->unique('id')->sortBy('urutan')->values();
 
         $validPairs = $kelasRuangs->map(function ($kr) {
-            return $kr->ruang_id . '-' . $kr->sesi_id;
+            return $kr->ruang_id.'-'.$kr->sesi_id;
         })->unique()->values();
 
         $gurus = Guru::get(['id', 'nama_guru']);
@@ -79,27 +79,27 @@ class PengawasController extends Controller
         foreach ($payload as $item) {
             $guruId = $item['guru_id'];
             $sesiId = $item['sesi_id'];
-            
+
             // Check if this guru is already assigned to another jadwal that overlaps in time for the SAME sesi
             $konflik = Pengawas::where('guru_id', $guruId)
                 ->where('sesi_id', $sesiId)
                 ->whereHas('jadwal', function ($q) use ($jadwal) {
                     $q->where('id', '!=', $jadwal->id)
-                      ->where('tgl_mulai', '<', $jadwal->tgl_selesai)
-                      ->where('tgl_selesai', '>', $jadwal->tgl_mulai);
+                        ->where('tgl_mulai', '<', $jadwal->tgl_selesai)
+                        ->where('tgl_selesai', '>', $jadwal->tgl_mulai);
                 })->exists();
 
             if ($konflik) {
                 $guru = Guru::find($guruId);
                 throw ValidationException::withMessages([
-                    'pengawas' => "Guru {$guru->nama_guru} sudah ditugaskan sebagai pengawas pada ujian lain yang waktunya tumpang tindih."
+                    'pengawas' => "Guru {$guru->nama_guru} sudah ditugaskan sebagai pengawas pada ujian lain yang waktunya tumpang tindih.",
                 ]);
             }
         }
 
         DB::transaction(function () use ($jadwal, $payload) {
             Pengawas::where('jadwal_id', $jadwal->id)->delete();
-            
+
             foreach ($payload as $item) {
                 Pengawas::create([
                     'jadwal_id' => $jadwal->id,

@@ -19,14 +19,14 @@ return new class extends Migration
             $table->foreignId('siswa_id')->constrained('siswa');
             $table->tinyInteger('jenis_soal');
             $table->integer('no_soal_alias'); // Nomor tampil ke siswa
-            
+
             // Alias acak opsi (mapping A->C, B->A, dst)
             $table->char('opsi_alias_a', 1)->nullable();
             $table->char('opsi_alias_b', 1)->nullable();
             $table->char('opsi_alias_c', 1)->nullable();
             $table->char('opsi_alias_d', 1)->nullable();
             $table->char('opsi_alias_e', 1)->nullable();
-            
+
             $table->longText('jawaban_alias')->nullable(); // Kunci setelah alias
             $table->longText('jawaban_siswa')->nullable(); // Jawaban yang dipilih
             $table->longText('jawaban_benar')->nullable(); // Cache kunci benar

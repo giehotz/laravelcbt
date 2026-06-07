@@ -5,6 +5,7 @@ namespace Tests\Feature\Cbt;
 use App\Models\Cbt\Ruang;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class RuangTest extends TestCase
@@ -16,9 +17,9 @@ class RuangTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        \Spatie\Permission\Models\Role::create(['name' => 'superadmin']);
-        
+
+        Role::create(['name' => 'superadmin']);
+
         $this->superadmin = User::factory()->create();
         $this->superadmin->assignRole('superadmin');
     }

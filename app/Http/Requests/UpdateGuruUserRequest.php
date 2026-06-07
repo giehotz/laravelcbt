@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Master\Guru;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateGuruUserRequest extends FormRequest
@@ -13,20 +14,21 @@ class UpdateGuruUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $guruId = $this->route('guru');
-        $userId = null;
-        if ($guruId) {
-            $guru = \App\Models\Master\Guru::find($guruId);
-            $userId = $guru?->user_id;
-        }
+        $guruParam = $this->route('guru');
+        $guru = $guruParam instanceof Guru
+            ? $guruParam
+            : Guru::find($guruParam);
+
+        $guruId = $guru?->id;
+        $userId = $guru?->user_id;
 
         return [
             'nama_guru' => 'required|string|max:100',
-            'email' => 'nullable|email|max:254|unique:users,email,' . $userId,
-            'username' => 'required|string|max:50|unique:users,username,' . $userId,
+            'email' => 'nullable|email|max:254|unique:users,email,'.$userId,
+            'username' => 'required|string|max:50|unique:users,username,'.$userId,
             'password' => 'nullable|string|min:8',
             'nip' => 'nullable|string|max:30',
-            'kode_guru' => 'nullable|string|max:10|unique:guru,kode_guru,' . $guruId,
+            'kode_guru' => 'nullable|string|max:10|unique:guru,kode_guru,'.$guruId,
             'no_ktp' => 'nullable|string|max:16',
             'tempat_lahir' => 'nullable|string|max:50',
             'tgl_lahir' => 'nullable|date',

@@ -19,7 +19,7 @@ const notifikasi = computed(() => {
 
     if (!props.jadwal || props.jadwal.length === 0) return hasil;
 
-    props.jadwal.forEach(item => {
+    props.jadwal.forEach((item) => {
         const mulai = new Date(item.tgl_mulai);
         const selisih = (mulai.getTime() - now.getTime()) / 60000; // in minutes
 
@@ -68,35 +68,57 @@ const notifikasi = computed(() => {
 
 // Sync to Pinia store for Navbar Badge
 const notifikasiStore = useNotifikasiStore();
-watch(notifikasi, (val) => {
-    notifikasiStore.set(val);
-}, { immediate: true });
+watch(
+    notifikasi,
+    (val) => {
+        notifikasiStore.set(val);
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
     <Card>
         <CardHeader class="pb-3">
-            <CardTitle class="text-sm font-medium flex items-center gap-2">
+            <CardTitle class="flex items-center gap-2 text-sm font-medium">
                 <Bell class="h-4 w-4" />
                 Notifikasi
-                <span v-if="notifikasi.length > 0" class="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto">
+                <span
+                    v-if="notifikasi.length > 0"
+                    class="ml-auto rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground"
+                >
                     {{ notifikasi.length }}
                 </span>
             </CardTitle>
         </CardHeader>
         <CardContent>
-            <div v-if="notifikasi.length === 0" class="text-sm text-muted-foreground text-center py-4">
+            <div
+                v-if="notifikasi.length === 0"
+                class="py-4 text-center text-sm text-muted-foreground"
+            >
                 Tidak ada notifikasi saat ini.
             </div>
             <div v-else class="space-y-3">
-                <Link v-for="notif in notifikasi" :key="notif.id" :href="notif.href" class="block group">
-                    <Alert :variant="notif.type" class="group-hover:bg-muted/50 transition-colors cursor-pointer relative pr-8">
+                <Link
+                    v-for="notif in notifikasi"
+                    :key="notif.id"
+                    :href="notif.href"
+                    class="group block"
+                >
+                    <Alert
+                        :variant="notif.type"
+                        class="relative cursor-pointer pr-8 transition-colors group-hover:bg-muted/50"
+                    >
                         <component :is="notif.icon" class="h-4 w-4" />
-                        <AlertTitle class="text-xs font-semibold">{{ notif.title }}</AlertTitle>
-                        <AlertDescription class="text-xs mt-1">
+                        <AlertTitle class="text-xs font-semibold">{{
+                            notif.title
+                        }}</AlertTitle>
+                        <AlertDescription class="mt-1 text-xs">
                             {{ notif.pesan }}
                         </AlertDescription>
-                        <ChevronRight class="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground" />
+                        <ChevronRight
+                            class="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                        />
                     </Alert>
                 </Link>
             </div>

@@ -2,15 +2,21 @@
 
 namespace App\Models\Master;
 
+use App\Models\Cbt\DurasiSiswa;
+use App\Models\Cbt\SesiSiswa;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Siswa extends Model
 {
+    use HasFactory;
+
     protected $table = 'siswa';
 
     protected $fillable = [
+        'user_id',
         'nisn',
         'nis',
         'nama',
@@ -70,6 +76,27 @@ class Siswa extends Model
 
     public function durasi()
     {
-        return $this->hasMany(\App\Models\CbtDurasiSiswa::class, 'siswa_id');
+        return $this->hasMany(DurasiSiswa::class, 'siswa_id');
+    }
+
+    public function bukuInduk()
+    {
+        return $this->hasOne(BukuInduk::class, 'siswa_id');
+    }
+
+    public function kelasAktif()
+    {
+        return $this->hasOne(KelasSiswa::class, 'siswa_id')
+            ->where('tahun_pelajaran_id', function ($query) {
+                $query->select('id')->from('tahun_pelajaran')->where('active', true)->limit(1);
+            })
+            ->where('semester_id', function ($query) {
+                $query->select('id')->from('semesters')->where('active', true)->limit(1);
+            });
+    }
+
+    public function sesiSiswa()
+    {
+        return $this->hasMany(SesiSiswa::class, 'siswa_id');
     }
 }

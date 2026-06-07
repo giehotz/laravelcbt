@@ -4,15 +4,14 @@ namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cbt\Jadwal;
-use App\Models\Cbt\KelasRuang;
-use App\Models\CbtKopKartu;
+use App\Models\Cbt\Nilai;
 use App\Models\CbtKopAbsensi;
 use App\Models\CbtKopBerita;
+use App\Models\CbtKopKartu;
 use App\Models\Master\Siswa;
-use App\Models\CbtNilai;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ReportController extends Controller
 {
@@ -22,8 +21,9 @@ class ReportController extends Controller
     public function index()
     {
         $jadwals = Jadwal::with(['bankSoal'])->orderBy('tgl_mulai', 'desc')->get();
+
         return Inertia::render('Cbt/Guru/Report', [
-            'jadwals' => $jadwals
+            'jadwals' => $jadwals,
         ]);
     }
 
@@ -34,7 +34,7 @@ class ReportController extends Controller
     {
         $jadwalId = $request->query('jadwal_id');
         $jadwal = Jadwal::find($jadwalId);
-        
+
         // Ambil data siswa yang terhubung dengan jadwal ini melalui kelas_ruang
         $siswas = DB::table('cbt_sesi_siswa')
             ->join('siswa', 'siswa.id', '=', 'cbt_sesi_siswa.siswa_id')
@@ -50,7 +50,7 @@ class ReportController extends Controller
         return Inertia::render('Cbt/Guru/PrintKartu', [
             'siswas' => $siswas,
             'kop' => $kop,
-            'jadwal' => $jadwal
+            'jadwal' => $jadwal,
         ]);
     }
 
@@ -61,7 +61,7 @@ class ReportController extends Controller
     {
         $jadwalId = $request->query('jadwal_id');
         $jadwal = Jadwal::with('bankSoal')->find($jadwalId);
-        
+
         $siswas = DB::table('cbt_sesi_siswa')
             ->join('siswa', 'siswa.id', '=', 'cbt_sesi_siswa.siswa_id')
             ->leftJoin('cbt_kelas_ruang', 'cbt_kelas_ruang.id', '=', 'cbt_sesi_siswa.kelas_ruang_id')
@@ -78,7 +78,7 @@ class ReportController extends Controller
         return Inertia::render('Cbt/Guru/PrintAbsensi', [
             'siswas' => $siswas,
             'kop' => $kop,
-            'jadwal' => $jadwal
+            'jadwal' => $jadwal,
         ]);
     }
 
@@ -114,7 +114,7 @@ class ReportController extends Controller
         return Inertia::render('Cbt/Guru/PrintBerita', [
             'ruangSesiList' => $ruangSesiList,
             'kop' => $kop,
-            'jadwal' => $jadwal
+            'jadwal' => $jadwal,
         ]);
     }
 
@@ -136,12 +136,13 @@ class ReportController extends Controller
         // Menambahkan properti total_nilai
         $nilais = $nilais->map(function ($n) {
             $n->total_nilai = $n->pg_nilai + $n->kompleks_nilai + $n->jodohkan_nilai + $n->isian_nilai + $n->esai_nilai;
+
             return $n;
         });
 
         return Inertia::render('Cbt/Guru/RekapNilai', [
             'nilais' => $nilais,
-            'jadwal' => $jadwal
+            'jadwal' => $jadwal,
         ]);
     }
 }

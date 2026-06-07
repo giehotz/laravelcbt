@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Setting;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\Guru;
 use App\Http\Requests\UpdateProfileGuruRequest;
 use App\Models\Master\Ekstra;
+use App\Models\Master\Guru;
 use App\Models\Master\Kelas;
 use App\Models\Master\Mapel;
 use App\Services\AcademicPeriodService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -23,9 +24,9 @@ class GuruAssignmentController extends Controller
 
         $guru->load([
             'user',
-            'jabatanGuru' => fn($q) => $q->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId),
-            'guruMapelKelas' => fn($q) => $q->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId),
-            'ekstraPembina' => fn($q) => $q->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId),
+            'jabatanGuru' => fn ($q) => $q->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId),
+            'guruMapelKelas' => fn ($q) => $q->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId),
+            'ekstraPembina' => fn ($q) => $q->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId),
         ]);
 
         return Inertia::render('Setting/User/GuruAssignment', [
@@ -42,14 +43,14 @@ class GuruAssignmentController extends Controller
         $tpId = $periodService->activeTpId();
         $smtId = $periodService->activeSmtId();
 
-        if (!$tpId || !$smtId) {
+        if (! $tpId || ! $smtId) {
             return back()->withErrors(['message' => 'Tahun Pelajaran atau Semester aktif belum diatur.']);
         }
 
         try {
             DB::transaction(function () use ($guru, $data, $tpId, $smtId) {
                 // Update Jabatan
-                if (!empty($data['jabatan'])) {
+                if (! empty($data['jabatan'])) {
                     $guru->jabatanGuru()->updateOrCreate(
                         ['tahun_pelajaran_id' => $tpId, 'semester_id' => $smtId],
                         ['jabatan' => $data['jabatan'], 'is_aktif' => $data['is_aktif_jabatan'] ?? true]
@@ -60,7 +61,7 @@ class GuruAssignmentController extends Controller
 
                 // Update Mapel Kelas
                 $guru->guruMapelKelas()->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId)->delete();
-                if (!empty($data['mapel_kelas'])) {
+                if (! empty($data['mapel_kelas'])) {
                     $insertData = [];
                     foreach ($data['mapel_kelas'] as $mk) {
                         foreach ($mk['kelas'] as $kelasId) {
@@ -80,7 +81,7 @@ class GuruAssignmentController extends Controller
 
                 // Update Ekstra
                 $guru->ekstraPembina()->where('tahun_pelajaran_id', $tpId)->where('semester_id', $smtId)->delete();
-                if (!empty($data['ekstra'])) {
+                if (! empty($data['ekstra'])) {
                     $insertData = [];
                     foreach ($data['ekstra'] as $ekstraId) {
                         $insertData[] = [
@@ -97,10 +98,10 @@ class GuruAssignmentController extends Controller
             });
 
             return back()->with('success', 'Penugasan guru berhasil disimpan.');
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->withErrors(['message' => 'Terjadi konflik data (Race Condition) atau duplikasi pada database saat menyimpan penugasan.'])->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem: '.$e->getMessage()])->withInput();
         }
     }
 }

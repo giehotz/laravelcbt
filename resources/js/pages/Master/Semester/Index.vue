@@ -61,49 +61,69 @@ const deleteSemester = (id: number) => {
 <template>
     <Head title="Semester" />
 
-    <div class="px-6 py-6 max-w-5xl mx-auto space-y-6">
+    <div class="mx-auto max-w-5xl space-y-6 px-6 py-6">
         <Heading
             title="Semester"
             description="Kelola semester aktif untuk mempartisi jadwal ujian, mata pelajaran, dan data rekap penilaian siswa."
         />
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
             <!-- Left Side: Table List -->
-            <div class="lg:col-span-2 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
+            <div
+                class="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <table class="w-full border-collapse text-left">
                     <thead>
-                        <tr class="bg-neutral-50 dark:bg-zinc-800/50 border-b border-neutral-200 dark:border-zinc-800 text-xs font-semibold uppercase text-neutral-500 tracking-wider">
+                        <tr
+                            class="border-b border-neutral-200 bg-neutral-50 text-xs font-semibold tracking-wider text-neutral-500 uppercase dark:border-zinc-800 dark:bg-zinc-800/50"
+                        >
                             <th class="px-6 py-4">Kode Semester</th>
                             <th class="px-6 py-4">Nama Semester</th>
                             <th class="px-6 py-4 text-center">Status</th>
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-200 dark:divide-zinc-800 text-sm">
-                        <tr v-for="semester in semesters" :key="semester.id" class="hover:bg-neutral-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                            <td class="px-6 py-4 font-medium text-neutral-800 dark:text-neutral-200 flex items-center gap-2">
-                                <Clock class="w-4 h-4 text-neutral-400" />
+                    <tbody
+                        class="divide-y divide-neutral-200 text-sm dark:divide-zinc-800"
+                    >
+                        <tr
+                            v-for="semester in semesters"
+                            :key="semester.id"
+                            class="transition-colors hover:bg-neutral-50/50 dark:hover:bg-zinc-800/30"
+                        >
+                            <td
+                                class="flex items-center gap-2 px-6 py-4 font-medium text-neutral-800 dark:text-neutral-200"
+                            >
+                                <Clock class="h-4 w-4 text-neutral-400" />
                                 <span>{{ semester.smt }}</span>
                             </td>
-                            <td class="px-6 py-4 text-neutral-600 dark:text-neutral-400">
+                            <td
+                                class="px-6 py-4 text-neutral-600 dark:text-neutral-400"
+                            >
                                 {{ semester.nama_smt }}
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span v-if="semester.active" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-                                    <CheckCircle class="w-3 h-3" />
+                                <span
+                                    v-if="semester.active"
+                                    class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                >
+                                    <CheckCircle class="h-3 w-3" />
                                     <span>Aktif</span>
                                 </span>
-                                <span v-else class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-neutral-100 text-neutral-600 dark:bg-zinc-800 dark:text-zinc-400">
+                                <span
+                                    v-else
+                                    class="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-zinc-800 dark:text-zinc-400"
+                                >
                                     <span>Inaktif</span>
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-right space-x-2">
+                            <td class="space-x-2 px-6 py-4 text-right">
                                 <Button
                                     v-if="!semester.active"
                                     size="sm"
                                     variant="outline"
                                     @click="activateSemester(semester.id)"
-                                    class="text-xs font-semibold text-emerald-600 hover:text-emerald-500 border-emerald-200 hover:border-emerald-300 bg-emerald-50/50 hover:bg-emerald-50"
+                                    class="border-emerald-200 bg-emerald-50/50 text-xs font-semibold text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-500"
                                 >
                                     Aktifkan
                                 </Button>
@@ -112,16 +132,22 @@ const deleteSemester = (id: number) => {
                                     size="sm"
                                     variant="ghost"
                                     @click="deleteSemester(semester.id)"
-                                    class="text-rose-600 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                                    class="text-rose-600 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/20"
                                 >
-                                    <Trash2 class="w-4 h-4" />
+                                    <Trash2 class="h-4 w-4" />
                                 </Button>
                             </td>
                         </tr>
                         <tr v-if="semesters.length === 0">
-                            <td colspan="4" class="px-6 py-12 text-center text-neutral-500">
-                                <AlertTriangle class="w-8 h-8 mx-auto text-amber-500 mb-2" />
-                                Belum ada data semester. Silakan tambahkan baru di sebelah kanan.
+                            <td
+                                colspan="4"
+                                class="px-6 py-12 text-center text-neutral-500"
+                            >
+                                <AlertTriangle
+                                    class="mx-auto mb-2 h-8 w-8 text-amber-500"
+                                />
+                                Belum ada data semester. Silakan tambahkan baru
+                                di sebelah kanan.
                             </td>
                         </tr>
                     </tbody>
@@ -129,28 +155,63 @@ const deleteSemester = (id: number) => {
             </div>
 
             <!-- Right Side: Form Create -->
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-4">
-                <h3 class="text-sm font-semibold uppercase tracking-wider text-neutral-500">Tambah Semester</h3>
+            <div
+                class="space-y-4 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <h3
+                    class="text-sm font-semibold tracking-wider text-neutral-500 uppercase"
+                >
+                    Tambah Semester
+                </h3>
                 <form @submit.prevent="submit" class="space-y-4">
                     <div class="grid gap-2">
-                        <Label for="smt">Kode Semester <span class="text-rose-500">*</span></Label>
-                        <Input id="smt" v-model="form.smt" required placeholder="Contoh: 1, 2, atau ganjil, genap" />
+                        <Label for="smt"
+                            >Kode Semester
+                            <span class="text-rose-500">*</span></Label
+                        >
+                        <Input
+                            id="smt"
+                            v-model="form.smt"
+                            required
+                            placeholder="Contoh: 1, 2, atau ganjil, genap"
+                        />
                         <InputError :message="form.errors.smt" />
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="nama_smt">Nama Semester <span class="text-rose-500">*</span></Label>
-                        <Input id="nama_smt" v-model="form.nama_smt" required placeholder="Contoh: Ganjil, Genap" />
+                        <Label for="nama_smt"
+                            >Nama Semester
+                            <span class="text-rose-500">*</span></Label
+                        >
+                        <Input
+                            id="nama_smt"
+                            v-model="form.nama_smt"
+                            required
+                            placeholder="Contoh: Ganjil, Genap"
+                        />
                         <InputError :message="form.errors.nama_smt" />
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <input id="active" type="checkbox" v-model="form.active" class="rounded border-neutral-300 dark:border-zinc-700 text-emerald-600 focus:ring-emerald-500" />
-                        <Label for="active" class="text-sm font-medium text-neutral-700 dark:text-neutral-300 cursor-pointer">Jadikan Semester Aktif</Label>
+                        <input
+                            id="active"
+                            type="checkbox"
+                            v-model="form.active"
+                            class="rounded border-neutral-300 text-emerald-600 focus:ring-emerald-500 dark:border-zinc-700"
+                        />
+                        <Label
+                            for="active"
+                            class="cursor-pointer text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                            >Jadikan Semester Aktif</Label
+                        >
                         <InputError :message="form.errors.active" />
                     </div>
 
-                    <Button type="submit" :disabled="form.processing" class="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold shadow">
+                    <Button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="w-full bg-zinc-900 font-semibold text-white shadow hover:bg-zinc-800"
+                    >
                         Tambah Data
                     </Button>
                 </form>

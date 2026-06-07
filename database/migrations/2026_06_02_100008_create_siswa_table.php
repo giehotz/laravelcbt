@@ -57,7 +57,7 @@ return new class extends Migration
             $table->string('pekerjaan_wali', 100)->nullable();
             $table->string('nohp_wali', 20)->nullable();
             $table->text('alamat_wali')->nullable();
-            
+
             $table->string('nik', 30)->nullable();
             $table->string('warga_negara', 20)->default('WNI');
             $table->string('uid', 255)->nullable()->unique();

@@ -12,26 +12,27 @@ class TokenController extends Controller
     public function index()
     {
         $token = Token::first();
-        
-        if (!$token) {
+
+        if (! $token) {
             $token = Token::generate();
         }
 
         return Inertia::render('Cbt/Token/Index', [
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
     public function generate()
     {
         Token::generate();
+
         return back()->with('success', 'Token ujian berhasil diperbarui.');
     }
 
     public function toggleAuto(Request $request)
     {
         $request->validate([
-            'auto' => 'required|boolean'
+            'auto' => 'required|boolean',
         ]);
 
         $token = Token::first();

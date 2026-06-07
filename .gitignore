@@ -12,7 +12,9 @@
 /resources/js/routes
 /resources/js/wayfinder
 /vendor
-.DS_Store
+/docs
+/graphify-out/*
+.DS_Store``
 .env
 .env.local
 .env.*.local
@@ -37,3 +39,23 @@ test_log.txt
 *.key
 .cache/
 .turbo/
+
+# AI / IDE agent configs (local)
+/.claude/
+/CLAUDE.md
+/.codex/
+/.cursor/
+/.gemini/
+/GEMINI.md
+/.junie/
+/.kiro/
+/.amp/
+/opencode.json
+/AGENTS.md
+/.mcp.json
+
+# GitHub auto-generated skills
+/.github/skills/
+
+# Utility scripts
+/scripts/

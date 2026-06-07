@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cbt\Jadwal;
+use App\Models\Cbt\Nilai;
+use App\Models\Cbt\SoalSiswa;
 use App\Models\Master\Siswa;
-use App\Models\CbtSoalSiswa;
-use App\Models\CbtNilai;
 use App\Services\CbtService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class KoreksiController extends Controller
 {
@@ -20,17 +20,17 @@ class KoreksiController extends Controller
     public function index(Request $request)
     {
         // Ambil jadwal yang memiliki soal essai
-        $jadwals = Jadwal::with(['bankSoal' => function($q) {
-                $q->where('jml_esai', '>', 0);
-            }])
-            ->whereHas('bankSoal', function($q) {
+        $jadwals = Jadwal::with(['bankSoal' => function ($q) {
+            $q->where('jml_esai', '>', 0);
+        }])
+            ->whereHas('bankSoal', function ($q) {
                 $q->where('jml_esai', '>', 0);
             })
             ->orderBy('tgl_mulai', 'desc')
             ->get();
 
         return Inertia::render('Cbt/Guru/KoreksiList', [
-            'jadwals' => $jadwals
+            'jadwals' => $jadwals,
         ]);
     }
 
@@ -44,7 +44,7 @@ class KoreksiController extends Controller
             ->join('siswa', 'siswa.id', '=', 'cbt_durasi_siswa.siswa_id')
             ->leftJoin('cbt_nilai', function ($join) use ($jadwal) {
                 $join->on('cbt_nilai.siswa_id', '=', 'siswa.id')
-                     ->where('cbt_nilai.jadwal_id', '=', $jadwal->id);
+                    ->where('cbt_nilai.jadwal_id', '=', $jadwal->id);
             })
             ->where('cbt_durasi_siswa.jadwal_id', $jadwal->id)
             ->where('cbt_durasi_siswa.status', 2) // Selesai
@@ -59,7 +59,7 @@ class KoreksiController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $siswaUjian
+            'data' => $siswaUjian,
         ]);
     }
 
@@ -68,14 +68,14 @@ class KoreksiController extends Controller
      */
     public function koreksiSiswa(Request $request, Jadwal $jadwal, Siswa $siswa)
     {
-        $soalSiswas = CbtSoalSiswa::with('soal')
+        $soalSiswas = SoalSiswa::with('soal')
             ->where('jadwal_id', $jadwal->id)
             ->where('siswa_id', $siswa->id)
             ->where('jenis_soal', 5) // Essai
             ->orderBy('no_soal_alias', 'asc')
             ->get();
 
-        $nilai = CbtNilai::where('jadwal_id', $jadwal->id)
+        $nilai = Nilai::where('jadwal_id', $jadwal->id)
             ->where('siswa_id', $siswa->id)
             ->first();
 
@@ -83,7 +83,7 @@ class KoreksiController extends Controller
             'jadwal' => $jadwal->load('bankSoal'),
             'siswa' => $siswa,
             'soalSiswas' => $soalSiswas,
-            'nilai' => $nilai
+            'nilai' => $nilai,
         ]);
     }
 
@@ -98,14 +98,14 @@ class KoreksiController extends Controller
             'koreksi.*.point_esai' => 'required|numeric|min:0',
         ]);
 
-        DB::transaction(function () use ($request, $jadwal, $siswa, $cbtService) {
+        DB::transaction(function () use ($request, $jadwal, $siswa) {
             $totalPointEssai = 0;
 
             foreach ($request->koreksi as $item) {
-                CbtSoalSiswa::where('id', $item['id'])
+                SoalSiswa::where('id', $item['id'])
                     ->where('siswa_id', $siswa->id)
                     ->update([
-                        'point_esai' => $item['point_esai']
+                        'point_esai' => $item['point_esai'],
                     ]);
                 $totalPointEssai += $item['point_esai'];
             }
@@ -122,8 +122,8 @@ class KoreksiController extends Controller
                 }
             }
 
-            // Update nilai di CbtNilai
-            $nilai = CbtNilai::where('siswa_id', $siswa->id)
+            // Update nilai di Nilai
+            $nilai = Nilai::where('siswa_id', $siswa->id)
                 ->where('jadwal_id', $jadwal->id)
                 ->first();
 

@@ -2,8 +2,9 @@
 
 namespace App\Actions;
 
-use App\Models\Semester;
 use App\Events\SemesterActivated;
+use App\Models\Semester;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ActivateSemesterAction
@@ -21,8 +22,8 @@ class ActivateSemesterAction
             $semester->update(['active' => true]);
 
             // Clear cache
-            \Illuminate\Support\Facades\Cache::forget('semester_active');
-            \Illuminate\Support\Facades\Cache::forget('semester_active_array');
+            Cache::forget('semester_active');
+            Cache::forget('semester_active_array');
 
             // Dispatch event
             event(new SemesterActivated($semester));

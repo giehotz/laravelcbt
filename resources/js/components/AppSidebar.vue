@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { 
-    LayoutGrid, 
-    Calendar, 
-    Clock, 
-    School, 
-    UserCheck, 
-    GraduationCap, 
+import {
+    LayoutGrid,
+    Calendar,
+    Clock,
+    School,
+    UserCheck,
+    GraduationCap,
     ShieldAlert,
     Layers,
     Milestone,
@@ -22,7 +22,7 @@ import {
     Key,
     Activity,
     CheckSquare,
-    Printer
+    Printer,
 } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -74,15 +74,21 @@ const { state } = useSidebar();
 const roles = computed<string[]>(() => page.props.auth?.roles ?? []);
 
 const hasRole = (roleList: string[]) => {
-    return roleList.some(role => roles.value.includes(role));
+    return roleList.some((role) => roles.value.includes(role));
 };
 
 const isAdminOrOperator = computed(() => hasRole(['superadmin', 'operator']));
 const isSuperAdmin = computed(() => hasRole(['superadmin']));
-const canAccessCbt = computed(() => hasRole(['superadmin', 'operator', 'proktor', 'guru', 'kepsek']));
-const canAccessMonitoring = computed(() => hasRole(['superadmin', 'operator', 'proktor', 'kepsek']));
+const canAccessCbt = computed(() =>
+    hasRole(['superadmin', 'operator', 'proktor', 'guru', 'kepsek']),
+);
+const canAccessMonitoring = computed(() =>
+    hasRole(['superadmin', 'operator', 'proktor', 'kepsek']),
+);
 const canAccessKoreksi = computed(() => hasRole(['superadmin', 'guru']));
-const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepsek']));
+const canAccessReport = computed(() =>
+    hasRole(['superadmin', 'operator', 'kepsek']),
+);
 </script>
 
 <template>
@@ -90,7 +96,11 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child class="hover:bg-sidebar-accent/50 transition-colors">
+                    <SidebarMenuButton
+                        size="lg"
+                        as-child
+                        class="transition-colors hover:bg-sidebar-accent/50"
+                    >
                         <Link :href="dashboard()">
                             <AppLogo />
                         </Link>
@@ -102,7 +112,10 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
         <SidebarContent class="py-2">
             <!-- HOME SECTION -->
             <SidebarGroup class="px-2 py-1">
-                <SidebarGroupLabel class="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">Home</SidebarGroupLabel>
+                <SidebarGroupLabel
+                    class="text-xs font-semibold tracking-wider text-sidebar-foreground/40 uppercase"
+                    >Home</SidebarGroupLabel
+                >
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -112,7 +125,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="dashboard()">
-                                <LayoutGrid class="w-4 h-4" />
+                                <LayoutGrid class="h-4 w-4" />
                                 <span>Dashboard</span>
                             </Link>
                         </SidebarMenuButton>
@@ -122,7 +135,10 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
 
             <!-- DATA MASTER SECTION (superadmin & operator only) -->
             <SidebarGroup v-if="isAdminOrOperator" class="px-2 py-1">
-                <SidebarGroupLabel class="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">Data Master</SidebarGroupLabel>
+                <SidebarGroupLabel
+                    class="text-xs font-semibold tracking-wider text-sidebar-foreground/40 uppercase"
+                    >Data Master</SidebarGroupLabel
+                >
                 <SidebarMenu>
                     <!-- Tahun & Semester -->
                     <SidebarMenuItem>
@@ -133,7 +149,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="tpIndex.url()">
-                                <Calendar class="w-4 h-4" />
+                                <Calendar class="h-4 w-4" />
                                 <span>Tahun & Semester</span>
                             </Link>
                         </SidebarMenuButton>
@@ -148,7 +164,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="levelIndex.url()">
-                                <Layers class="w-4 h-4" />
+                                <Layers class="h-4 w-4" />
                                 <span>Level Kelas</span>
                             </Link>
                         </SidebarMenuButton>
@@ -163,7 +179,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="jurusanIndex.url()">
-                                <Milestone class="w-4 h-4" />
+                                <Milestone class="h-4 w-4" />
                                 <span>Jurusan</span>
                             </Link>
                         </SidebarMenuButton>
@@ -178,7 +194,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="mapelIndex.url()">
-                                <BookOpen class="w-4 h-4" />
+                                <BookOpen class="h-4 w-4" />
                                 <span>Mata Pelajaran</span>
                             </Link>
                         </SidebarMenuButton>
@@ -193,7 +209,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="kelasIndex.url()">
-                                <Users class="w-4 h-4" />
+                                <Users class="h-4 w-4" />
                                 <span>Rombel / Kelas</span>
                             </Link>
                         </SidebarMenuButton>
@@ -208,7 +224,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="ekstraIndex.url()">
-                                <Compass class="w-4 h-4" />
+                                <Compass class="h-4 w-4" />
                                 <span>Ekstrakurikuler</span>
                             </Link>
                         </SidebarMenuButton>
@@ -218,7 +234,10 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
 
             <!-- CBT SECTION -->
             <SidebarGroup v-if="canAccessCbt" class="px-2 py-1">
-                <SidebarGroupLabel class="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">CBT (Computer Based Test)</SidebarGroupLabel>
+                <SidebarGroupLabel
+                    class="text-xs font-semibold tracking-wider text-sidebar-foreground/40 uppercase"
+                    >CBT (Computer Based Test)</SidebarGroupLabel
+                >
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -228,7 +247,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtJenisIndex.url()">
-                                <Database class="w-4 h-4" />
+                                <Database class="h-4 w-4" />
                                 <span>Jenis Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -242,7 +261,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtSesiIndex.url()">
-                                <Clock4 class="w-4 h-4" />
+                                <Clock4 class="h-4 w-4" />
                                 <span>Sesi Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -256,7 +275,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtRuangIndex.url()">
-                                <MonitorPlay class="w-4 h-4" />
+                                <MonitorPlay class="h-4 w-4" />
                                 <span>Ruang Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -265,12 +284,14 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             as-child
-                            :is-active="isCurrentUrl(cbtNomorPesertaIndex.url())"
+                            :is-active="
+                                isCurrentUrl(cbtNomorPesertaIndex.url())
+                            "
                             tooltip="Nomor Peserta"
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtNomorPesertaIndex.url()">
-                                <Hash class="w-4 h-4" />
+                                <Hash class="h-4 w-4" />
                                 <span>Nomor Peserta</span>
                             </Link>
                         </SidebarMenuButton>
@@ -284,7 +305,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtAturRuangIndex.url()">
-                                <Map class="w-4 h-4" />
+                                <Map class="h-4 w-4" />
                                 <span>Atur Ruang & Sesi</span>
                             </Link>
                         </SidebarMenuButton>
@@ -298,7 +319,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtBankSoalIndex.url()">
-                                <Library class="w-4 h-4" />
+                                <Library class="h-4 w-4" />
                                 <span>Bank Soal</span>
                             </Link>
                         </SidebarMenuButton>
@@ -312,7 +333,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtTokenIndex.url()">
-                                <Key class="w-4 h-4" />
+                                <Key class="h-4 w-4" />
                                 <span>Token Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -326,7 +347,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtJadwalIndex.url()">
-                                <Calendar class="w-4 h-4" />
+                                <Calendar class="h-4 w-4" />
                                 <span>Jadwal Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -340,7 +361,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtPengawasIndex.url()">
-                                <Users class="w-4 h-4" />
+                                <Users class="h-4 w-4" />
                                 <span>Pengawas Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -349,12 +370,14 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             as-child
-                            :is-active="$page.url.startsWith('/cbt/alokasi-waktu')"
+                            :is-active="
+                                $page.url.startsWith('/cbt/alokasi-waktu')
+                            "
                             tooltip="Alokasi Waktu"
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtAlokasiWaktuIndex.url()">
-                                <Clock class="w-4 h-4" />
+                                <Clock class="h-4 w-4" />
                                 <span>Alokasi Waktu</span>
                             </Link>
                         </SidebarMenuButton>
@@ -367,7 +390,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtMonitoringIndex.url()">
-                                <Activity class="w-4 h-4" />
+                                <Activity class="h-4 w-4" />
                                 <span>Monitoring Ujian</span>
                             </Link>
                         </SidebarMenuButton>
@@ -381,7 +404,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtKoreksiIndex.url()">
-                                <CheckSquare class="w-4 h-4" />
+                                <CheckSquare class="h-4 w-4" />
                                 <span>Koreksi Essai</span>
                             </Link>
                         </SidebarMenuButton>
@@ -395,7 +418,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="cbtReportIndex.url()">
-                                <Printer class="w-4 h-4" />
+                                <Printer class="h-4 w-4" />
                                 <span>Cetak Laporan</span>
                             </Link>
                         </SidebarMenuButton>
@@ -405,7 +428,10 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
 
             <!-- PENGATURAN SECTION (superadmin & operator only) -->
             <SidebarGroup v-if="isAdminOrOperator" class="px-2 py-1">
-                <SidebarGroupLabel class="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">Pengaturan</SidebarGroupLabel>
+                <SidebarGroupLabel
+                    class="text-xs font-semibold tracking-wider text-sidebar-foreground/40 uppercase"
+                    >Pengaturan</SidebarGroupLabel
+                >
                 <SidebarMenu>
                     <!-- School Profile (superadmin only) -->
                     <SidebarMenuItem v-if="isSuperAdmin">
@@ -416,7 +442,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="schoolEdit.url()">
-                                <School class="w-4 h-4" />
+                                <School class="h-4 w-4" />
                                 <span>Profil Sekolah</span>
                             </Link>
                         </SidebarMenuButton>
@@ -431,7 +457,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="adminIndex.url()">
-                                <ShieldAlert class="w-4 h-4" />
+                                <ShieldAlert class="h-4 w-4" />
                                 <span>User Admin</span>
                             </Link>
                         </SidebarMenuButton>
@@ -445,7 +471,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="guruIndex.url()">
-                                <UserCheck class="w-4 h-4" />
+                                <UserCheck class="h-4 w-4" />
                                 <span>User Guru</span>
                             </Link>
                         </SidebarMenuButton>
@@ -459,7 +485,7 @@ const canAccessReport = computed(() => hasRole(['superadmin', 'operator', 'kepse
                             class="transition-all duration-200"
                         >
                             <Link :href="siswaIndex.url()">
-                                <GraduationCap class="w-4 h-4" />
+                                <GraduationCap class="h-4 w-4" />
                                 <span>User Siswa</span>
                             </Link>
                         </SidebarMenuButton>

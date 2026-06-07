@@ -2,10 +2,10 @@
 
 namespace App\Models\Master;
 
-use App\Models\TahunPelajaran;
 use App\Models\Semester;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Models\TahunPelajaran;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class KelasSiswa extends Pivot
 {

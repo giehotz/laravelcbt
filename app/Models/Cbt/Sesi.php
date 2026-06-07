@@ -2,9 +2,9 @@
 
 namespace App\Models\Cbt;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Sesi extends Model
 {

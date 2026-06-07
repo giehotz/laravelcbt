@@ -2,34 +2,34 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Master\Kelas;
+use App\Models\User;
 
 class KelasPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator', 'guru']);
+        return $user->hasMinRoleLevel(40);
     }
 
     public function view(User $user, Kelas $kelas): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator', 'guru']);
+        return $user->hasMinRoleLevel(40);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     public function update(User $user, Kelas $kelas): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     public function delete(User $user, Kelas $kelas): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -38,11 +38,11 @@ class KelasPolicy
      */
     public function manageStudents(User $user, Kelas $kelas): bool
     {
-        if ($user->hasAnyRole(['superadmin', 'operator'])) {
+        if ($user->hasMinRoleLevel(60)) {
             return true;
         }
 
-        if ($user->hasRole('guru') && $user->guru && $user->guru->id === $kelas->guru_id) {
+        if ($user->hasMinRoleLevel(40) && $user->guru && $user->guru->id === $kelas->guru_id) {
             return true;
         }
 

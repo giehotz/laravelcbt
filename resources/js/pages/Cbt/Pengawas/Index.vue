@@ -1,15 +1,28 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3'
-import { show as showPengawasRoute } from '@/routes/cbt/pengawas'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Users } from 'lucide-vue-next'
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { show as showPengawasRoute } from '@/routes/cbt/pengawas';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Users } from 'lucide-vue-next';
 
 defineProps<{
-    jadwals: any[]
-}>()
+    jadwals: any[];
+}>();
 </script>
 
 <template>
@@ -17,18 +30,19 @@ defineProps<{
 
     <div class="flex h-full flex-1 flex-col gap-4 p-4 lg:p-6">
         <div class="mb-4">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="text-xl leading-tight font-semibold text-gray-800">
                 Pengawas Ujian
             </h2>
         </div>
 
         <div>
-            <div class="max-w-7xl mx-auto">
+            <div class="mx-auto max-w-7xl">
                 <Card>
                     <CardHeader>
                         <CardTitle>Daftar Jadwal Ujian</CardTitle>
                         <CardDescription>
-                            Pilih jadwal ujian untuk mengatur guru pengawas pada masing-masing ruang dan sesi.
+                            Pilih jadwal ujian untuk mengatur guru pengawas pada
+                            masing-masing ruang dan sesi.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -38,37 +52,67 @@ defineProps<{
                                     <TableHead>Mata Pelajaran</TableHead>
                                     <TableHead>Jenis Ujian</TableHead>
                                     <TableHead>Waktu Pelaksanaan</TableHead>
-                                    <TableHead class="text-center">Jumlah Pengawas</TableHead>
-                                    <TableHead class="text-right">Aksi</TableHead>
+                                    <TableHead class="text-center"
+                                        >Jumlah Pengawas</TableHead
+                                    >
+                                    <TableHead class="text-right"
+                                        >Aksi</TableHead
+                                    >
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 <TableRow v-if="jadwals.length === 0">
-                                    <TableCell colspan="5" class="text-center py-8 text-muted-foreground">
+                                    <TableCell
+                                        colspan="5"
+                                        class="py-8 text-center text-muted-foreground"
+                                    >
                                         Tidak ada jadwal ujian aktif.
                                     </TableCell>
                                 </TableRow>
-                                <TableRow v-for="jadwal in jadwals" :key="jadwal.id">
+                                <TableRow
+                                    v-for="jadwal in jadwals"
+                                    :key="jadwal.id"
+                                >
                                     <TableCell class="font-medium">
-                                        {{ jadwal.bankSoal?.mapel?.nama_mapel || '-' }}
+                                        {{
+                                            jadwal.bankSoal?.mapel
+                                                ?.nama_mapel || '-'
+                                        }}
                                     </TableCell>
                                     <TableCell>
-                                        {{ jadwal.bankSoal?.jenis?.nama_jenis || '-' }}
+                                        {{
+                                            jadwal.bankSoal?.jenis
+                                                ?.nama_jenis || '-'
+                                        }}
                                     </TableCell>
                                     <TableCell>
                                         <div class="text-sm">
-                                            {{ jadwal.tgl_mulai }} <br> s/d {{ jadwal.tgl_selesai }}
+                                            {{ jadwal.tgl_mulai }} <br />
+                                            s/d {{ jadwal.tgl_selesai }}
                                         </div>
                                     </TableCell>
                                     <TableCell class="text-center">
-                                        <Badge variant="secondary" class="gap-1">
-                                            <Users class="w-3 h-3" />
+                                        <Badge
+                                            variant="secondary"
+                                            class="gap-1"
+                                        >
+                                            <Users class="h-3 w-3" />
                                             {{ jadwal.pengawas_count }}
                                         </Badge>
                                     </TableCell>
                                     <TableCell class="text-right">
-                                        <Button as-child size="sm" variant="outline">
-                                            <Link :href="showPengawasRoute.url({jadwal: jadwal.id})">
+                                        <Button
+                                            as-child
+                                            size="sm"
+                                            variant="outline"
+                                        >
+                                            <Link
+                                                :href="
+                                                    showPengawasRoute.url({
+                                                        jadwal: jadwal.id,
+                                                    })
+                                                "
+                                            >
                                                 Atur Pengawas
                                             </Link>
                                         </Button>

@@ -14,18 +14,18 @@ const props = defineProps<{
         token: string;
         auto: boolean;
         updated_at: string;
-    }
+    };
 }>();
 
 const form = useForm({
-    auto: props.token.auto
+    auto: props.token.auto,
 });
 
 const handleGenerate = () => {
     form.post(generate.url(), {
         onSuccess: () => {
             toast.success('Token berhasil diperbarui');
-        }
+        },
     });
 };
 
@@ -35,7 +35,7 @@ const handleToggleAuto = (checked: boolean) => {
         preserveScroll: true,
         onSuccess: () => {
             toast.success('Pengaturan auto-generate berhasil disimpan');
-        }
+        },
     });
 };
 </script>
@@ -44,53 +44,102 @@ const handleToggleAuto = (checked: boolean) => {
     <Head title="Token Ujian" />
 
     <div class="flex h-full flex-1 flex-col gap-4 p-4 lg:p-6">
-        <Heading title="Token Ujian" description="Kelola token akses untuk pelaksanaan ujian CBT." variant="small" />
+        <Heading
+            title="Token Ujian"
+            description="Kelola token akses untuk pelaksanaan ujian CBT."
+            variant="small"
+        />
 
         <div class="max-w-3xl space-y-6">
             <!-- Token Display Card -->
-            <div class="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-                <div class="bg-primary/5 p-6 border-b border-border flex flex-col items-center justify-center text-center space-y-4">
-                    <div class="p-3 bg-primary/10 rounded-full text-primary">
-                        <Key class="w-8 h-8" />
+            <div
+                class="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+            >
+                <div
+                    class="flex flex-col items-center justify-center space-y-4 border-b border-border bg-primary/5 p-6 text-center"
+                >
+                    <div class="rounded-full bg-primary/10 p-3 text-primary">
+                        <Key class="h-8 w-8" />
                     </div>
                     <div class="space-y-1">
-                        <p class="text-sm font-medium text-muted-foreground uppercase tracking-widest">Token Ujian Saat Ini</p>
-                        <h2 class="text-6xl font-black tracking-widest text-foreground font-mono">
+                        <p
+                            class="text-sm font-medium tracking-widest text-muted-foreground uppercase"
+                        >
+                            Token Ujian Saat Ini
+                        </p>
+                        <h2
+                            class="font-mono text-6xl font-black tracking-widest text-foreground"
+                        >
                             {{ token.token }}
                         </h2>
                     </div>
-                    
-                    <p class="text-xs text-muted-foreground mt-4 flex items-center justify-center">
-                        <Clock class="w-3 h-3 mr-1" />
-                        Terakhir diupdate: {{ new Date(token.updated_at).toLocaleString('id-ID') }}
+
+                    <p
+                        class="mt-4 flex items-center justify-center text-xs text-muted-foreground"
+                    >
+                        <Clock class="mr-1 h-3 w-3" />
+                        Terakhir diupdate:
+                        {{ new Date(token.updated_at).toLocaleString('id-ID') }}
                     </p>
                 </div>
-                
-                <div class="p-6 bg-card flex flex-col sm:flex-row items-center justify-between gap-4">
+
+                <div
+                    class="flex flex-col items-center justify-between gap-4 bg-card p-6 sm:flex-row"
+                >
                     <div class="flex items-center space-x-3">
-                        <Switch id="auto-token" :checked="form.auto" @update:checked="handleToggleAuto" />
+                        <Switch
+                            id="auto-token"
+                            :checked="form.auto"
+                            @update:checked="handleToggleAuto"
+                        />
                         <div class="space-y-0.5">
-                            <Label for="auto-token" class="font-semibold text-base">Auto-Generate Token</Label>
-                            <p class="text-sm text-muted-foreground">Otomatis perbarui token setiap 15 menit</p>
+                            <Label
+                                for="auto-token"
+                                class="text-base font-semibold"
+                                >Auto-Generate Token</Label
+                            >
+                            <p class="text-sm text-muted-foreground">
+                                Otomatis perbarui token setiap 15 menit
+                            </p>
                         </div>
                     </div>
-                    
-                    <Button @click="handleGenerate" :disabled="form.processing" size="lg" class="w-full sm:w-auto">
-                        <RefreshCcw class="w-4 h-4 mr-2" :class="{ 'animate-spin': form.processing }" />
+
+                    <Button
+                        @click="handleGenerate"
+                        :disabled="form.processing"
+                        size="lg"
+                        class="w-full sm:w-auto"
+                    >
+                        <RefreshCcw
+                            class="mr-2 h-4 w-4"
+                            :class="{ 'animate-spin': form.processing }"
+                        />
                         Generate Token Baru
                     </Button>
                 </div>
             </div>
 
             <!-- Information Alert -->
-            <div class="bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 p-4 rounded-lg flex items-start border border-blue-200 dark:border-blue-900">
-                <Settings class="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
+            <div
+                class="flex items-start rounded-lg border border-blue-200 bg-blue-50 p-4 text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300"
+            >
+                <Settings class="mt-0.5 mr-3 h-5 w-5 flex-shrink-0" />
                 <div class="text-sm">
-                    <p class="font-semibold mb-1">Informasi Token Ujian</p>
-                    <ul class="list-disc ml-4 space-y-1">
-                        <li>Token ujian digunakan sebagai kunci masuk (password sekunder) bagi peserta sebelum memulai ujian.</li>
-                        <li>Token hanya diwajibkan untuk jadwal ujian yang mengaktifkan fitur token.</li>
-                        <li>Fitur <strong>Auto-Generate</strong> akan secara otomatis mengganti token setiap 15 menit melalui task scheduler server (Cron Job).</li>
+                    <p class="mb-1 font-semibold">Informasi Token Ujian</p>
+                    <ul class="ml-4 list-disc space-y-1">
+                        <li>
+                            Token ujian digunakan sebagai kunci masuk (password
+                            sekunder) bagi peserta sebelum memulai ujian.
+                        </li>
+                        <li>
+                            Token hanya diwajibkan untuk jadwal ujian yang
+                            mengaktifkan fitur token.
+                        </li>
+                        <li>
+                            Fitur <strong>Auto-Generate</strong> akan secara
+                            otomatis mengganti token setiap 15 menit melalui
+                            task scheduler server (Cron Job).
+                        </li>
                     </ul>
                 </div>
             </div>

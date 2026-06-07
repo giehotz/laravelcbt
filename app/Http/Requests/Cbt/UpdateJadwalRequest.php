@@ -33,4 +33,17 @@ class UpdateJadwalRequest extends FormRequest
             'pengawas.*' => 'exists:guru,id',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'acak_soal' => filter_var($this->acak_soal, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'acak_opsi' => filter_var($this->acak_opsi, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'hasil_tampil' => filter_var($this->hasil_tampil, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'token' => filter_var($this->token, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'ulang' => filter_var($this->ulang, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'reset_login' => filter_var($this->reset_login, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'rekap' => filter_var($this->rekap, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+        ]);
+    }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
 use App\Models\Master\Kelas;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,38 +15,38 @@ class PengumumanController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        
+
         $query = Post::with('user');
 
-        // Access Control: 
+        // Access Control:
         // Admin/Operator/Kepsek can see everything.
         // Guru/Siswa can only see posts targeted to them.
         if ($user->hasRole('siswa')) {
             $kelasId = $user->siswa->kelasAktif?->kelas_id;
-            
-            $query->where(function($q) use ($kelasId) {
+
+            $query->where(function ($q) use ($kelasId) {
                 $q->whereJsonContains('kepada->type', 'all')
-                  ->orWhereJsonContains('kepada->type', 'siswa');
-                  
+                    ->orWhereJsonContains('kepada->type', 'siswa');
+
                 if ($kelasId) {
                     // if target is specific kelas
-                    $q->orWhere(function($sub) use ($kelasId) {
+                    $q->orWhere(function ($sub) use ($kelasId) {
                         $sub->whereJsonContains('kepada->type', 'kelas')
                             ->whereJsonContains('kepada->ids', $kelasId);
                     });
                 }
             });
         } elseif ($user->hasRole('guru')) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->whereJsonContains('kepada->type', 'all')
-                  ->orWhereJsonContains('kepada->type', 'guru');
+                    ->orWhereJsonContains('kepada->type', 'guru');
             });
         }
 
         $posts = $query->latest()->paginate(10);
 
         return Inertia::render('Pengumuman/Index', [
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
@@ -60,7 +60,7 @@ class PengumumanController extends Controller
         $kelas = Kelas::select('id', 'nama')->get();
 
         return Inertia::render('Pengumuman/Form', [
-            'kelas' => $kelas
+            'kelas' => $kelas,
         ]);
     }
 

@@ -10,7 +10,7 @@ class SoalPair extends Model
     protected $table = 'cbt_soal_pairs';
 
     protected $fillable = [
-        'soal_id', 'kiri', 'kanan'
+        'soal_id', 'kiri', 'kanan',
     ];
 
     /**

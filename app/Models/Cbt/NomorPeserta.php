@@ -2,6 +2,9 @@
 
 namespace App\Models\Cbt;
 
+use App\Models\Master\Siswa;
+use App\Models\Semester;
+use App\Models\TahunPelajaran;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,16 +23,16 @@ class NomorPeserta extends Model
 
     public function siswa()
     {
-        return $this->belongsTo(\App\Models\Master\Siswa::class, 'siswa_id');
+        return $this->belongsTo(Siswa::class, 'siswa_id');
     }
 
     public function tahunPelajaran()
     {
-        return $this->belongsTo(\App\Models\TahunPelajaran::class, 'tp_id');
+        return $this->belongsTo(TahunPelajaran::class, 'tp_id');
     }
 
     public function semester()
     {
-        return $this->belongsTo(\App\Models\Semester::class, 'smt_id');
+        return $this->belongsTo(Semester::class, 'smt_id');
     }
 }

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Master;
 
+use App\Actions\ActivateSemesterAction;
 use App\Http\Controllers\Controller;
-use App\Models\Semester;
 use App\Http\Requests\StoreSemesterRequest;
 use App\Http\Requests\UpdateSemesterRequest;
-use App\Actions\ActivateSemesterAction;
+use App\Models\Semester;
 use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Support\Facades\Cache;
 
 class SemesterController extends Controller
 {
@@ -47,8 +46,8 @@ class SemesterController extends Controller
         $semester->update($request->validated());
 
         if ($semester->active) {
-            \Illuminate\Support\Facades\Cache::forget('semester_active');
-            \Illuminate\Support\Facades\Cache::forget('semester_active_array');
+            Cache::forget('semester_active');
+            Cache::forget('semester_active_array');
         }
 
         return redirect()->route('master.tahun-pelajaran.index')

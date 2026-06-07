@@ -10,6 +10,6 @@ export const useNotifikasiStore = defineStore('notifikasi', {
     actions: {
         set(items: any[]) {
             this.items = items;
-        }
-    }
+        },
+    },
 });

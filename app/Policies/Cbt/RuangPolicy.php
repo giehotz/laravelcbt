@@ -28,7 +28,7 @@ class RuangPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -36,7 +36,7 @@ class RuangPolicy
      */
     public function update(User $user, Ruang $ruang): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -44,6 +44,6 @@ class RuangPolicy
      */
     public function delete(User $user, Ruang $ruang): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 }

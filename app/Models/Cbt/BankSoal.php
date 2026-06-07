@@ -2,8 +2,6 @@
 
 namespace App\Models\Cbt;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Models\Master\Guru;
 use App\Models\Master\Jurusan;
 use App\Models\Master\Mapel;
@@ -12,6 +10,7 @@ use App\Models\TahunPelajaran;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class BankSoal extends Model
@@ -28,7 +27,7 @@ class BankSoal extends Model
         'jml_kompleks', 'tampil_kompleks', 'bobot_kompleks', 'skoring_kompleks',
         'jml_jodohkan', 'tampil_jodohkan', 'bobot_jodohkan',
         'jml_isian', 'tampil_isian', 'bobot_isian',
-        'opsi', 'deskripsi', 'status', 'status_soal', 'soal_agama'
+        'opsi', 'deskripsi', 'status', 'status_soal', 'soal_agama',
     ];
 
     protected $casts = [
@@ -78,12 +77,9 @@ class BankSoal extends Model
     public function scopeVisibleBy(Builder $query, User $user): Builder
     {
         if ($user->hasRole('guru') && $user->guru) {
-            $assignmentService = app(\App\Services\GuruAssignmentService::class);
-            $allowedMapels = $assignmentService->allowedMapels($user->guru)->pluck('id');
-            
-            return $query->where('guru_id', $user->guru->id)
-                         ->whereIn('mapel_id', $allowedMapels);
+            return $query->where('guru_id', $user->guru->id);
         }
+
         return $query;
     }
 

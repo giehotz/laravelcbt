@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\Mapel;
 use App\Http\Requests\StoreMapelRequest;
 use App\Http\Requests\UpdateMapelRequest;
+use App\Models\Master\Mapel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -49,7 +49,7 @@ class MapelController extends Controller
         Gate::authorize('delete', $mapel);
 
         // Deletability check
-        if (!$mapel->deletable) {
+        if (! $mapel->deletable) {
             return redirect()->route('master.mapel.index')
                 ->with('error', 'Mata pelajaran ini tidak dapat dihapus.');
         }

@@ -4,10 +4,12 @@ namespace Tests\Feature\Cbt;
 
 use App\Models\Cbt\BankSoal;
 use App\Models\Cbt\Jenis;
-use App\Models\Cbt\Jadwal;
+use App\Models\Master\Mapel;
 use App\Models\Semester;
 use App\Models\TahunPelajaran;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class JadwalTest extends TestCase
@@ -17,14 +19,14 @@ class JadwalTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        \App\Models\Master\Mapel::unguard();
+
+        Mapel::unguard();
         TahunPelajaran::unguard();
         Semester::unguard();
         Jenis::unguard();
         BankSoal::unguard();
 
-        \App\Models\Master\Mapel::create(['id' => 1, 'nama_mapel' => 'Matematika']);
+        Mapel::create(['id' => 1, 'nama_mapel' => 'Matematika']);
         TahunPelajaran::create(['id' => 1, 'tahun' => '2025/2026', 'active' => true]);
         Semester::create(['id' => 1, 'smt' => '1', 'nama_smt' => 'Ganjil', 'active' => true]);
         Jenis::create(['id' => 1, 'nama_jenis' => 'PAS', 'kode_jenis' => 'PAS']);
@@ -42,10 +44,10 @@ class JadwalTest extends TestCase
             'kkm' => 70,
         ]);
 
-        $user = \App\Models\User::factory()->create();
+        $user = User::factory()->create();
         // create role if not exist
-        if (!\Spatie\Permission\Models\Role::where('name', 'superadmin')->exists()) {
-            \Spatie\Permission\Models\Role::create(['name' => 'superadmin']);
+        if (! Role::where('name', 'superadmin')->exists()) {
+            Role::create(['name' => 'superadmin']);
         }
         $user->assignRole('superadmin');
         $this->actingAs($user);

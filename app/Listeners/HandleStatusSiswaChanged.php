@@ -3,9 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\StatusSiswaChanged;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
 
 class HandleStatusSiswaChanged
@@ -31,7 +28,7 @@ class HandleStatusSiswaChanged
             if ($siswa->user_id) {
                 User::where('id', $siswa->user_id)->update(['is_active' => false]);
             }
-            
+
             // Note: Data kelas_siswa and cbt_durasi_siswa are kept as history
             // unless specific business rules require deletion.
         }

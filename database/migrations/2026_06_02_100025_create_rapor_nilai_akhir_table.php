@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('sumber_pas', 10)->default('manual');
             $table->boolean('final')->default(false); // sudah dikunci guru
             $table->timestamps();
-            $table->unique(['tp_id','smt_id','mapel_id','siswa_id']);
+            $table->unique(['tp_id', 'smt_id', 'mapel_id', 'siswa_id']);
         });
     }
 

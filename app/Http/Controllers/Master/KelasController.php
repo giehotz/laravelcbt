@@ -3,19 +3,20 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\Kelas;
-use App\Models\Master\LevelKelas;
-use App\Models\Master\Jurusan;
-use App\Models\Master\Guru;
-use App\Models\Master\Siswa;
-use App\Models\TahunPelajaran;
-use App\Models\Semester;
 use App\Http\Requests\StoreKelasRequest;
 use App\Http\Requests\UpdateKelasRequest;
 use App\Http\Requests\UpdateKelasStudentsRequest;
+use App\Models\Master\Guru;
+use App\Models\Master\Jurusan;
+use App\Models\Master\Kelas;
+use App\Models\Master\LevelKelas;
+use App\Models\Master\Siswa;
+use App\Models\Semester;
+use App\Models\TahunPelajaran;
 use App\Services\KelasStudentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -105,8 +106,8 @@ class KelasController extends Controller
         if ($search) {
             $unassignedQuery->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
             });
         }
 
@@ -139,7 +140,7 @@ class KelasController extends Controller
                 $kelas->tahun_pelajaran_id,
                 $kelas->semester_id
             );
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         }
 

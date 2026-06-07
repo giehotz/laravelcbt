@@ -18,7 +18,7 @@ class UpdateJurusanRequest extends FormRequest
 
         return [
             'nama_jurusan' => 'required|string|max:80',
-            'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,' . $id,
+            'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,'.$id,
             'mapel_peminatan' => 'nullable|array',
             'mapel_peminatan.*' => 'exists:mapel,id',
             'status' => 'sometimes|boolean',

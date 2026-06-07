@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('jenis_pts_id')->nullable()->constrained('cbt_jenis');
             $table->foreignId('jenis_pas_id')->nullable()->constrained('cbt_jenis');
             $table->timestamps();
-            $table->unique(['tp_id','smt_id']);
+            $table->unique(['tp_id', 'smt_id']);
         });
     }
 

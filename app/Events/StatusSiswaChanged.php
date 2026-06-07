@@ -12,6 +12,7 @@ class StatusSiswaChanged
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $siswa;
+
     public $newStatus;
 
     /**

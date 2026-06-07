@@ -5,6 +5,7 @@ namespace Tests\Feature\Cbt;
 use App\Models\Cbt\Jenis;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class JenisTest extends TestCase
@@ -12,18 +13,19 @@ class JenisTest extends TestCase
     use RefreshDatabase;
 
     protected User $superadmin;
+
     protected User $guru;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        \Spatie\Permission\Models\Role::create(['name' => 'superadmin']);
-        \Spatie\Permission\Models\Role::create(['name' => 'guru']);
-        
+
+        Role::create(['name' => 'superadmin']);
+        Role::create(['name' => 'guru']);
+
         $this->superadmin = User::factory()->create();
         $this->superadmin->assignRole('superadmin');
-        
+
         $this->guru = User::factory()->create();
         $this->guru->assignRole('guru');
     }
@@ -48,7 +50,7 @@ class JenisTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('cbt_jenis', $data);
     }
 

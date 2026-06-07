@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Cbt;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Master\Siswa;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CbtSoalSiswa extends Model
+class SoalSiswa extends Model
 {
     use HasUlids;
 
@@ -21,21 +22,21 @@ class CbtSoalSiswa extends Model
 
     public function siswa(): BelongsTo
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Siswa::class, 'siswa_id');
     }
 
     public function jadwal(): BelongsTo
     {
-        return $this->belongsTo(CbtJadwal::class);
+        return $this->belongsTo(Jadwal::class, 'jadwal_id');
     }
 
     public function bankSoal(): BelongsTo
     {
-        return $this->belongsTo(CbtBankSoal::class, 'bank_id');
+        return $this->belongsTo(BankSoal::class, 'bank_id');
     }
 
     public function soal(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Cbt\Soal::class, 'soal_id');
+        return $this->belongsTo(Soal::class, 'soal_id');
     }
 }

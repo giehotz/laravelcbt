@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Master;
 
+use App\Events\StatusSiswaChanged;
 use App\Http\Controllers\Controller;
-use App\Models\Master\BukuInduk;
 use App\Models\Master\Siswa;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class BukuIndukController extends Controller
 {
@@ -29,7 +29,7 @@ class BukuIndukController extends Controller
 
         return Inertia::render('Master/BukuInduk/Index', [
             'siswa' => $siswa,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -41,9 +41,9 @@ class BukuIndukController extends Controller
         // Parameter name is $buku_induk because route is resource('buku-induk')
         // but we bind it to Siswa to get the full profile + relasi
         $buku_induk->load('bukuInduk');
-        
+
         return Inertia::render('Master/BukuInduk/Edit', [
-            'siswa' => $buku_induk
+            'siswa' => $buku_induk,
         ]);
     }
 
@@ -68,7 +68,7 @@ class BukuIndukController extends Controller
             'buku_induk.kelainan_fisik' => 'nullable|string|max:150',
             'buku_induk.kegemaran' => 'nullable|string',
             'buku_induk.beasiswa' => 'nullable|string',
-            
+
             // Orang Tua (Siswa table)
             'siswa.nama_ayah' => 'nullable|string|max:150',
             'siswa.tgl_lahir_ayah' => 'nullable|string|max:50',
@@ -120,10 +120,10 @@ class BukuIndukController extends Controller
             }
 
             $newStatus = $validatedData['buku_induk']['status'] ?? $oldStatus;
-            
+
             // Trigger event if status changed to Lulus (2) or Pindah (3) or Keluar (4)
             if ($oldStatus !== $newStatus && in_array($newStatus, [2, 3, 4])) {
-                event(new \App\Events\StatusSiswaChanged($buku_induk, $newStatus));
+                event(new StatusSiswaChanged($buku_induk, $newStatus));
             }
         });
 

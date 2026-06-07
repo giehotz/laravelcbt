@@ -26,6 +26,7 @@ class Token extends Model
         $token = self::first();
         if ($token) {
             $token->update(['token' => $tokenStr]);
+
             return $token;
         }
 

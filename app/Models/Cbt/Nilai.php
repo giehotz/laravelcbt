@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Cbt;
 
+use App\Models\Master\Siswa;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CbtNilai extends Model
+class Nilai extends Model
 {
     protected $table = 'cbt_nilai';
 
@@ -17,11 +18,11 @@ class CbtNilai extends Model
 
     public function siswa(): BelongsTo
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Siswa::class, 'siswa_id');
     }
 
     public function jadwal(): BelongsTo
     {
-        return $this->belongsTo(CbtJadwal::class);
+        return $this->belongsTo(Jadwal::class, 'jadwal_id');
     }
 }

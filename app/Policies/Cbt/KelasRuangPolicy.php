@@ -2,7 +2,6 @@
 
 namespace App\Policies\Cbt;
 
-use App\Models\Cbt\KelasRuang;
 use App\Models\User;
 
 class KelasRuangPolicy
@@ -14,11 +13,11 @@ class KelasRuangPolicy
 
     public function store(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     public function update(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 }

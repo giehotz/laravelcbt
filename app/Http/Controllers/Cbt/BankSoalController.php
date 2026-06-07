@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Http\Requests\Cbt\StoreBankSoalRequest;
 use App\Models\Cbt\BankSoal;
 use App\Models\Cbt\Jenis;
+use App\Models\Master\Guru;
 use App\Models\Master\Jurusan;
 use App\Models\Master\Kelas;
-use App\Models\Master\Mapel;
 use App\Models\Master\LevelKelas;
+use App\Models\Master\Mapel;
 use App\Models\Semester;
 use App\Models\TahunPelajaran;
-use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
-use Inertia\Response;
 use App\Services\GuruAssignmentService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class BankSoalController extends Controller
 {
@@ -30,7 +30,7 @@ class BankSoalController extends Controller
 
         $tpAktif = TahunPelajaran::where('active', true)->first();
         $smtAktif = Semester::where('active', true)->first();
-        
+
         $bankSoals = BankSoal::visibleBy($request->user())
             ->where('tahun_pelajaran_id', $tpAktif?->id)
             ->where('semester_id', $smtAktif?->id)
@@ -48,9 +48,9 @@ class BankSoalController extends Controller
         $this->authorize('create', BankSoal::class);
         $user = $request->user();
         $assignmentService = app(GuruAssignmentService::class);
-        
-        $mapels = $user->hasRole('superadmin|operator|kepsek|proktor') 
-            ? Mapel::all(['id', 'nama_mapel']) 
+
+        $mapels = $user->hasRole('superadmin|operator|kepsek|proktor')
+            ? Mapel::all(['id', 'nama_mapel'])
             : ($user->guru ? $assignmentService->allowedMapels($user->guru) : collect());
 
         return Inertia::render('Cbt/BankSoal/Form', [
@@ -62,6 +62,7 @@ class BankSoalController extends Controller
             'levelKelas' => LevelKelas::all(['id', 'level']),
             'isGuru' => $user->hasRole('guru'),
             'guruAssignments' => ($user->hasRole('guru') && $user->guru) ? $user->guru->guruMapelKelas()->with('kelas:id')->get() : [],
+            'gurus' => $user->hasRole('guru') ? [] : Guru::all(['id', 'nama_guru']),
         ]);
     }
 
@@ -69,12 +70,14 @@ class BankSoalController extends Controller
     {
         $this->authorize('create', BankSoal::class);
         $data = $request->validated();
-        $data['guru_id'] = $request->user()->guru?->id;
+        if ($request->user()->hasRole('guru')) {
+            $data['guru_id'] = $request->user()->guru?->id;
+        }
         $data['tahun_pelajaran_id'] = TahunPelajaran::where('active', true)->first()->id;
         $data['semester_id'] = Semester::where('active', true)->first()->id;
-        
+
         BankSoal::create($data);
-        
+
         return redirect()->route('cbt.bank-soal.index')->with('success', 'Bank Soal berhasil dibuat.');
     }
 
@@ -83,9 +86,9 @@ class BankSoalController extends Controller
         $this->authorize('update', $bankSoal);
         $user = $request->user();
         $assignmentService = app(GuruAssignmentService::class);
-        
-        $mapels = $user->hasRole('superadmin|operator|kepsek|proktor') 
-            ? Mapel::all(['id', 'nama_mapel']) 
+
+        $mapels = $user->hasRole('superadmin|operator|kepsek|proktor')
+            ? Mapel::all(['id', 'nama_mapel'])
             : ($user->guru ? $assignmentService->allowedMapels($user->guru) : collect());
 
         return Inertia::render('Cbt/BankSoal/Form', [
@@ -97,13 +100,19 @@ class BankSoalController extends Controller
             'levelKelas' => LevelKelas::all(['id', 'level']),
             'isGuru' => $user->hasRole('guru'),
             'guruAssignments' => ($user->hasRole('guru') && $user->guru) ? $user->guru->guruMapelKelas()->with('kelas:id')->get() : [],
+            'gurus' => $user->hasRole('guru') ? [] : Guru::all(['id', 'nama_guru']),
         ]);
     }
 
     public function update(StoreBankSoalRequest $request, BankSoal $bankSoal): RedirectResponse
     {
         $this->authorize('update', $bankSoal);
-        $bankSoal->update($request->validated());
+        $data = $request->validated();
+        if ($request->user()->hasRole('guru')) {
+            $data['guru_id'] = $request->user()->guru?->id;
+        }
+        $bankSoal->update($data);
+
         return redirect()->route('cbt.bank-soal.index')->with('success', 'Bank Soal berhasil diperbarui.');
     }
 
@@ -111,6 +120,7 @@ class BankSoalController extends Controller
     {
         $this->authorize('delete', $bankSoal);
         $bankSoal->delete();
+
         return redirect()->back()->with('success', 'Bank Soal berhasil dihapus.');
     }
 }

@@ -17,6 +17,7 @@ const props = defineProps<{
     levelKelas: Array<any>;
     isGuru: boolean;
     guruAssignments: Array<any>;
+    gurus?: Array<any>;
 }>();
 
 const filteredKelas = computed(() => {
@@ -24,19 +25,25 @@ const filteredKelas = computed(() => {
 
     // Filter by level if selected
     if (form.level) {
-        const selectedLevel = props.levelKelas.find(l => l.level === form.level);
+        const selectedLevel = props.levelKelas.find(
+            (l) => l.level === form.level,
+        );
         if (selectedLevel) {
-            availableKelas = availableKelas.filter(k => k.level_id === selectedLevel.id);
+            availableKelas = availableKelas.filter(
+                (k) => k.level_id === selectedLevel.id,
+            );
         }
     }
 
     // Filter by assignment if the user is a guru and mapel is selected
     if (props.isGuru && form.mapel_id) {
         const allowedKelasIds = props.guruAssignments
-            .filter(assignment => assignment.mapel_id === form.mapel_id)
-            .map(assignment => assignment.kelas_id);
-            
-        availableKelas = availableKelas.filter(k => allowedKelasIds.includes(k.id));
+            .filter((assignment) => assignment.mapel_id === form.mapel_id)
+            .map((assignment) => assignment.kelas_id);
+
+        availableKelas = availableKelas.filter((k) =>
+            allowedKelasIds.includes(k.id),
+        );
     }
 
     return availableKelas;
@@ -52,6 +59,7 @@ const form = useForm({
     kelas: props.bankSoal?.kelas || [],
     mapel_id: props.bankSoal?.mapel_id || '',
     jurusan_id: props.bankSoal?.jurusan_id || '',
+    guru_id: props.bankSoal?.guru_id || '',
     kkm: props.bankSoal?.kkm || 0,
     status: props.bankSoal?.status || 0,
     opsi: props.bankSoal?.opsi || 5,
@@ -78,19 +86,30 @@ const submit = () => {
 };
 
 const totalBobot = () => {
-    return Number(form.bobot_pg) + Number(form.bobot_esai) + 
-           Number(form.bobot_kompleks) + Number(form.bobot_jodohkan) + 
-           Number(form.bobot_isian);
+    return (
+        Number(form.bobot_pg) +
+        Number(form.bobot_esai) +
+        Number(form.bobot_kompleks) +
+        Number(form.bobot_jodohkan) +
+        Number(form.bobot_isian)
+    );
 };
 </script>
 
 <template>
     <Head :title="isEdit ? 'Edit Bank Soal' : 'Tambah Bank Soal'" />
 
-    <div class="px-6 py-6 max-w-5xl mx-auto space-y-6">
+    <div class="mx-auto max-w-5xl space-y-6 px-6 py-6">
         <div class="flex items-center gap-4">
-            <Button variant="outline" size="icon" @click="$inertia.visit(index.url())" class="rounded-full w-10 h-10 border-neutral-200 dark:border-zinc-800">
-                <ArrowLeft class="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
+            <Button
+                variant="outline"
+                size="icon"
+                @click="$inertia.visit(index.url())"
+                class="h-10 w-10 rounded-full border-neutral-200 dark:border-zinc-800"
+            >
+                <ArrowLeft
+                    class="h-5 w-5 text-neutral-600 dark:text-neutral-400"
+                />
             </Button>
             <Heading
                 :title="isEdit ? 'Edit Bank Soal' : 'Tambah Bank Soal'"
@@ -100,170 +119,482 @@ const totalBobot = () => {
 
         <form @submit.prevent="submit" class="space-y-6">
             <!-- Informasi Umum -->
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
-                <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-200 border-b border-neutral-200 dark:border-zinc-800 pb-3">Informasi Umum</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+                class="space-y-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <h3
+                    class="border-b border-neutral-200 pb-3 text-lg font-bold text-neutral-800 dark:border-zinc-800 dark:text-neutral-200"
+                >
+                    Informasi Umum
+                </h3>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div class="space-y-2">
                         <Label>Kode Bank Soal</Label>
-                        <Input v-model="form.kode" placeholder="Misal: MTK-X-GANJIL" />
-                        <div v-if="form.errors.kode" class="text-xs text-rose-500">{{ form.errors.kode }}</div>
+                        <Input
+                            v-model="form.kode"
+                            placeholder="Misal: MTK-X-GANJIL"
+                        />
+                        <div
+                            v-if="form.errors.kode"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.kode }}
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <Label>Nama / Deskripsi Ujian</Label>
-                        <Input v-model="form.nama" placeholder="Misal: Penilaian Akhir Semester Ganjil" />
-                        <div v-if="form.errors.nama" class="text-xs text-rose-500">{{ form.errors.nama }}</div>
+                        <Input
+                            v-model="form.nama"
+                            placeholder="Misal: Penilaian Akhir Semester Ganjil"
+                        />
+                        <div
+                            v-if="form.errors.nama"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.nama }}
+                        </div>
                     </div>
 
                     <div class="space-y-2">
                         <Label>Jenis Ujian</Label>
-                        <select v-model="form.jenis_id" class="w-full h-10 px-3 py-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        <select
+                            v-model="form.jenis_id"
+                            class="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                        >
                             <option value="">Pilih Jenis Ujian</option>
-                            <option v-for="j in jenis" :key="j.id" :value="j.id">{{ j.nama_jenis }}</option>
+                            <option
+                                v-for="j in jenis"
+                                :key="j.id"
+                                :value="j.id"
+                            >
+                                {{ j.nama_jenis }}
+                            </option>
                         </select>
-                        <div v-if="form.errors.jenis_id" class="text-xs text-rose-500">{{ form.errors.jenis_id }}</div>
+                        <div
+                            v-if="form.errors.jenis_id"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.jenis_id }}
+                        </div>
                     </div>
-                    
+
                     <div class="space-y-2">
                         <Label>Mata Pelajaran</Label>
-                        <select v-model="form.mapel_id" class="w-full h-10 px-3 py-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        <select
+                            v-model="form.mapel_id"
+                            class="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                        >
                             <option value="">Pilih Mapel</option>
-                            <option v-for="m in mapel" :key="m.id" :value="m.id">{{ m.nama_mapel }}</option>
+                            <option
+                                v-for="m in mapel"
+                                :key="m.id"
+                                :value="m.id"
+                            >
+                                {{ m.nama_mapel }}
+                            </option>
                         </select>
-                        <div v-if="form.errors.mapel_id" class="text-xs text-rose-500">{{ form.errors.mapel_id }}</div>
+                        <div
+                            v-if="form.errors.mapel_id"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.mapel_id }}
+                        </div>
+                    </div>
+
+                    <div v-if="!isGuru" class="space-y-2">
+                        <Label>Guru Pengampu</Label>
+                        <select
+                            v-model="form.guru_id"
+                            class="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                        >
+                            <option value="">Pilih Guru</option>
+                            <option
+                                v-for="g in gurus"
+                                :key="g.id"
+                                :value="g.id"
+                            >
+                                {{ g.nama_guru }}
+                            </option>
+                        </select>
+                        <div
+                            v-if="form.errors.guru_id"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.guru_id }}
+                        </div>
                     </div>
 
                     <div class="space-y-2">
                         <Label>Level Kelas</Label>
-                        <select v-model="form.level" class="w-full h-10 px-3 py-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        <select
+                            v-model="form.level"
+                            class="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                        >
                             <option value="">Pilih Level</option>
-                            <option v-for="l in levelKelas" :key="l.id" :value="l.level">Level {{ l.level }}</option>
+                            <option
+                                v-for="l in levelKelas"
+                                :key="l.id"
+                                :value="l.level"
+                            >
+                                Level {{ l.level }}
+                            </option>
                         </select>
-                        <div v-if="form.errors.level" class="text-xs text-rose-500">{{ form.errors.level }}</div>
+                        <div
+                            v-if="form.errors.level"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.level }}
+                        </div>
                     </div>
 
                     <div class="space-y-2">
                         <Label>Jurusan (Opsional)</Label>
-                        <select v-model="form.jurusan_id" class="w-full h-10 px-3 py-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        <select
+                            v-model="form.jurusan_id"
+                            class="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                        >
                             <option value="">Semua Jurusan</option>
-                            <option v-for="j in jurusan" :key="j.id" :value="j.id">{{ j.nama_jurusan }}</option>
+                            <option
+                                v-for="j in jurusan"
+                                :key="j.id"
+                                :value="j.id"
+                            >
+                                {{ j.nama_jurusan }}
+                            </option>
                         </select>
                     </div>
 
                     <div class="space-y-2 md:col-span-2">
                         <Label>Kelas (Pilih satu atau lebih)</Label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 border border-neutral-200 dark:border-zinc-800 rounded-lg p-4 bg-neutral-50/50 dark:bg-zinc-950/50">
-                            <label v-for="k in filteredKelas" :key="k.id" class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" :value="k.id" v-model="form.kelas" class="rounded text-amber-600 focus:ring-amber-500 border-neutral-300 dark:border-zinc-700 bg-white dark:bg-zinc-900" />
-                                <span class="text-sm font-medium">{{ k.nama_kelas }}</span>
+                        <div
+                            class="grid grid-cols-2 gap-2 rounded-lg border border-neutral-200 bg-neutral-50/50 p-4 sm:grid-cols-3 lg:grid-cols-4 dark:border-zinc-800 dark:bg-zinc-950/50"
+                        >
+                            <label
+                                v-for="k in filteredKelas"
+                                :key="k.id"
+                                class="flex cursor-pointer items-center gap-2"
+                            >
+                                <input
+                                    type="checkbox"
+                                    :value="k.id"
+                                    v-model="form.kelas"
+                                    class="rounded border-neutral-300 bg-white text-amber-600 focus:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-900"
+                                />
+                                <span class="text-sm font-medium">{{
+                                    k.nama_kelas
+                                }}</span>
                             </label>
                         </div>
-                        <div v-if="form.errors.kelas" class="text-xs text-rose-500">{{ form.errors.kelas }}</div>
+                        <div
+                            v-if="form.errors.kelas"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.kelas }}
+                        </div>
                     </div>
-                    
+
                     <div class="space-y-2">
                         <Label>Jumlah Opsi Pilihan Ganda</Label>
-                        <select v-model="form.opsi" class="w-full h-10 px-3 py-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        <select
+                            v-model="form.opsi"
+                            class="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                        >
                             <option :value="3">3 (A, B, C)</option>
                             <option :value="4">4 (A, B, C, D)</option>
                             <option :value="5">5 (A, B, C, D, E)</option>
                         </select>
-                        <div v-if="form.errors.opsi" class="text-xs text-rose-500">{{ form.errors.opsi }}</div>
+                        <div
+                            v-if="form.errors.opsi"
+                            class="text-xs text-rose-500"
+                        >
+                            {{ form.errors.opsi }}
+                        </div>
                     </div>
 
                     <div class="space-y-2">
                         <Label>KKM</Label>
-                        <Input type="number" v-model="form.kkm" min="0" max="100" />
+                        <Input
+                            type="number"
+                            v-model="form.kkm"
+                            min="0"
+                            max="100"
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Konfigurasi Bobot & Soal -->
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
-                <div class="flex justify-between items-end border-b border-neutral-200 dark:border-zinc-800 pb-3">
-                    <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-200">Konfigurasi Tampil & Bobot</h3>
-                    <div class="text-sm font-semibold p-2 rounded-lg" :class="totalBobot() === 100 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'">
+            <div
+                class="space-y-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-end justify-between border-b border-neutral-200 pb-3 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-lg font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Konfigurasi Tampil & Bobot
+                    </h3>
+                    <div
+                        class="rounded-lg p-2 text-sm font-semibold"
+                        :class="
+                            totalBobot() === 100
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'
+                        "
+                    >
                         Total Bobot: {{ totalBobot() }}%
                     </div>
                 </div>
 
-                <div v-if="form.errors.status" class="bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 p-3 rounded-lg text-sm mb-4">
+                <div
+                    v-if="form.errors.status"
+                    class="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-400"
+                >
                     {{ form.errors.status }}
                 </div>
-                
+
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left border-collapse">
+                    <table class="w-full border-collapse text-left text-sm">
                         <thead>
-                            <tr class="bg-neutral-50/50 dark:bg-zinc-950 border-b border-neutral-200 dark:border-zinc-800">
-                                <th class="py-3 px-4 font-semibold text-neutral-600 dark:text-neutral-400">Tipe Soal</th>
-                                <th class="py-3 px-4 font-semibold text-neutral-600 dark:text-neutral-400 w-32 text-center">Tersedia di Bank</th>
-                                <th class="py-3 px-4 font-semibold text-neutral-600 dark:text-neutral-400 w-32">Ditampilkan</th>
-                                <th class="py-3 px-4 font-semibold text-neutral-600 dark:text-neutral-400 w-32">Bobot (%)</th>
+                            <tr
+                                class="border-b border-neutral-200 bg-neutral-50/50 dark:border-zinc-800 dark:bg-zinc-950"
+                            >
+                                <th
+                                    class="px-4 py-3 font-semibold text-neutral-600 dark:text-neutral-400"
+                                >
+                                    Tipe Soal
+                                </th>
+                                <th
+                                    class="w-32 px-4 py-3 text-center font-semibold text-neutral-600 dark:text-neutral-400"
+                                >
+                                    Tersedia di Bank
+                                </th>
+                                <th
+                                    class="w-32 px-4 py-3 font-semibold text-neutral-600 dark:text-neutral-400"
+                                >
+                                    Ditampilkan
+                                </th>
+                                <th
+                                    class="w-32 px-4 py-3 font-semibold text-neutral-600 dark:text-neutral-400"
+                                >
+                                    Bobot (%)
+                                </th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-neutral-100 dark:divide-zinc-800/50">
+                        <tbody
+                            class="divide-y divide-neutral-100 dark:divide-zinc-800/50"
+                        >
                             <!-- PG -->
                             <tr>
-                                <td class="py-3 px-4 font-medium">Pilihan Ganda</td>
-                                <td class="py-3 px-4 text-center font-mono text-neutral-500">{{ isEdit ? bankSoal.jml_pg : 0 }}</td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.tampil_pg" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.tampil_pg" class="text-[10px] text-rose-500 mt-1">{{ form.errors.tampil_pg }}</div>
+                                <td class="px-4 py-3 font-medium">
+                                    Pilihan Ganda
                                 </td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.bobot_pg" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.bobot_pg" class="text-[10px] text-rose-500 mt-1">{{ form.errors.bobot_pg }}</div>
+                                <td
+                                    class="px-4 py-3 text-center font-mono text-neutral-500"
+                                >
+                                    {{ isEdit ? bankSoal.jml_pg : 0 }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.tampil_pg"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.tampil_pg"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.tampil_pg }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.bobot_pg"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.bobot_pg"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.bobot_pg }}
+                                    </div>
                                 </td>
                             </tr>
                             <!-- Kompleks -->
                             <tr>
-                                <td class="py-3 px-4 font-medium">
+                                <td class="px-4 py-3 font-medium">
                                     Ganda Kompleks
-                                    <div class="text-[10px] text-neutral-400 mt-1 font-semibold flex items-center gap-1">
+                                    <div
+                                        class="mt-1 flex items-center gap-1 text-[10px] font-semibold text-neutral-400"
+                                    >
                                         Skoring:
-                                        <select v-model="form.skoring_kompleks" class="border rounded p-0.5 bg-white dark:bg-zinc-950 font-normal">
-                                            <option value="all_or_nothing">All or Nothing</option>
-                                            <option value="partial">Sebagian (Partial)</option>
+                                        <select
+                                            v-model="form.skoring_kompleks"
+                                            class="rounded border bg-white p-0.5 font-normal dark:bg-zinc-950"
+                                        >
+                                            <option value="all_or_nothing">
+                                                All or Nothing
+                                            </option>
+                                            <option value="partial">
+                                                Sebagian (Partial)
+                                            </option>
                                         </select>
                                     </div>
                                 </td>
-                                <td class="py-3 px-4 text-center font-mono text-neutral-500">{{ isEdit ? bankSoal.jml_kompleks : 0 }}</td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.tampil_kompleks" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.tampil_kompleks" class="text-[10px] text-rose-500 mt-1">{{ form.errors.tampil_kompleks }}</div>
+                                <td
+                                    class="px-4 py-3 text-center font-mono text-neutral-500"
+                                >
+                                    {{ isEdit ? bankSoal.jml_kompleks : 0 }}
                                 </td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.bobot_kompleks" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.bobot_kompleks" class="text-[10px] text-rose-500 mt-1">{{ form.errors.bobot_kompleks }}</div>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.tampil_kompleks"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.tampil_kompleks"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.tampil_kompleks }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.bobot_kompleks"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.bobot_kompleks"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.bobot_kompleks }}
+                                    </div>
                                 </td>
                             </tr>
                             <!-- Jodohkan -->
                             <tr>
-                                <td class="py-3 px-4 font-medium">Menjodohkan</td>
-                                <td class="py-3 px-4 text-center font-mono text-neutral-500">{{ isEdit ? bankSoal.jml_jodohkan : 0 }}</td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.tampil_jodohkan" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.tampil_jodohkan" class="text-[10px] text-rose-500 mt-1">{{ form.errors.tampil_jodohkan }}</div>
+                                <td class="px-4 py-3 font-medium">
+                                    Menjodohkan
                                 </td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.bobot_jodohkan" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.bobot_jodohkan" class="text-[10px] text-rose-500 mt-1">{{ form.errors.bobot_jodohkan }}</div>
+                                <td
+                                    class="px-4 py-3 text-center font-mono text-neutral-500"
+                                >
+                                    {{ isEdit ? bankSoal.jml_jodohkan : 0 }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.tampil_jodohkan"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.tampil_jodohkan"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.tampil_jodohkan }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.bobot_jodohkan"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.bobot_jodohkan"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.bobot_jodohkan }}
+                                    </div>
                                 </td>
                             </tr>
                             <!-- Isian -->
                             <tr>
-                                <td class="py-3 px-4 font-medium">Isian Singkat</td>
-                                <td class="py-3 px-4 text-center font-mono text-neutral-500">{{ isEdit ? bankSoal.jml_isian : 0 }}</td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.tampil_isian" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.tampil_isian" class="text-[10px] text-rose-500 mt-1">{{ form.errors.tampil_isian }}</div>
+                                <td class="px-4 py-3 font-medium">
+                                    Isian Singkat
                                 </td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.bobot_isian" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.bobot_isian" class="text-[10px] text-rose-500 mt-1">{{ form.errors.bobot_isian }}</div>
+                                <td
+                                    class="px-4 py-3 text-center font-mono text-neutral-500"
+                                >
+                                    {{ isEdit ? bankSoal.jml_isian : 0 }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.tampil_isian"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.tampil_isian"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.tampil_isian }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.bobot_isian"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.bobot_isian"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.bobot_isian }}
+                                    </div>
                                 </td>
                             </tr>
                             <!-- Esai -->
                             <tr>
-                                <td class="py-3 px-4 font-medium">Uraian / Esai</td>
-                                <td class="py-3 px-4 text-center font-mono text-neutral-500">{{ isEdit ? bankSoal.jml_esai : 0 }}</td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.tampil_esai" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.tampil_esai" class="text-[10px] text-rose-500 mt-1">{{ form.errors.tampil_esai }}</div>
+                                <td class="px-4 py-3 font-medium">
+                                    Uraian / Esai
                                 </td>
-                                <td class="py-3 px-4"><Input type="number" v-model="form.bobot_esai" class="h-8 text-center" min="0" />
-                                    <div v-if="form.errors.bobot_esai" class="text-[10px] text-rose-500 mt-1">{{ form.errors.bobot_esai }}</div>
+                                <td
+                                    class="px-4 py-3 text-center font-mono text-neutral-500"
+                                >
+                                    {{ isEdit ? bankSoal.jml_esai : 0 }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.tampil_esai"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.tampil_esai"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.tampil_esai }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Input
+                                        type="number"
+                                        v-model="form.bobot_esai"
+                                        class="h-8 text-center"
+                                        min="0"
+                                    />
+                                    <div
+                                        v-if="form.errors.bobot_esai"
+                                        class="mt-1 text-[10px] text-rose-500"
+                                    >
+                                        {{ form.errors.bobot_esai }}
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -272,17 +603,26 @@ const totalBobot = () => {
             </div>
 
             <!-- Publish Section -->
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm flex items-center justify-between">
+            <div
+                class="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+            >
                 <div class="flex items-center gap-4">
                     <Label class="font-bold">Status Bank Soal:</Label>
-                    <select v-model="form.status" class="h-10 px-3 py-2 rounded-md border border-neutral-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    <select
+                        v-model="form.status"
+                        class="h-10 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
+                    >
                         <option :value="0">0 - Draft (Belum Selesai)</option>
                         <option :value="1">1 - Selesai & Aktif</option>
                     </select>
                 </div>
-                
-                <Button type="submit" :disabled="form.processing" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold flex items-center gap-2">
-                    <Save class="w-4 h-4" />
+
+                <Button
+                    type="submit"
+                    :disabled="form.processing"
+                    class="flex items-center gap-2 bg-amber-500 font-semibold text-white hover:bg-amber-600"
+                >
+                    <Save class="h-4 w-4" />
                     Simpan Bank Soal
                 </Button>
             </div>

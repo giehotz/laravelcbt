@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\Cbt;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use App\Models\Cbt\Jenis;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreJenisRequest extends FormRequest
 {

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Setting;
 use App\Http\Requests\UpdateSettingRequest;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -26,7 +26,7 @@ class SettingController extends Controller
      */
     public function update(UpdateSettingRequest $request): RedirectResponse
     {
-        $setting = Setting::first() ?: new Setting();
+        $setting = Setting::first() ?: new Setting;
         $data = $request->validated();
 
         if ($request->hasFile('logo')) {

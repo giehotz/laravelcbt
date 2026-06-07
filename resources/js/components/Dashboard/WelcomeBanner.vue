@@ -4,8 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const props = defineProps<{
     serverTime: string;
-    tp: { id: number, tahun: string } | null;
-    smt: { id: number, nama_smt: string } | null;
+    tp: { id: number; tahun: string } | null;
+    smt: { id: number; nama_smt: string } | null;
     user: any;
 }>();
 
@@ -24,7 +24,9 @@ onUnmounted(() => {
 
 const jamTampil = computed(() => {
     return now.value.toLocaleTimeString('id-ID', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
     });
 });
 
@@ -39,18 +41,27 @@ const getGreeting = () => {
 
 <template>
     <Card class="bg-primary text-primary-foreground">
-        <CardContent class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <CardContent
+            class="flex flex-col items-start justify-between gap-4 p-6 md:flex-row md:items-center"
+        >
             <div>
                 <h2 class="text-2xl font-bold tracking-tight">
                     {{ getGreeting() }}, {{ user.name }}
                 </h2>
-                <p class="text-primary-foreground/80 mt-1">
-                    Tahun Pelajaran: {{ tp?.tahun || 'Belum Diatur' }} | Semester: {{ smt?.nama_smt || 'Belum Diatur' }}
+                <p class="mt-1 text-primary-foreground/80">
+                    Tahun Pelajaran: {{ tp?.tahun || 'Belum Diatur' }} |
+                    Semester: {{ smt?.nama_smt || 'Belum Diatur' }}
                 </p>
             </div>
-            <div class="text-right bg-primary-foreground/10 px-4 py-2 rounded-lg">
-                <p class="text-sm font-medium text-primary-foreground/80 uppercase tracking-wider">Waktu Server</p>
-                <div class="text-3xl font-mono font-bold">{{ jamTampil }}</div>
+            <div
+                class="rounded-lg bg-primary-foreground/10 px-4 py-2 text-right"
+            >
+                <p
+                    class="text-sm font-medium tracking-wider text-primary-foreground/80 uppercase"
+                >
+                    Waktu Server
+                </p>
+                <div class="font-mono text-3xl font-bold">{{ jamTampil }}</div>
             </div>
         </CardContent>
     </Card>

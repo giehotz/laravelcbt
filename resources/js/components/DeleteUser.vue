@@ -116,7 +116,9 @@ const isSuperAdmin = computed(() => {
             </Dialog>
             <div v-else class="flex flex-col items-start gap-2">
                 <Button variant="destructive" disabled>Delete account</Button>
-                <p class="text-xs text-red-600 dark:text-red-400 font-medium">Akun Super Admin tidak dapat dihapus.</p>
+                <p class="text-xs font-medium text-red-600 dark:text-red-400">
+                    Akun Super Admin tidak dapat dihapus.
+                </p>
             </div>
         </div>
     </div>

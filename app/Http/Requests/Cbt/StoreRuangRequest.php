@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Cbt;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Cbt\Ruang;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRuangRequest extends FormRequest
 {

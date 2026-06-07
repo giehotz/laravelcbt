@@ -8,7 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Compass, Plus, X, Edit2, Trash2 } from 'lucide-vue-next';
 
-import { store as storeEkstra, update as updateEkstra, destroy as destroyEkstra } from '@/routes/master/ekstra';
+import {
+    store as storeEkstra,
+    update as updateEkstra,
+    destroy as destroyEkstra,
+} from '@/routes/master/ekstra';
 
 defineOptions({
     layout: {
@@ -35,7 +39,7 @@ const props = defineProps<{
 
 const isAddModalOpen = ref(false);
 const isEditModalOpen = ref(false);
-const selectedEkstra = ref<typeof props.ekstras[0] | null>(null);
+const selectedEkstra = ref<(typeof props.ekstras)[0] | null>(null);
 
 const addForm = useForm({
     nama_ekstra: '',
@@ -56,7 +60,7 @@ const submitAdd = () => {
     });
 };
 
-const openEditModal = (ex: typeof props.ekstras[0]) => {
+const openEditModal = (ex: (typeof props.ekstras)[0]) => {
     selectedEkstra.value = ex;
     editForm.nama_ekstra = ex.nama_ekstra;
     editForm.kode_ekstra = ex.kode_ekstra;
@@ -85,61 +89,98 @@ const handleDelete = (id: number) => {
 <template>
     <Head title="Ekstrakurikuler" />
 
-    <div class="px-6 py-6 max-w-4xl mx-auto space-y-6">
+    <div class="mx-auto max-w-4xl space-y-6 px-6 py-6">
         <Heading
             title="Ekstrakurikuler"
             description="Atur kegiatan ekstrakurikuler sekolah untuk pendataan nilai rapor siswa (contoh: Pramuka, OSIS, Paskibra)."
         />
 
-        <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden flex flex-col transition-all">
-            <div class="px-6 py-4 border-b border-neutral-200 dark:border-zinc-800 flex justify-between items-center bg-neutral-50/50 dark:bg-zinc-800/30">
+        <div
+            class="flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-all dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <div
+                class="flex items-center justify-between border-b border-neutral-200 bg-neutral-50/50 px-6 py-4 dark:border-zinc-800 dark:bg-zinc-800/30"
+            >
                 <div class="flex items-center gap-2">
-                    <Compass class="w-5 h-5 text-zinc-500" />
-                    <h3 class="font-bold text-neutral-800 dark:text-neutral-200 text-sm uppercase tracking-wider">Daftar Ekstrakurikuler</h3>
+                    <Compass class="h-5 w-5 text-zinc-500" />
+                    <h3
+                        class="text-sm font-bold tracking-wider text-neutral-800 uppercase dark:text-neutral-200"
+                    >
+                        Daftar Ekstrakurikuler
+                    </h3>
                 </div>
-                <Button @click="isAddModalOpen = true" size="sm" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white font-semibold flex items-center gap-1 shadow-sm transition-colors">
-                    <Plus class="w-4 h-4" />
+                <Button
+                    @click="isAddModalOpen = true"
+                    size="sm"
+                    class="flex items-center gap-1 bg-zinc-900 font-semibold text-white shadow-sm transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                >
+                    <Plus class="h-4 w-4" />
                     <span>Tambah Ekstra</span>
                 </Button>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full border-collapse text-left">
                     <thead>
-                        <tr class="bg-neutral-50/30 dark:bg-zinc-900/50 border-b border-neutral-200 dark:border-zinc-800 text-[11px] font-bold uppercase text-neutral-500 tracking-wider">
-                            <th class="px-6 py-3.5 w-20 text-center">No</th>
-                            <th class="px-6 py-3.5 w-40">Kode</th>
+                        <tr
+                            class="border-b border-neutral-200 bg-neutral-50/30 text-[11px] font-bold tracking-wider text-neutral-500 uppercase dark:border-zinc-800 dark:bg-zinc-900/50"
+                        >
+                            <th class="w-20 px-6 py-3.5 text-center">No</th>
+                            <th class="w-40 px-6 py-3.5">Kode</th>
                             <th class="px-6 py-3.5">Nama Kegiatan</th>
-                            <th class="px-6 py-3.5 text-right w-44">Aksi</th>
+                            <th class="w-44 px-6 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-200 dark:divide-zinc-800 text-sm">
-                        <tr v-for="(ex, idx) in ekstras" :key="ex.id" class="hover:bg-neutral-50/30 dark:hover:bg-zinc-800/20 transition-colors">
-                            <td class="px-6 py-4 text-center font-medium text-neutral-400 dark:text-neutral-500">{{ idx + 1 }}</td>
-                            <td class="px-6 py-4 font-mono font-semibold text-zinc-600 dark:text-zinc-400">{{ ex.kode_ekstra }}</td>
-                            <td class="px-6 py-4 font-bold text-neutral-800 dark:text-neutral-200">{{ ex.nama_ekstra }}</td>
-                            <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                    <tbody
+                        class="divide-y divide-neutral-200 text-sm dark:divide-zinc-800"
+                    >
+                        <tr
+                            v-for="(ex, idx) in ekstras"
+                            :key="ex.id"
+                            class="transition-colors hover:bg-neutral-50/30 dark:hover:bg-zinc-800/20"
+                        >
+                            <td
+                                class="px-6 py-4 text-center font-medium text-neutral-400 dark:text-neutral-500"
+                            >
+                                {{ idx + 1 }}
+                            </td>
+                            <td
+                                class="px-6 py-4 font-mono font-semibold text-zinc-600 dark:text-zinc-400"
+                            >
+                                {{ ex.kode_ekstra }}
+                            </td>
+                            <td
+                                class="px-6 py-4 font-bold text-neutral-800 dark:text-neutral-200"
+                            >
+                                {{ ex.nama_ekstra }}
+                            </td>
+                            <td
+                                class="space-x-2 px-6 py-4 text-right whitespace-nowrap"
+                            >
                                 <Button
                                     size="sm"
                                     @click="openEditModal(ex)"
-                                    class="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700 font-semibold text-xs px-2.5 py-1.5 h-8 rounded shadow-sm transition-colors"
+                                    class="h-8 rounded bg-amber-500 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
                                 >
-                                    <Edit2 class="w-3.5 h-3.5 mr-1" />
+                                    <Edit2 class="mr-1 h-3.5 w-3.5" />
                                     Edit
                                 </Button>
                                 <Button
                                     size="sm"
                                     variant="destructive"
                                     @click="handleDelete(ex.id)"
-                                    class="bg-rose-600 hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800 text-white font-semibold text-xs px-2.5 py-1.5 h-8 rounded shadow-sm transition-colors"
+                                    class="h-8 rounded bg-rose-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-800"
                                 >
-                                    <Trash2 class="w-3.5 h-3.5 mr-1" />
+                                    <Trash2 class="mr-1 h-3.5 w-3.5" />
                                     Hapus
                                 </Button>
                             </td>
                         </tr>
                         <tr v-if="ekstras.length === 0">
-                            <td colspan="4" class="px-6 py-8 text-center text-neutral-500">
+                            <td
+                                colspan="4"
+                                class="px-6 py-8 text-center text-neutral-500"
+                            >
                                 Belum ada data ekstrakurikuler.
                             </td>
                         </tr>
@@ -150,31 +191,70 @@ const handleDelete = (id: number) => {
     </div>
 
     <!-- Modal Form: Tambah Ekstra -->
-    <div v-if="isAddModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 w-full max-w-md rounded-xl shadow-xl overflow-hidden flex flex-col">
-            <div class="px-6 py-4 border-b border-neutral-200 dark:border-zinc-800 flex justify-between items-center">
-                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">Tambah Ekstrakurikuler</h3>
-                <button @click="isAddModalOpen = false" class="text-neutral-400 hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer p-1 rounded-lg">
-                    <X class="w-5 h-5" />
+    <div
+        v-if="isAddModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity"
+    >
+        <div
+            class="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <div
+                class="flex items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-zinc-800"
+            >
+                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
+                    Tambah Ekstrakurikuler
+                </h3>
+                <button
+                    @click="isAddModalOpen = false"
+                    class="hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer rounded-lg p-1 text-neutral-400"
+                >
+                    <X class="h-5 w-5" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitAdd" class="p-6 space-y-4">
+            <form @submit.prevent="submitAdd" class="space-y-4 p-6">
                 <div class="grid gap-2">
-                    <Label for="kode_ekstra">Kode Ekstrakurikuler <span class="text-rose-500">*</span></Label>
-                    <Input id="kode_ekstra" v-model="addForm.kode_ekstra" required placeholder="Contoh: PRAM, OSIS, PASK" />
+                    <Label for="kode_ekstra"
+                        >Kode Ekstrakurikuler
+                        <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="kode_ekstra"
+                        v-model="addForm.kode_ekstra"
+                        required
+                        placeholder="Contoh: PRAM, OSIS, PASK"
+                    />
                     <InputError :message="addForm.errors.kode_ekstra" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="nama_ekstra">Nama Kegiatan <span class="text-rose-500">*</span></Label>
-                    <Input id="nama_ekstra" v-model="addForm.nama_ekstra" required placeholder="Contoh: Pramuka, OSIS, Paskibra" />
+                    <Label for="nama_ekstra"
+                        >Nama Kegiatan
+                        <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="nama_ekstra"
+                        v-model="addForm.nama_ekstra"
+                        required
+                        placeholder="Contoh: Pramuka, OSIS, Paskibra"
+                    />
                     <InputError :message="addForm.errors.nama_ekstra" />
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-zinc-800">
-                    <Button type="button" variant="outline" @click="isAddModalOpen = false">Batal</Button>
-                    <Button type="submit" :disabled="addForm.processing" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white font-semibold">
+                <div
+                    class="flex justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-zinc-800"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="isAddModalOpen = false"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        :disabled="addForm.processing"
+                        class="bg-zinc-900 font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                    >
                         Simpan
                     </Button>
                 </div>
@@ -183,31 +263,70 @@ const handleDelete = (id: number) => {
     </div>
 
     <!-- Modal Form: Edit Ekstra -->
-    <div v-if="isEditModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity">
-        <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 w-full max-w-md rounded-xl shadow-xl overflow-hidden flex flex-col">
-            <div class="px-6 py-4 border-b border-neutral-200 dark:border-zinc-800 flex justify-between items-center">
-                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">Edit Ekstrakurikuler</h3>
-                <button @click="isEditModalOpen = false" class="text-neutral-400 hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer p-1 rounded-lg">
-                    <X class="w-5 h-5" />
+    <div
+        v-if="isEditModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity"
+    >
+        <div
+            class="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <div
+                class="flex items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-zinc-800"
+            >
+                <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
+                    Edit Ekstrakurikuler
+                </h3>
+                <button
+                    @click="isEditModalOpen = false"
+                    class="hover:text-neutral-650 dark:hover:text-neutral-250 cursor-pointer rounded-lg p-1 text-neutral-400"
+                >
+                    <X class="h-5 w-5" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitEdit" class="p-6 space-y-4">
+            <form @submit.prevent="submitEdit" class="space-y-4 p-6">
                 <div class="grid gap-2">
-                    <Label for="edit_kode_ekstra">Kode Ekstrakurikuler <span class="text-rose-500">*</span></Label>
-                    <Input id="edit_kode_ekstra" v-model="editForm.kode_ekstra" required placeholder="Contoh: PRAM, OSIS, PASK" />
+                    <Label for="edit_kode_ekstra"
+                        >Kode Ekstrakurikuler
+                        <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="edit_kode_ekstra"
+                        v-model="editForm.kode_ekstra"
+                        required
+                        placeholder="Contoh: PRAM, OSIS, PASK"
+                    />
                     <InputError :message="editForm.errors.kode_ekstra" />
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="edit_nama_ekstra">Nama Kegiatan <span class="text-rose-500">*</span></Label>
-                    <Input id="edit_nama_ekstra" v-model="editForm.nama_ekstra" required placeholder="Contoh: Pramuka, OSIS, Paskibra" />
+                    <Label for="edit_nama_ekstra"
+                        >Nama Kegiatan
+                        <span class="text-rose-500">*</span></Label
+                    >
+                    <Input
+                        id="edit_nama_ekstra"
+                        v-model="editForm.nama_ekstra"
+                        required
+                        placeholder="Contoh: Pramuka, OSIS, Paskibra"
+                    />
                     <InputError :message="editForm.errors.nama_ekstra" />
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-neutral-200 dark:border-zinc-800">
-                    <Button type="button" variant="outline" @click="isEditModalOpen = false">Batal</Button>
-                    <Button type="submit" :disabled="editForm.processing" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-50 dark:hover:bg-zinc-200 dark:text-zinc-950 text-white font-semibold">
+                <div
+                    class="flex justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-zinc-800"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="isEditModalOpen = false"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        :disabled="editForm.processing"
+                        class="bg-zinc-900 font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                    >
                         Simpan Perubahan
                     </Button>
                 </div>

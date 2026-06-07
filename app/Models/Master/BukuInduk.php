@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Master;
 
 use Illuminate\Database\Eloquent\Model;
 
 class BukuInduk extends Model
 {
     protected $table = 'buku_induk';
+
     protected $primaryKey = 'siswa_id';
+
     public $incrementing = false;
 
     protected $fillable = [

@@ -40,17 +40,22 @@ import {
     Plus,
     Trash2,
     Table as TableIcon,
-    Wand2
+    Wand2,
+    List,
+    ListOrdered,
 } from 'lucide-vue-next';
 import axios from 'axios';
 
-const props = withDefaults(defineProps<{
-    modelValue: string | null;
-    minimal?: boolean;
-}>(), {
-    modelValue: '',
-    minimal: false
-});
+const props = withDefaults(
+    defineProps<{
+        modelValue: string | null;
+        minimal?: boolean;
+    }>(),
+    {
+        modelValue: '',
+        minimal: false,
+    },
+);
 
 const emit = defineEmits(['update:modelValue']);
 
@@ -61,7 +66,7 @@ const CustomImage = Image.extend({
             ...this.parent?.(),
             width: {
                 default: null,
-                renderHTML: attributes => {
+                renderHTML: (attributes) => {
                     if (!attributes.width) {
                         return {};
                     }
@@ -69,7 +74,7 @@ const CustomImage = Image.extend({
                         width: attributes.width,
                     };
                 },
-                parseHTML: element => element.getAttribute('width'),
+                parseHTML: (element) => element.getAttribute('width'),
             },
         };
     },
@@ -90,8 +95,9 @@ const FontSize = Extension.create({
                 attributes: {
                     fontSize: {
                         default: null,
-                        parseHTML: element => element.style.fontSize?.replace('px', ''),
-                        renderHTML: attributes => {
+                        parseHTML: (element) =>
+                            element.style.fontSize?.replace('px', ''),
+                        renderHTML: (attributes) => {
                             if (!attributes.fontSize) {
                                 return {};
                             }
@@ -106,16 +112,22 @@ const FontSize = Extension.create({
     },
     addCommands() {
         return {
-            setFontSize: (fontSize: string) => ({ chain }: any) => {
-                return chain()
-                    .setMark('textStyle', { fontSize: fontSize ? `${fontSize}` : null })
-                    .run();
-            },
-            unsetFontSize: () => ({ chain }: any) => {
-                return chain()
-                    .setMark('textStyle', { fontSize: null })
-                    .run();
-            },
+            setFontSize:
+                (fontSize: string) =>
+                ({ chain }: any) => {
+                    return chain()
+                        .setMark('textStyle', {
+                            fontSize: fontSize ? `${fontSize}` : null,
+                        })
+                        .run();
+                },
+            unsetFontSize:
+                () =>
+                ({ chain }: any) => {
+                    return chain()
+                        .setMark('textStyle', { fontSize: null })
+                        .run();
+                },
         } as any;
     },
 });
@@ -155,7 +167,11 @@ const VideoExtension = Node.create({
 
     renderHTML({ HTMLAttributes }) {
         const src = HTMLAttributes.src || '';
-        if (src.includes('youtube.com') || src.includes('youtu.be') || src.includes('vimeo.com')) {
+        if (
+            src.includes('youtube.com') ||
+            src.includes('youtu.be') ||
+            src.includes('vimeo.com')
+        ) {
             let embedUrl = src;
             if (src.includes('watch?v=')) {
                 embedUrl = src.replace('watch?v=', 'embed/');
@@ -166,17 +182,23 @@ const VideoExtension = Node.create({
                 const videoId = src.split('/').pop()?.split('?')[0];
                 embedUrl = `https://player.vimeo.com/video/${videoId}`;
             }
-            return ['iframe', mergeAttributes(HTMLAttributes, {
-                src: embedUrl,
-                frameborder: '0',
-                allowfullscreen: 'true',
-                class: 'aspect-video w-full rounded-lg shadow-md my-2',
-            })];
+            return [
+                'iframe',
+                mergeAttributes(HTMLAttributes, {
+                    src: embedUrl,
+                    frameborder: '0',
+                    allowfullscreen: 'true',
+                    class: 'aspect-video w-full rounded-lg shadow-md my-2',
+                }),
+            ];
         }
-        return ['video', mergeAttributes(HTMLAttributes, {
-            controls: 'true',
-            class: 'w-full rounded-lg shadow-md my-2',
-        })];
+        return [
+            'video',
+            mergeAttributes(HTMLAttributes, {
+                controls: 'true',
+                class: 'w-full rounded-lg shadow-md my-2',
+            }),
+        ];
     },
 });
 
@@ -202,15 +224,25 @@ const MathExtension = Node.create({
             },
             {
                 tag: 'span.katex',
-            }
+            },
         ];
     },
 
     renderHTML({ HTMLAttributes }) {
-        return ['math', mergeAttributes(HTMLAttributes, { xmlns: 'http://www.w3.org/1998/Math/MathML' }), 
-            ['semantics', {}, 
-                ['annotation', { encoding: 'application/x-tex' }, HTMLAttributes.formula]
-            ]
+        return [
+            'math',
+            mergeAttributes(HTMLAttributes, {
+                xmlns: 'http://www.w3.org/1998/Math/MathML',
+            }),
+            [
+                'semantics',
+                {},
+                [
+                    'annotation',
+                    { encoding: 'application/x-tex' },
+                    HTMLAttributes.formula,
+                ],
+            ],
         ];
     },
 });
@@ -218,7 +250,10 @@ const MathExtension = Node.create({
 const editor = useEditor({
     content: props.modelValue,
     extensions: [
-        StarterKit,
+        StarterKit.configure({
+            link: false,
+            underline: false,
+        }),
         CustomImage,
         Table.configure({
             resizable: true,
@@ -227,7 +262,7 @@ const editor = useEditor({
         TableHeader,
         TableCell,
         MathExtension,
-        Underline,
+        Underline.configure(),
         TextAlign.configure({
             types: ['heading', 'paragraph'],
         }),
@@ -235,9 +270,9 @@ const editor = useEditor({
             openOnClick: false,
         }),
         Highlight.configure({ multicolor: true }),
-        Color,
-        TextStyle,
-        FontFamily,
+        Color.configure(),
+        TextStyle.configure(),
+        FontFamily.configure(),
         FontSize,
         VideoExtension,
     ],
@@ -251,11 +286,14 @@ const editor = useEditor({
     },
 });
 
-watch(() => props.modelValue, (value) => {
-    const isSame = editor.value?.getHTML() === value;
-    if (isSame) return;
-    editor.value?.commands.setContent(value || '', false as any);
-});
+watch(
+    () => props.modelValue,
+    (value) => {
+        const isSame = editor.value?.getHTML() === value;
+        if (isSame) return;
+        editor.value?.commands.setContent(value || '', false as any);
+    },
+);
 
 // State definitions
 const fileInputRef = ref<HTMLInputElement | null>(null);
@@ -334,12 +372,19 @@ const highlightColors = [
 ];
 
 // Helper methods
-const toggleDropdown = (type: 'font' | 'fontSize' | 'color' | 'align' | 'table') => {
-    activeFontDropdown.value = type === 'font' ? !activeFontDropdown.value : false;
-    activeFontSizeDropdown.value = type === 'fontSize' ? !activeFontSizeDropdown.value : false;
-    activeColorDropdown.value = type === 'color' ? !activeColorDropdown.value : false;
-    activeAlignDropdown.value = type === 'align' ? !activeAlignDropdown.value : false;
-    activeTableDropdown.value = type === 'table' ? !activeTableDropdown.value : false;
+const toggleDropdown = (
+    type: 'font' | 'fontSize' | 'color' | 'align' | 'table',
+) => {
+    activeFontDropdown.value =
+        type === 'font' ? !activeFontDropdown.value : false;
+    activeFontSizeDropdown.value =
+        type === 'fontSize' ? !activeFontSizeDropdown.value : false;
+    activeColorDropdown.value =
+        type === 'color' ? !activeColorDropdown.value : false;
+    activeAlignDropdown.value =
+        type === 'align' ? !activeAlignDropdown.value : false;
+    activeTableDropdown.value =
+        type === 'table' ? !activeTableDropdown.value : false;
     showWandMenu.value = false;
 };
 
@@ -392,7 +437,10 @@ const unsetHighlightColor = () => {
 
 const toggleCodeView = () => {
     if (isCodeView.value) {
-        editor.value?.commands.setContent(codeContentText.value || '', false as any);
+        editor.value?.commands.setContent(
+            codeContentText.value || '',
+            false as any,
+        );
     } else {
         codeContentText.value = editor.value?.getHTML() || '';
     }
@@ -408,20 +456,24 @@ watch(codeContentText, (value) => {
 const uploadImage = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-    
+
     const file = input.files[0];
     const formData = new FormData();
     formData.append('image', file);
-    
+
     try {
         const response = await axios.post('/cbt/soal/upload-image', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        
+
         if (response.data.url) {
-            editor.value?.chain().focus().setImage({ src: response.data.url }).run();
+            editor.value
+                ?.chain()
+                .focus()
+                .setImage({ src: response.data.url })
+                .run();
             showImageModal.value = false;
         }
     } catch (error) {
@@ -434,24 +486,34 @@ const uploadImage = async (event: Event) => {
 const uploadFile = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-    
+
     const file = input.files[0];
     const formData = new FormData();
     formData.append('image', file); // Reuses standard image file upload endpoint
-    
+
     try {
         const response = await axios.post('/cbt/soal/upload-image', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        
+
         if (response.data.url) {
             const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name);
             if (isImg) {
-                editor.value?.chain().focus().setImage({ src: response.data.url }).run();
+                editor.value
+                    ?.chain()
+                    .focus()
+                    .setImage({ src: response.data.url })
+                    .run();
             } else {
-                editor.value?.chain().focus().insertContent(`<a href="${response.data.url}" target="_blank" class="text-amber-600 underline font-semibold">${file.name}</a>`).run();
+                editor.value
+                    ?.chain()
+                    .focus()
+                    .insertContent(
+                        `<a href="${response.data.url}" target="_blank" class="text-amber-600 underline font-semibold">${file.name}</a>`,
+                    )
+                    .run();
             }
             showUploadModal.value = false;
         }
@@ -491,7 +553,11 @@ const resizeImage = () => {
 const applyResize = () => {
     const newWidth = resizeWidthInput.value.trim();
     if (newWidth) {
-        editor.value?.chain().focus().updateAttributes('image', { width: newWidth }).run();
+        editor.value
+            ?.chain()
+            .focus()
+            .updateAttributes('image', { width: newWidth })
+            .run();
     }
     showResizeModal.value = false;
 };
@@ -504,7 +570,13 @@ const insertMath = () => {
 const applyMath = () => {
     const formula = mathFormulaInput.value.trim();
     if (formula) {
-        editor.value?.chain().focus().insertContent(`<math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><annotation encoding="application/x-tex">${formula}</annotation></semantics></math>`).run();
+        editor.value
+            ?.chain()
+            .focus()
+            .insertContent(
+                `<math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><annotation encoding="application/x-tex">${formula}</annotation></semantics></math>`,
+            )
+            .run();
     }
     showMathModal.value = false;
 };
@@ -525,7 +597,11 @@ const insertLink = () => {
         if (!/^https?:\/\//i.test(url)) {
             finalUrl = `https://${url}`;
         }
-        editor.value?.chain().focus().setLink({ href: finalUrl, target: '_blank' }).run();
+        editor.value
+            ?.chain()
+            .focus()
+            .setLink({ href: finalUrl, target: '_blank' })
+            .run();
     }
     showLinkModal.value = false;
 };
@@ -538,10 +614,14 @@ const openVideoModal = () => {
 const insertVideo = () => {
     const url = videoUrlInput.value.trim();
     if (url) {
-        editor.value?.chain().focus().insertContent({
-            type: 'video',
-            attrs: { src: url }
-        }).run();
+        editor.value
+            ?.chain()
+            .focus()
+            .insertContent({
+                type: 'video',
+                attrs: { src: url },
+            })
+            .run();
     }
     showVideoModal.value = false;
 };
@@ -549,10 +629,12 @@ const insertVideo = () => {
 const runWandAction = (action: string) => {
     if (!editor.value) return;
     showWandMenu.value = false;
-    
+
     if (action === 'clean') {
         const html = editor.value.getHTML();
-        const cleaned = html.replace(/&nbsp;&nbsp;/g, ' ').replace(/ {2,}/g, ' ');
+        const cleaned = html
+            .replace(/&nbsp;&nbsp;/g, ' ')
+            .replace(/ {2,}/g, ' ');
         editor.value.commands.setContent(cleaned);
     } else if (action === 'math') {
         insertMath();
@@ -563,7 +645,11 @@ const runWandAction = (action: string) => {
 
 // Table actions
 const insertTable = () => {
-    editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor.value
+        ?.chain()
+        .focus()
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run();
     activeTableDropdown.value = false;
 };
 const addRowBefore = () => {
@@ -606,60 +692,130 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div 
+    <div
         :class="[
-            isFullscreen 
-                ? 'fixed inset-0 z-[8888] bg-white dark:bg-zinc-950 p-6 flex flex-col h-screen overflow-hidden' 
-                : 'border border-neutral-300 dark:border-zinc-700 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-amber-500 transition-shadow bg-white dark:bg-zinc-950'
+            isFullscreen
+                ? 'fixed inset-0 z-[8888] flex h-screen flex-col overflow-hidden bg-white p-6 dark:bg-zinc-950'
+                : 'overflow-hidden rounded-xl border border-neutral-300 bg-white transition-shadow focus-within:ring-2 focus-within:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-950',
         ]"
     >
         <!-- Toolbar -->
-        <div v-if="editor" class="flex flex-wrap items-center gap-1 p-2 bg-neutral-50 dark:bg-zinc-900 border-b border-neutral-200 dark:border-zinc-800">
+        <div
+            v-if="editor"
+            class="flex flex-wrap items-center gap-1 border-b border-neutral-200 bg-neutral-50 p-2 dark:border-zinc-800 dark:bg-zinc-900"
+        >
             <!-- Wand Menu -->
             <div class="relative">
-                <button type="button" @click.stop="showWandMenu = !showWandMenu" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors flex items-center gap-0.5" title="Asisten Cepat">
-                    <Wand2 class="w-4 h-4 text-amber-500 animate-pulse" />
-                    <ChevronDown class="w-3 h-3" />
+                <button
+                    type="button"
+                    @click.stop="showWandMenu = !showWandMenu"
+                    class="flex items-center gap-0.5 rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    title="Asisten Cepat"
+                >
+                    <Wand2 class="h-4 w-4 animate-pulse text-amber-500" />
+                    <ChevronDown class="h-3 w-3" />
                 </button>
-                <div v-if="showWandMenu" class="absolute left-0 mt-1 z-50 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg py-1 text-xs w-[180px]">
-                    <button type="button" @click="runWandAction('clean')" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
+                <div
+                    v-if="showWandMenu"
+                    class="absolute left-0 z-50 mt-1 w-[180px] rounded-lg border border-neutral-200 bg-white py-1 text-xs shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                    <button
+                        type="button"
+                        @click="runWandAction('clean')"
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Bersihkan Spasi Ganda
                     </button>
-                    <button type="button" @click="runWandAction('math')" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="runWandAction('math')"
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Rumus LaTeX
                     </button>
-                    <button type="button" @click="runWandAction('table')" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="runWandAction('table')"
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Tabel Template
                     </button>
                 </div>
             </div>
 
             <!-- Basic formatting -->
-            <button type="button" @click="editor.chain().focus().toggleBold().run()" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600 font-bold': editor.isActive('bold') }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Tebal (Ctrl+B)">
-                <Bold class="w-4 h-4" />
+            <button
+                type="button"
+                @click="editor.chain().focus().toggleBold().run()"
+                :class="{
+                    'bg-neutral-200 font-bold text-amber-600 dark:bg-zinc-800':
+                        editor.isActive('bold'),
+                }"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Tebal (Ctrl+B)"
+            >
+                <Bold class="h-4 w-4" />
             </button>
-            <button type="button" @click="editor.chain().focus().toggleItalic().run()" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600': editor.isActive('italic') }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Miring (Ctrl+I)">
-                <Italic class="w-4 h-4" />
+            <button
+                type="button"
+                @click="editor.chain().focus().toggleItalic().run()"
+                :class="{
+                    'bg-neutral-200 text-amber-600 dark:bg-zinc-800':
+                        editor.isActive('italic'),
+                }"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Miring (Ctrl+I)"
+            >
+                <Italic class="h-4 w-4" />
             </button>
-            <button type="button" @click="editor.chain().focus().toggleUnderline().run()" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600': editor.isActive('underline') }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Garis Bawah (Ctrl+U)">
-                <UnderlineIcon class="w-4 h-4" />
+            <button
+                type="button"
+                @click="editor.chain().focus().toggleUnderline().run()"
+                :class="{
+                    'bg-neutral-200 text-amber-600 dark:bg-zinc-800':
+                        editor.isActive('underline'),
+                }"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Garis Bawah (Ctrl+U)"
+            >
+                <UnderlineIcon class="h-4 w-4" />
             </button>
 
             <!-- Eraser / Clear style -->
-            <button type="button" @click="editor.chain().focus().clearNodes().unsetAllMarks().run()" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Hapus Semua Format">
-                <Eraser class="w-4 h-4" />
+            <button
+                type="button"
+                @click="
+                    editor.chain().focus().clearNodes().unsetAllMarks().run()
+                "
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Hapus Semua Format"
+            >
+                <Eraser class="h-4 w-4" />
             </button>
 
-            <div class="w-px h-5 bg-neutral-300 dark:bg-zinc-700 mx-1"></div>
+            <div class="mx-1 h-5 w-px bg-neutral-300 dark:bg-zinc-700"></div>
 
             <!-- Font Family -->
             <div class="relative">
-                <button type="button" @click.stop="toggleDropdown('font')" class="px-2 py-1 text-xs rounded border border-neutral-300 dark:border-zinc-700 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-1 transition-colors min-w-[80px] justify-between">
+                <button
+                    type="button"
+                    @click.stop="toggleDropdown('font')"
+                    class="flex min-w-[80px] items-center justify-between gap-1 rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-zinc-700 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                >
                     <span>Font</span>
-                    <ChevronDown class="w-3 h-3 text-neutral-400" />
+                    <ChevronDown class="h-3 w-3 text-neutral-400" />
                 </button>
-                <div v-if="activeFontDropdown" class="absolute left-0 mt-1 z-50 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg py-1 text-xs w-[140px] max-h-[200px] overflow-y-auto">
-                    <button v-for="f in fonts" :key="f.value" type="button" @click="setFontFamily(f.value)" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full">
+                <div
+                    v-if="activeFontDropdown"
+                    class="absolute left-0 z-50 mt-1 max-h-[200px] w-[140px] overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 text-xs shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                    <button
+                        v-for="f in fonts"
+                        :key="f.value"
+                        type="button"
+                        @click="setFontFamily(f.value)"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         {{ f.name }}
                     </button>
                 </div>
@@ -667,12 +823,25 @@ onBeforeUnmount(() => {
 
             <!-- Font Size -->
             <div class="relative">
-                <button type="button" @click.stop="toggleDropdown('fontSize')" class="px-2 py-1 text-xs rounded border border-neutral-300 dark:border-zinc-700 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-1 transition-colors min-w-[60px] justify-between">
+                <button
+                    type="button"
+                    @click.stop="toggleDropdown('fontSize')"
+                    class="flex min-w-[60px] items-center justify-between gap-1 rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-zinc-700 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                >
                     <span>Ukuran</span>
-                    <ChevronDown class="w-3 h-3 text-neutral-400" />
+                    <ChevronDown class="h-3 w-3 text-neutral-400" />
                 </button>
-                <div v-if="activeFontSizeDropdown" class="absolute left-0 mt-1 z-50 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg py-1 text-xs w-[100px] max-h-[200px] overflow-y-auto">
-                    <button v-for="s in fontSizes" :key="s.value" type="button" @click="setFontSizeValue(s.value)" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full">
+                <div
+                    v-if="activeFontSizeDropdown"
+                    class="absolute left-0 z-50 mt-1 max-h-[200px] w-[100px] overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 text-xs shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                    <button
+                        v-for="s in fontSizes"
+                        :key="s.value"
+                        type="button"
+                        @click="setFontSizeValue(s.value)"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         {{ s.name }}
                     </button>
                 </div>
@@ -680,43 +849,69 @@ onBeforeUnmount(() => {
 
             <!-- Text & Highlight Color -->
             <div class="relative">
-                <button type="button" @click.stop="toggleDropdown('color')" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors flex items-center gap-0.5" title="Warna Teks & Highlight">
+                <button
+                    type="button"
+                    @click.stop="toggleDropdown('color')"
+                    class="flex items-center gap-0.5 rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    title="Warna Teks & Highlight"
+                >
                     <div class="flex flex-col items-center">
-                        <span class="text-xs font-bold leading-none -mb-0.5">A</span>
-                        <div class="w-3.5 h-1 bg-amber-500 rounded-sm"></div>
+                        <span class="-mb-0.5 text-xs leading-none font-bold"
+                            >A</span
+                        >
+                        <div class="h-1 w-3.5 rounded-sm bg-amber-500"></div>
                     </div>
-                    <ChevronDown class="w-3 h-3" />
+                    <ChevronDown class="h-3 w-3" />
                 </button>
-                <div v-if="activeColorDropdown" class="absolute left-0 mt-1 z-50 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg p-3 text-xs w-[240px] flex flex-col gap-3">
+                <div
+                    v-if="activeColorDropdown"
+                    class="absolute left-0 z-50 mt-1 flex w-[240px] flex-col gap-3 rounded-lg border border-neutral-200 bg-white p-3 text-xs shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                >
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-neutral-500">Warna Teks</span>
-                            <button type="button" @click="unsetTextColor" class="text-[10px] text-red-500 hover:underline">Reset</button>
+                        <div class="mb-1 flex items-center justify-between">
+                            <span class="font-bold text-neutral-500"
+                                >Warna Teks</span
+                            >
+                            <button
+                                type="button"
+                                @click="unsetTextColor"
+                                class="text-[10px] text-red-500 hover:underline"
+                            >
+                                Reset
+                            </button>
                         </div>
                         <div class="grid grid-cols-8 gap-1">
-                            <button 
-                                v-for="c in textColors" 
-                                :key="c.value" 
-                                type="button" 
-                                @click="setTextColor(c.value)" 
-                                class="w-5 h-5 rounded border border-neutral-200 dark:border-zinc-700"
+                            <button
+                                v-for="c in textColors"
+                                :key="c.value"
+                                type="button"
+                                @click="setTextColor(c.value)"
+                                class="h-5 w-5 rounded border border-neutral-200 dark:border-zinc-700"
                                 :style="{ backgroundColor: c.value }"
                                 :title="c.name"
                             ></button>
                         </div>
                     </div>
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-neutral-500">Highlight</span>
-                            <button type="button" @click="unsetHighlightColor" class="text-[10px] text-red-500 hover:underline">Reset</button>
+                        <div class="mb-1 flex items-center justify-between">
+                            <span class="font-bold text-neutral-500"
+                                >Highlight</span
+                            >
+                            <button
+                                type="button"
+                                @click="unsetHighlightColor"
+                                class="text-[10px] text-red-500 hover:underline"
+                            >
+                                Reset
+                            </button>
                         </div>
                         <div class="grid grid-cols-6 gap-1">
-                            <button 
-                                v-for="h in highlightColors" 
-                                :key="h.value" 
-                                type="button" 
-                                @click="setHighlightColor(h.value)" 
-                                class="w-6 h-6 rounded border border-neutral-200 dark:border-zinc-700"
+                            <button
+                                v-for="h in highlightColors"
+                                :key="h.value"
+                                type="button"
+                                @click="setHighlightColor(h.value)"
+                                class="h-6 w-6 rounded border border-neutral-200 dark:border-zinc-700"
                                 :style="{ backgroundColor: h.value }"
                                 :title="h.name"
                             ></button>
@@ -725,110 +920,267 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <div class="w-px h-5 bg-neutral-300 dark:bg-zinc-700 mx-1"></div>
+            <div class="mx-1 h-5 w-px bg-neutral-300 dark:bg-zinc-700"></div>
 
             <!-- Bullet List, Ordered List, Alignment -->
-            <button type="button" @click="editor.chain().focus().toggleBulletList().run()" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600': editor.isActive('bulletList') }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Bullet List">
-                <List class="w-4 h-4" />
+            <button
+                type="button"
+                @click="editor.chain().focus().toggleBulletList().run()"
+                :class="{
+                    'bg-neutral-200 text-amber-600 dark:bg-zinc-800':
+                        editor.isActive('bulletList'),
+                }"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Bullet List"
+            >
+                <List class="h-4 w-4" />
             </button>
-            <button type="button" @click="editor.chain().focus().toggleOrderedList().run()" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600': editor.isActive('orderedList') }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Ordered List">
-                <ListOrdered class="w-4 h-4" />
+            <button
+                type="button"
+                @click="editor.chain().focus().toggleOrderedList().run()"
+                :class="{
+                    'bg-neutral-200 text-amber-600 dark:bg-zinc-800':
+                        editor.isActive('orderedList'),
+                }"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Ordered List"
+            >
+                <ListOrdered class="h-4 w-4" />
             </button>
 
             <!-- Align Dropdown -->
             <div class="relative">
-                <button type="button" @click.stop="toggleDropdown('align')" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors flex items-center gap-0.5" title="Perataan Paragraf">
-                    <AlignLeft v-if="editor.isActive({ textAlign: 'left' }) || (!editor.isActive({ textAlign: 'center' }) && !editor.isActive({ textAlign: 'right' }) && !editor.isActive({ textAlign: 'justify' }))" class="w-4 h-4" />
-                    <AlignCenter v-else-if="editor.isActive({ textAlign: 'center' })" class="w-4 h-4" />
-                    <AlignRight v-else-if="editor.isActive({ textAlign: 'right' })" class="w-4 h-4" />
-                    <AlignJustify v-else-if="editor.isActive({ textAlign: 'justify' })" class="w-4 h-4" />
-                    <ChevronDown class="w-3 h-3" />
+                <button
+                    type="button"
+                    @click.stop="toggleDropdown('align')"
+                    class="flex items-center gap-0.5 rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    title="Perataan Paragraf"
+                >
+                    <AlignLeft
+                        v-if="
+                            editor.isActive({ textAlign: 'left' }) ||
+                            (!editor.isActive({ textAlign: 'center' }) &&
+                                !editor.isActive({ textAlign: 'right' }) &&
+                                !editor.isActive({ textAlign: 'justify' }))
+                        "
+                        class="h-4 w-4"
+                    />
+                    <AlignCenter
+                        v-else-if="editor.isActive({ textAlign: 'center' })"
+                        class="h-4 w-4"
+                    />
+                    <AlignRight
+                        v-else-if="editor.isActive({ textAlign: 'right' })"
+                        class="h-4 w-4"
+                    />
+                    <AlignJustify
+                        v-else-if="editor.isActive({ textAlign: 'justify' })"
+                        class="h-4 w-4"
+                    />
+                    <ChevronDown class="h-3 w-3" />
                 </button>
-                <div v-if="activeAlignDropdown" class="absolute left-0 mt-1 z-50 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg py-1 text-xs w-[120px]">
-                    <button type="button" @click="editor.chain().focus().setTextAlign('left').run(); activeAlignDropdown = false;" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
-                        <AlignLeft class="w-3.5 h-3.5" /> Rata Kiri
+                <div
+                    v-if="activeAlignDropdown"
+                    class="absolute left-0 z-50 mt-1 w-[120px] rounded-lg border border-neutral-200 bg-white py-1 text-xs shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                    <button
+                        type="button"
+                        @click="
+                            editor.chain().focus().setTextAlign('left').run();
+                            activeAlignDropdown = false;
+                        "
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
+                        <AlignLeft class="h-3.5 w-3.5" /> Rata Kiri
                     </button>
-                    <button type="button" @click="editor.chain().focus().setTextAlign('center').run(); activeAlignDropdown = false;" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
-                        <AlignCenter class="w-3.5 h-3.5" /> Rata Tengah
+                    <button
+                        type="button"
+                        @click="
+                            editor.chain().focus().setTextAlign('center').run();
+                            activeAlignDropdown = false;
+                        "
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
+                        <AlignCenter class="h-3.5 w-3.5" /> Rata Tengah
                     </button>
-                    <button type="button" @click="editor.chain().focus().setTextAlign('right').run(); activeAlignDropdown = false;" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
-                        <AlignRight class="w-3.5 h-3.5" /> Rata Kanan
+                    <button
+                        type="button"
+                        @click="
+                            editor.chain().focus().setTextAlign('right').run();
+                            activeAlignDropdown = false;
+                        "
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
+                        <AlignRight class="h-3.5 w-3.5" /> Rata Kanan
                     </button>
-                    <button type="button" @click="editor.chain().focus().setTextAlign('justify').run(); activeAlignDropdown = false;" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
-                        <AlignJustify class="w-3.5 h-3.5" /> Rata Kiri Kanan
+                    <button
+                        type="button"
+                        @click="
+                            editor
+                                .chain()
+                                .focus()
+                                .setTextAlign('justify')
+                                .run();
+                            activeAlignDropdown = false;
+                        "
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
+                        <AlignJustify class="h-3.5 w-3.5" /> Rata Kiri Kanan
                     </button>
                 </div>
             </div>
 
             <!-- Table dropdown -->
             <div class="relative">
-                <button type="button" @click.stop="toggleDropdown('table')" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors flex items-center gap-0.5" title="Tabel">
-                    <TableIcon class="w-4 h-4" />
-                    <ChevronDown class="w-3 h-3" />
+                <button
+                    type="button"
+                    @click.stop="toggleDropdown('table')"
+                    class="flex items-center gap-0.5 rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    title="Tabel"
+                >
+                    <TableIcon class="h-4 w-4" />
+                    <ChevronDown class="h-3 w-3" />
                 </button>
-                <div v-if="activeTableDropdown" class="absolute left-0 mt-1 z-50 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-lg shadow-lg py-1 text-xs w-[180px]">
-                    <button type="button" @click="insertTable" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full flex items-center gap-2">
-                        <Plus class="w-3.5 h-3.5 text-green-500" /> Sisipkan Tabel 3x3
+                <div
+                    v-if="activeTableDropdown"
+                    class="absolute left-0 z-50 mt-1 w-[180px] rounded-lg border border-neutral-200 bg-white py-1 text-xs shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                    <button
+                        type="button"
+                        @click="insertTable"
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
+                        <Plus class="h-3.5 w-3.5 text-green-500" /> Sisipkan
+                        Tabel 3x3
                     </button>
-                    <div class="h-px bg-neutral-200 dark:bg-zinc-800 my-1"></div>
-                    <button type="button" @click="addRowBefore" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full">
+                    <div
+                        class="my-1 h-px bg-neutral-200 dark:bg-zinc-800"
+                    ></div>
+                    <button
+                        type="button"
+                        @click="addRowBefore"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Tambah Baris Sebelum
                     </button>
-                    <button type="button" @click="addRowAfter" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full">
+                    <button
+                        type="button"
+                        @click="addRowAfter"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Tambah Baris Sesudah
                     </button>
-                    <button type="button" @click="deleteRow" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full text-red-500">
+                    <button
+                        type="button"
+                        @click="deleteRow"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 text-red-500 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Hapus Baris
                     </button>
-                    <div class="h-px bg-neutral-200 dark:bg-zinc-800 my-1"></div>
-                    <button type="button" @click="addColBefore" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full">
+                    <div
+                        class="my-1 h-px bg-neutral-200 dark:bg-zinc-800"
+                    ></div>
+                    <button
+                        type="button"
+                        @click="addColBefore"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Tambah Kolom Sebelum
                     </button>
-                    <button type="button" @click="addColAfter" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full">
+                    <button
+                        type="button"
+                        @click="addColAfter"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Tambah Kolom Sesudah
                     </button>
-                    <button type="button" @click="deleteCol" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full text-red-500">
+                    <button
+                        type="button"
+                        @click="deleteCol"
+                        class="w-full px-3 py-1.5 text-left text-neutral-700 text-red-500 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
                         Hapus Kolom
                     </button>
-                    <div class="h-px bg-neutral-200 dark:bg-zinc-800 my-1"></div>
-                    <button type="button" @click="deleteTable" class="px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-neutral-300 text-left w-full text-red-500 font-semibold flex items-center gap-2">
-                        <Trash2 class="w-3.5 h-3.5" /> Hapus Tabel
+                    <div
+                        class="my-1 h-px bg-neutral-200 dark:bg-zinc-800"
+                    ></div>
+                    <button
+                        type="button"
+                        @click="deleteTable"
+                        class="flex w-full items-center gap-2 px-3 py-1.5 text-left font-semibold text-neutral-700 text-red-500 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-zinc-800"
+                    >
+                        <Trash2 class="h-3.5 w-3.5" /> Hapus Tabel
                     </button>
                 </div>
             </div>
 
             <!-- Links -->
-            <button type="button" @click="openLinkModal" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600': editor.isActive('link') }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Sisipkan Link">
-                <LinkIcon class="w-4 h-4" />
+            <button
+                type="button"
+                @click="openLinkModal"
+                :class="{
+                    'bg-neutral-200 text-amber-600 dark:bg-zinc-800':
+                        editor.isActive('link'),
+                }"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Sisipkan Link"
+            >
+                <LinkIcon class="h-4 w-4" />
             </button>
 
             <!-- Image icon -->
-            <button type="button" @click="handleImageClick" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Sisipkan Gambar (Upload atau URL)">
-                <ImageIcon class="w-4 h-4" />
+            <button
+                type="button"
+                @click="handleImageClick"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Sisipkan Gambar (Upload atau URL)"
+            >
+                <ImageIcon class="h-4 w-4" />
             </button>
-            <input ref="fileInputRef" type="file" class="hidden" accept="image/*" @change="uploadImage" />
+            <input
+                ref="fileInputRef"
+                type="file"
+                class="hidden"
+                accept="image/*"
+                @change="uploadImage"
+            />
 
             <!-- Video icon -->
-            <button type="button" @click="openVideoModal" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Sisipkan Video (YouTube / Direct Link)">
-                <VideoIcon class="w-4 h-4" />
+            <button
+                type="button"
+                @click="openVideoModal"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Sisipkan Video (YouTube / Direct Link)"
+            >
+                <VideoIcon class="h-4 w-4" />
             </button>
 
             <!-- Upload icon -->
-            <button type="button" @click="showUploadModal = true" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Unggah Berkas">
-                <Upload class="w-4 h-4" />
+            <button
+                type="button"
+                @click="showUploadModal = true"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Unggah Berkas"
+            >
+                <Upload class="h-4 w-4" />
             </button>
 
             <!-- Formula math -->
-            <button type="button" @click="insertMath" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Sisipkan Rumus Matematika">
-                <Sigma class="w-4 h-4" />
+            <button
+                type="button"
+                @click="insertMath"
+                class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                title="Sisipkan Rumus Matematika"
+            >
+                <Sigma class="h-4 w-4" />
             </button>
 
             <!-- Image sizing options (Active when image selected) -->
-            <button 
-                v-if="editor.isActive('image')" 
-                type="button" 
-                @click="resizeImage" 
-                class="p-1.5 rounded bg-amber-100 dark:bg-amber-950/40 hover:bg-amber-200 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-semibold text-xs flex items-center gap-1 transition-colors border border-amber-200 dark:border-amber-900/50" 
+            <button
+                v-if="editor.isActive('image')"
+                type="button"
+                @click="resizeImage"
+                class="flex items-center gap-1 rounded border border-amber-200 bg-amber-100 p-1.5 text-xs font-semibold text-amber-800 transition-colors hover:bg-amber-200 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/40"
                 title="Ubah Ukuran Gambar Terpilih"
             >
                 Ubah Ukuran
@@ -836,57 +1188,111 @@ onBeforeUnmount(() => {
 
             <!-- Fullscreen, Code, Help aligned to the right -->
             <div class="ml-auto flex items-center gap-1">
-                <button type="button" @click="isFullscreen = !isFullscreen" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" :title="isFullscreen ? 'Layar Kecil' : 'Layar Penuh'">
-                    <Minimize2 v-if="isFullscreen" class="w-4 h-4 text-amber-600" />
-                    <Maximize2 v-else class="w-4 h-4" />
+                <button
+                    type="button"
+                    @click="isFullscreen = !isFullscreen"
+                    class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    :title="isFullscreen ? 'Layar Kecil' : 'Layar Penuh'"
+                >
+                    <Minimize2
+                        v-if="isFullscreen"
+                        class="h-4 w-4 text-amber-600"
+                    />
+                    <Maximize2 v-else class="h-4 w-4" />
                 </button>
-                <button type="button" @click="toggleCodeView" :class="{ 'bg-neutral-200 dark:bg-zinc-800 text-amber-600': isCodeView }" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Kode HTML">
-                    <Code class="w-4 h-4" />
+                <button
+                    type="button"
+                    @click="toggleCodeView"
+                    :class="{
+                        'bg-neutral-200 text-amber-600 dark:bg-zinc-800':
+                            isCodeView,
+                    }"
+                    class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    title="Kode HTML"
+                >
+                    <Code class="h-4 w-4" />
                 </button>
-                <button type="button" @click="showHelpModal = true" class="p-1.5 rounded hover:bg-neutral-200 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors" title="Bantuan">
-                    <HelpCircle class="w-4 h-4" />
+                <button
+                    type="button"
+                    @click="showHelpModal = true"
+                    class="rounded p-1.5 text-neutral-600 transition-colors hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    title="Bantuan"
+                >
+                    <HelpCircle class="h-4 w-4" />
                 </button>
             </div>
         </div>
 
         <!-- Editor Content / HTML Editor -->
-        <div :class="[isFullscreen ? 'flex-1 overflow-y-auto' : '']" class="bg-white dark:bg-zinc-950 min-h-[150px]">
-            <EditorContent v-show="!isCodeView" :editor="editor" class="h-full" />
-            <textarea 
-                v-show="isCodeView" 
-                v-model="codeContentText" 
-                class="w-full min-h-[150px] p-4 font-mono text-xs bg-zinc-900 text-zinc-100 dark:bg-zinc-950 dark:text-zinc-200 focus:outline-none resize-none border-t border-neutral-200 dark:border-zinc-800"
+        <div
+            :class="[isFullscreen ? 'flex-1 overflow-y-auto' : '']"
+            class="min-h-[150px] bg-white dark:bg-zinc-950"
+        >
+            <EditorContent
+                v-show="!isCodeView"
+                :editor="editor"
+                class="h-full"
+            />
+            <textarea
+                v-show="isCodeView"
+                v-model="codeContentText"
+                class="min-h-[150px] w-full resize-none border-t border-neutral-200 bg-zinc-900 p-4 font-mono text-xs text-zinc-100 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
                 :class="[isFullscreen ? 'h-full' : '']"
                 placeholder="<!-- Masukkan Kode HTML Anda di sini -->"
             ></textarea>
         </div>
 
         <!-- Custom Modals -->
-        
+
         <!-- Image Modal -->
-        <div v-if="showImageModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[450px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Sisipkan Gambar</h3>
-                    <button type="button" @click="showImageModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showImageModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[450px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Sisipkan Gambar
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showImageModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
 
-                <div class="flex bg-neutral-100 dark:bg-zinc-800 p-1 rounded-lg">
-                    <button 
-                        type="button" 
+                <div
+                    class="flex rounded-lg bg-neutral-100 p-1 dark:bg-zinc-800"
+                >
+                    <button
+                        type="button"
                         @click="imageTab = 'upload'"
-                        class="flex-1 py-1.5 text-xs font-bold rounded-md transition-all"
-                        :class="imageTab === 'upload' ? 'bg-white dark:bg-zinc-700 text-neutral-900 dark:text-neutral-100 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'"
+                        class="flex-1 rounded-md py-1.5 text-xs font-bold transition-all"
+                        :class="
+                            imageTab === 'upload'
+                                ? 'bg-white text-neutral-900 shadow-sm dark:bg-zinc-700 dark:text-neutral-100'
+                                : 'text-neutral-500 hover:text-neutral-700'
+                        "
                     >
                         Upload Komputer
                     </button>
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         @click="imageTab = 'url'"
-                        class="flex-1 py-1.5 text-xs font-bold rounded-md transition-all"
-                        :class="imageTab === 'url' ? 'bg-white dark:bg-zinc-700 text-neutral-900 dark:text-neutral-100 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'"
+                        class="flex-1 rounded-md py-1.5 text-xs font-bold transition-all"
+                        :class="
+                            imageTab === 'url'
+                                ? 'bg-white text-neutral-900 shadow-sm dark:bg-zinc-700 dark:text-neutral-100'
+                                : 'text-neutral-500 hover:text-neutral-700'
+                        "
                     >
                         URL Gambar
                     </button>
@@ -894,14 +1300,18 @@ onBeforeUnmount(() => {
 
                 <div class="py-2">
                     <div v-show="imageTab === 'upload'" class="space-y-4">
-                        <div 
+                        <div
                             @click="fileInputRef?.click()"
-                            class="border-2 border-dashed border-neutral-300 dark:border-zinc-700 hover:border-amber-500 dark:hover:border-amber-500 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-neutral-50 dark:hover:bg-zinc-800/30 flex flex-col items-center justify-center gap-3 group"
+                            class="group flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-neutral-300 p-8 text-center transition-all hover:border-amber-500 hover:bg-neutral-50 dark:border-zinc-700 dark:hover:border-amber-500 dark:hover:bg-zinc-800/30"
                         >
-                            <div class="p-3 bg-neutral-100 dark:bg-zinc-800 text-neutral-500 group-hover:text-amber-600 rounded-full transition-colors">
-                                <ImageIcon class="w-6 h-6" />
+                            <div
+                                class="rounded-full bg-neutral-100 p-3 text-neutral-500 transition-colors group-hover:text-amber-600 dark:bg-zinc-800"
+                            >
+                                <ImageIcon class="h-6 w-6" />
                             </div>
-                            <span class="text-xs font-bold text-neutral-600 dark:text-neutral-400">
+                            <span
+                                class="text-xs font-bold text-neutral-600 dark:text-neutral-400"
+                            >
                                 Klik untuk memilih file dari komputer Anda
                             </span>
                             <span class="text-[10px] text-neutral-400">
@@ -911,30 +1321,34 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div v-show="imageTab === 'url'" class="space-y-3">
-                        <label class="text-xs font-bold text-neutral-500 block">Masukkan Link URL Gambar:</label>
-                        <input 
+                        <label class="block text-xs font-bold text-neutral-500"
+                            >Masukkan Link URL Gambar:</label
+                        >
+                        <input
                             v-model="imageUrlInput"
-                            type="text" 
-                            class="w-full border-neutral-300 dark:border-zinc-700 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs h-9 px-3 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                            type="text"
+                            class="h-9 w-full rounded-lg border-neutral-300 bg-white px-3 text-xs text-neutral-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-neutral-100"
                             placeholder="Contoh: https://site.com/image.jpg"
                             @keyup.enter="insertUrlImage"
                         />
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button 
-                        type="button" 
+                <div
+                    class="flex justify-end gap-2 border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
                         @click="showImageModal = false"
-                        class="px-4 py-2 border border-neutral-200 dark:border-zinc-700 text-xs font-bold rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-800 text-neutral-600 dark:text-neutral-400 transition-colors"
+                        class="rounded-lg border border-neutral-200 px-4 py-2 text-xs font-bold text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-zinc-700 dark:text-neutral-400 dark:hover:bg-zinc-800"
                     >
                         Batal
                     </button>
-                    <button 
+                    <button
                         v-if="imageTab === 'url'"
-                        type="button" 
+                        type="button"
                         @click="insertUrlImage"
-                        class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors"
+                        class="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-amber-600"
                     >
                         Sisipkan Gambar
                     </button>
@@ -943,185 +1357,455 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Image Resize Modal -->
-        <div v-if="showResizeModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[400px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Ubah Ukuran Gambar</h3>
-                    <button type="button" @click="showResizeModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showResizeModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[400px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Ubah Ukuran Gambar
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showResizeModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-neutral-500 block">Masukkan lebar gambar:</label>
-                    <input 
+                    <label class="block text-xs font-bold text-neutral-500"
+                        >Masukkan lebar gambar:</label
+                    >
+                    <input
                         v-model="resizeWidthInput"
-                        type="text" 
-                        class="w-full border-neutral-300 dark:border-zinc-700 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs h-9 px-3 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                        type="text"
+                        class="h-9 w-full rounded-lg border-neutral-300 bg-white px-3 text-xs text-neutral-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-neutral-100"
                         placeholder="Contoh: 200, 350, atau 50%"
                         @keyup.enter="applyResize"
                     />
-                    <div class="flex flex-wrap gap-1 mt-1">
-                        <button type="button" @click="resizeWidthInput = '150'" class="px-2 py-1 bg-neutral-100 dark:bg-zinc-800 text-[10px] rounded hover:bg-neutral-200">150px</button>
-                        <button type="button" @click="resizeWidthInput = '300'" class="px-2 py-1 bg-neutral-100 dark:bg-zinc-800 text-[10px] rounded hover:bg-neutral-200">300px</button>
-                        <button type="button" @click="resizeWidthInput = '25%'" class="px-2 py-1 bg-neutral-100 dark:bg-zinc-800 text-[10px] rounded hover:bg-neutral-200">25%</button>
-                        <button type="button" @click="resizeWidthInput = '50%'" class="px-2 py-1 bg-neutral-100 dark:bg-zinc-800 text-[10px] rounded hover:bg-neutral-200">50%</button>
-                        <button type="button" @click="resizeWidthInput = '100%'" class="px-2 py-1 bg-neutral-100 dark:bg-zinc-800 text-[10px] rounded hover:bg-neutral-200">100%</button>
+                    <div class="mt-1 flex flex-wrap gap-1">
+                        <button
+                            type="button"
+                            @click="resizeWidthInput = '150'"
+                            class="rounded bg-neutral-100 px-2 py-1 text-[10px] hover:bg-neutral-200 dark:bg-zinc-800"
+                        >
+                            150px
+                        </button>
+                        <button
+                            type="button"
+                            @click="resizeWidthInput = '300'"
+                            class="rounded bg-neutral-100 px-2 py-1 text-[10px] hover:bg-neutral-200 dark:bg-zinc-800"
+                        >
+                            300px
+                        </button>
+                        <button
+                            type="button"
+                            @click="resizeWidthInput = '25%'"
+                            class="rounded bg-neutral-100 px-2 py-1 text-[10px] hover:bg-neutral-200 dark:bg-zinc-800"
+                        >
+                            25%
+                        </button>
+                        <button
+                            type="button"
+                            @click="resizeWidthInput = '50%'"
+                            class="rounded bg-neutral-100 px-2 py-1 text-[10px] hover:bg-neutral-200 dark:bg-zinc-800"
+                        >
+                            50%
+                        </button>
+                        <button
+                            type="button"
+                            @click="resizeWidthInput = '100%'"
+                            class="rounded bg-neutral-100 px-2 py-1 text-[10px] hover:bg-neutral-200 dark:bg-zinc-800"
+                        >
+                            100%
+                        </button>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button type="button" @click="showResizeModal = false" class="px-4 py-2 border border-neutral-200 dark:border-zinc-700 text-xs font-bold rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-zinc-800">Batal</button>
-                    <button type="button" @click="applyResize" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg">Terapkan</button>
+                <div
+                    class="flex justify-end gap-2 border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
+                        @click="showResizeModal = false"
+                        class="rounded-lg border border-neutral-200 px-4 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-50 dark:border-zinc-700 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="button"
+                        @click="applyResize"
+                        class="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600"
+                    >
+                        Terapkan
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Math Modal -->
-        <div v-if="showMathModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[400px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Rumus Matematika (LaTeX)</h3>
-                    <button type="button" @click="showMathModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showMathModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[400px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Rumus Matematika (LaTeX)
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showMathModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-neutral-500 block">Masukkan formula LaTeX:</label>
-                    <input 
+                    <label class="block text-xs font-bold text-neutral-500"
+                        >Masukkan formula LaTeX:</label
+                    >
+                    <input
                         v-model="mathFormulaInput"
-                        type="text" 
-                        class="w-full border-neutral-300 dark:border-zinc-700 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs h-9 px-3 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                        type="text"
+                        class="h-9 w-full rounded-lg border-neutral-300 bg-white px-3 text-xs text-neutral-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-neutral-100"
                         placeholder="Contoh: \frac{a}{b} atau x^2 + y^2 = r^2"
                         @keyup.enter="applyMath"
                     />
                     <div class="text-[10px] text-neutral-400">
-                        Rumus akan ditampilkan secara otomatis dalam format matematika terstruktur.
+                        Rumus akan ditampilkan secara otomatis dalam format
+                        matematika terstruktur.
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button type="button" @click="showMathModal = false" class="px-4 py-2 border border-neutral-200 dark:border-zinc-700 text-xs font-bold rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-zinc-800">Batal</button>
-                    <button type="button" @click="applyMath" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg">Sisipkan</button>
+                <div
+                    class="flex justify-end gap-2 border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
+                        @click="showMathModal = false"
+                        class="rounded-lg border border-neutral-200 px-4 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-50 dark:border-zinc-700 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="button"
+                        @click="applyMath"
+                        class="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600"
+                    >
+                        Sisipkan
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Link Modal -->
-        <div v-if="showLinkModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[400px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Sisipkan Link</h3>
-                    <button type="button" @click="showLinkModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showLinkModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[400px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Sisipkan Link
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showLinkModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-neutral-500 block">URL Link:</label>
-                    <input 
+                    <label class="block text-xs font-bold text-neutral-500"
+                        >URL Link:</label
+                    >
+                    <input
                         v-model="linkUrlInput"
-                        type="text" 
-                        class="w-full border-neutral-300 dark:border-zinc-700 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs h-9 px-3 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                        type="text"
+                        class="h-9 w-full rounded-lg border-neutral-300 bg-white px-3 text-xs text-neutral-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-neutral-100"
                         placeholder="Contoh: www.google.com"
                         @keyup.enter="insertLink"
                     />
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button type="button" @click="showLinkModal = false" class="px-4 py-2 border border-neutral-200 dark:border-zinc-700 text-xs font-bold rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-zinc-800">Batal</button>
-                    <button type="button" @click="insertLink" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg">Sisipkan</button>
+                <div
+                    class="flex justify-end gap-2 border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
+                        @click="showLinkModal = false"
+                        class="rounded-lg border border-neutral-200 px-4 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-50 dark:border-zinc-700 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="button"
+                        @click="insertLink"
+                        class="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600"
+                    >
+                        Sisipkan
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Video Modal -->
-        <div v-if="showVideoModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[400px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Sisipkan Video</h3>
-                    <button type="button" @click="showVideoModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showVideoModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[400px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Sisipkan Video
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showVideoModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-neutral-500 block">URL Video (YouTube / Vimeo / Direct Link):</label>
-                    <input 
+                    <label class="block text-xs font-bold text-neutral-500"
+                        >URL Video (YouTube / Vimeo / Direct Link):</label
+                    >
+                    <input
                         v-model="videoUrlInput"
-                        type="text" 
-                        class="w-full border-neutral-300 dark:border-zinc-700 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs h-9 px-3 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                        type="text"
+                        class="h-9 w-full rounded-lg border-neutral-300 bg-white px-3 text-xs text-neutral-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-neutral-100"
                         placeholder="Contoh: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                         @keyup.enter="insertVideo"
                     />
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button type="button" @click="showVideoModal = false" class="px-4 py-2 border border-neutral-200 dark:border-zinc-700 text-xs font-bold rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-zinc-800">Batal</button>
-                    <button type="button" @click="insertVideo" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg">Sisipkan</button>
+                <div
+                    class="flex justify-end gap-2 border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
+                        @click="showVideoModal = false"
+                        class="rounded-lg border border-neutral-200 px-4 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-50 dark:border-zinc-700 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        type="button"
+                        @click="insertVideo"
+                        class="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600"
+                    >
+                        Sisipkan
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Upload File Modal -->
-        <div v-if="showUploadModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[400px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Unggah Berkas / Dokumen</h3>
-                    <button type="button" @click="showUploadModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showUploadModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[400px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Unggah Berkas / Dokumen
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showUploadModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
                 <div class="space-y-4">
-                    <div 
+                    <div
                         @click="fileUploadInputRef?.click()"
-                        class="border-2 border-dashed border-neutral-300 dark:border-zinc-700 hover:border-amber-500 dark:hover:border-amber-500 rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-neutral-50 dark:hover:bg-zinc-800/30 flex flex-col items-center justify-center gap-3 group"
+                        class="group flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-neutral-300 p-8 text-center transition-all hover:border-amber-500 hover:bg-neutral-50 dark:border-zinc-700 dark:hover:border-amber-500 dark:hover:bg-zinc-800/30"
                     >
-                        <div class="p-3 bg-neutral-100 dark:bg-zinc-800 text-neutral-500 group-hover:text-amber-600 rounded-full transition-colors">
-                            <Upload class="w-6 h-6" />
+                        <div
+                            class="rounded-full bg-neutral-100 p-3 text-neutral-500 transition-colors group-hover:text-amber-600 dark:bg-zinc-800"
+                        >
+                            <Upload class="h-6 w-6" />
                         </div>
-                        <span class="text-xs font-bold text-neutral-600 dark:text-neutral-400">
+                        <span
+                            class="text-xs font-bold text-neutral-600 dark:text-neutral-400"
+                        >
                             Klik untuk memilih berkas dari komputer Anda
                         </span>
                         <span class="text-[10px] text-neutral-400">
-                            Mendukung berkas PDF, Word, Excel, Gambar, dll. (Maks. 5MB)
+                            Mendukung berkas PDF, Word, Excel, Gambar, dll.
+                            (Maks. 5MB)
                         </span>
                     </div>
-                    <input ref="fileUploadInputRef" type="file" class="hidden" @change="uploadFile" />
+                    <input
+                        ref="fileUploadInputRef"
+                        type="file"
+                        class="hidden"
+                        @change="uploadFile"
+                    />
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button type="button" @click="showUploadModal = false" class="px-4 py-2 border border-neutral-200 dark:border-zinc-700 text-xs font-bold rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-zinc-800">Batal</button>
+                <div
+                    class="flex justify-end gap-2 border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
+                        @click="showUploadModal = false"
+                        class="rounded-lg border border-neutral-200 px-4 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-50 dark:border-zinc-700 dark:text-neutral-400 dark:hover:bg-zinc-800"
+                    >
+                        Batal
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Help Modal -->
-        <div v-if="showHelpModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
-            <div class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-6 w-[450px] shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-                <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-bold text-neutral-800 dark:text-neutral-200">Panduan & Pintasan</h3>
-                    <button type="button" @click="showHelpModal = false" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1 rounded hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors">
-                        <X class="w-4 h-4" />
+        <div
+            v-if="showHelpModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="flex w-[450px] animate-in flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl duration-150 zoom-in-95 fade-in dark:border-zinc-800 dark:bg-zinc-900"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-zinc-800"
+                >
+                    <h3
+                        class="text-sm font-bold text-neutral-800 dark:text-neutral-200"
+                    >
+                        Panduan & Pintasan
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showHelpModal = false"
+                        class="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-zinc-800 dark:hover:text-neutral-300"
+                    >
+                        <X class="h-4 w-4" />
                     </button>
                 </div>
-                <div class="space-y-3 text-xs text-neutral-600 dark:text-neutral-400 max-h-[300px] overflow-y-auto pr-1">
+                <div
+                    class="max-h-[300px] space-y-3 overflow-y-auto pr-1 text-xs text-neutral-600 dark:text-neutral-400"
+                >
                     <div>
-                        <h4 class="font-bold text-neutral-800 dark:text-neutral-200 mb-1">Pintasan Keyboard:</h4>
-                        <ul class="list-disc list-inside space-y-1 pl-1">
-                            <li><kbd class="px-1.5 py-0.5 bg-neutral-100 dark:bg-zinc-800 rounded border border-neutral-200 dark:border-zinc-700">Ctrl + B</kbd> : Tebal (Bold)</li>
-                            <li><kbd class="px-1.5 py-0.5 bg-neutral-100 dark:bg-zinc-800 rounded border border-neutral-200 dark:border-zinc-700">Ctrl + I</kbd> : Miring (Italic)</li>
-                            <li><kbd class="px-1.5 py-0.5 bg-neutral-100 dark:bg-zinc-800 rounded border border-neutral-200 dark:border-zinc-700">Ctrl + U</kbd> : Garis Bawah (Underline)</li>
+                        <h4
+                            class="mb-1 font-bold text-neutral-800 dark:text-neutral-200"
+                        >
+                            Pintasan Keyboard:
+                        </h4>
+                        <ul class="list-inside list-disc space-y-1 pl-1">
+                            <li>
+                                <kbd
+                                    class="rounded border border-neutral-200 bg-neutral-100 px-1.5 py-0.5 dark:border-zinc-700 dark:bg-zinc-800"
+                                    >Ctrl + B</kbd
+                                >
+                                : Tebal (Bold)
+                            </li>
+                            <li>
+                                <kbd
+                                    class="rounded border border-neutral-200 bg-neutral-100 px-1.5 py-0.5 dark:border-zinc-700 dark:bg-zinc-800"
+                                    >Ctrl + I</kbd
+                                >
+                                : Miring (Italic)
+                            </li>
+                            <li>
+                                <kbd
+                                    class="rounded border border-neutral-200 bg-neutral-100 px-1.5 py-0.5 dark:border-zinc-700 dark:bg-zinc-800"
+                                    >Ctrl + U</kbd
+                                >
+                                : Garis Bawah (Underline)
+                            </li>
                         </ul>
                     </div>
                     <div>
-                        <h4 class="font-bold text-neutral-800 dark:text-neutral-200 mb-1">Rumus Matematika:</h4>
-                        <p>Gunakan tombol <Sigma class="w-3.5 h-3.5 inline text-amber-500 mx-0.5" /> untuk menyisipkan rumus LaTeX. Rumus akan di-render secara dinamis menggunakan KaTeX.</p>
-                        <p class="mt-1">Contoh penulisan: <code class="px-1 bg-neutral-100 dark:bg-zinc-800 rounded font-mono">\frac{a}{b}</code>, <code class="px-1 bg-neutral-100 dark:bg-zinc-800 rounded font-mono">x^2 + y^2 = r^2</code>.</p>
+                        <h4
+                            class="mb-1 font-bold text-neutral-800 dark:text-neutral-200"
+                        >
+                            Rumus Matematika:
+                        </h4>
+                        <p>
+                            Gunakan tombol
+                            <Sigma
+                                class="mx-0.5 inline h-3.5 w-3.5 text-amber-500"
+                            />
+                            untuk menyisipkan rumus LaTeX. Rumus akan di-render
+                            secara dinamis menggunakan KaTeX.
+                        </p>
+                        <p class="mt-1">
+                            Contoh penulisan:
+                            <code
+                                class="rounded bg-neutral-100 px-1 font-mono dark:bg-zinc-800"
+                                >\frac{a}{b}</code
+                            >,
+                            <code
+                                class="rounded bg-neutral-100 px-1 font-mono dark:bg-zinc-800"
+                                >x^2 + y^2 = r^2</code
+                            >.
+                        </p>
                     </div>
                     <div>
-                        <h4 class="font-bold text-neutral-800 dark:text-neutral-200 mb-1">Pengaturan Gambar:</h4>
-                        <p>Klik pada gambar untuk menampilkan tombol "Ubah Ukuran". Masukkan ukuran dalam piksel (misal <code class="px-1 bg-neutral-100 dark:bg-zinc-800 rounded font-mono">200</code>) atau persentase (misal <code class="px-1 bg-neutral-100 dark:bg-zinc-800 rounded font-mono">50%</code>).</p>
+                        <h4
+                            class="mb-1 font-bold text-neutral-800 dark:text-neutral-200"
+                        >
+                            Pengaturan Gambar:
+                        </h4>
+                        <p>
+                            Klik pada gambar untuk menampilkan tombol "Ubah
+                            Ukuran". Masukkan ukuran dalam piksel (misal
+                            <code
+                                class="rounded bg-neutral-100 px-1 font-mono dark:bg-zinc-800"
+                                >200</code
+                            >) atau persentase (misal
+                            <code
+                                class="rounded bg-neutral-100 px-1 font-mono dark:bg-zinc-800"
+                                >50%</code
+                            >).
+                        </p>
                     </div>
                 </div>
-                <div class="flex justify-end pt-2 border-t border-neutral-100 dark:border-zinc-800">
-                    <button type="button" @click="showHelpModal = false" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg">Tutup</button>
+                <div
+                    class="flex justify-end border-t border-neutral-100 pt-2 dark:border-zinc-800"
+                >
+                    <button
+                        type="button"
+                        @click="showHelpModal = false"
+                        class="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600"
+                    >
+                        Tutup
+                    </button>
                 </div>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -1138,7 +1822,8 @@ onBeforeUnmount(() => {
     table-layout: fixed;
     width: 100%;
 }
-.ProseMirror td, .ProseMirror th {
+.ProseMirror td,
+.ProseMirror th {
     border: 1px solid #d4d4d8; /* zinc-300 */
     box-sizing: border-box;
     min-width: 1em;
@@ -1146,7 +1831,8 @@ onBeforeUnmount(() => {
     position: relative;
     vertical-align: top;
 }
-.dark .ProseMirror td, .dark .ProseMirror th {
+.dark .ProseMirror td,
+.dark .ProseMirror th {
     border-color: #3f3f46; /* zinc-700 */
 }
 .ProseMirror th {

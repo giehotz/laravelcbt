@@ -20,7 +20,7 @@ class CreateSoalAction
     {
         // Sanitize all HTML fields
         $data['soal'] = $this->sanitizer->sanitize($data['soal']);
-        
+
         $opsiFields = ['opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'opsi_e'];
         foreach ($opsiFields as $opsi) {
             if (isset($data[$opsi])) {
@@ -42,7 +42,7 @@ class CreateSoalAction
         return DB::transaction(function () use ($data, $jenis, $pairs) {
             $soal = Soal::create($data);
 
-            if ($jenis === 3 && !empty($pairs)) {
+            if ($jenis === 3 && ! empty($pairs)) {
                 foreach ($pairs as $pair) {
                     $soal->pairs()->create([
                         'kiri' => $this->sanitizer->sanitize($pair['kiri']),

@@ -19,7 +19,7 @@ class StoreKelasRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('kelas')->where(fn($q) => $q
+                Rule::unique('kelas')->where(fn ($q) => $q
                     ->where('tahun_pelajaran_id', $this->tahun_pelajaran_id)
                     ->where('semester_id', $this->semester_id)
                 ),

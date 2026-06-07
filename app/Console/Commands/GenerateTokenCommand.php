@@ -27,7 +27,7 @@ class GenerateTokenCommand extends Command
     public function handle()
     {
         $token = Token::first();
-        
+
         if ($token && $token->auto) {
             Token::generate();
             $this->info('New token generated successfully.');

@@ -2,10 +2,11 @@
 
 namespace App\Models\Akademik;
 
+use App\Models\Cbt\CbtJenis;
+use App\Models\Master\Semester;
+use App\Models\Master\TahunPelajaran;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Master\TahunPelajaran;
-use App\Models\Master\Semester;
 
 class RaporConfig extends Model
 {
@@ -33,16 +34,16 @@ class RaporConfig extends Model
 
     public function jenisPh()
     {
-        return $this->belongsTo(\App\Models\Cbt\CbtJenis::class, 'jenis_ph_id');
+        return $this->belongsTo(CbtJenis::class, 'jenis_ph_id');
     }
 
     public function jenisPts()
     {
-        return $this->belongsTo(\App\Models\Cbt\CbtJenis::class, 'jenis_pts_id');
+        return $this->belongsTo(CbtJenis::class, 'jenis_pts_id');
     }
 
     public function jenisPas()
     {
-        return $this->belongsTo(\App\Models\Cbt\CbtJenis::class, 'jenis_pas_id');
+        return $this->belongsTo(CbtJenis::class, 'jenis_pas_id');
     }
 }

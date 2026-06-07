@@ -1,19 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Cbt\JenisUjianController;
-use App\Http\Controllers\Cbt\SesiController;
-use App\Http\Controllers\Cbt\RuangController;
-use App\Http\Controllers\Cbt\TokenController;
-use App\Http\Controllers\Cbt\JadwalController;
-use App\Http\Controllers\Cbt\PengawasController;
-use App\Http\Controllers\Cbt\NomorPesertaController;
 use App\Http\Controllers\Cbt\AturRuangSesiController;
 use App\Http\Controllers\Cbt\BankSoalController;
-use App\Http\Controllers\Cbt\SoalController;
-use App\Http\Controllers\Cbt\ProctorController;
+use App\Http\Controllers\Cbt\JadwalController;
+use App\Http\Controllers\Cbt\JenisUjianController;
 use App\Http\Controllers\Cbt\KoreksiController;
+use App\Http\Controllers\Cbt\NomorPesertaController;
+use App\Http\Controllers\Cbt\PengawasController;
+use App\Http\Controllers\Cbt\ProctorController;
 use App\Http\Controllers\Cbt\ReportController;
+use App\Http\Controllers\Cbt\RuangController;
+use App\Http\Controllers\Cbt\SesiController;
+use App\Http\Controllers\Cbt\SoalController;
+use App\Http\Controllers\Cbt\TokenController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,7 +68,11 @@ Route::post('atur-ruang/{kelasRuang}/sync', [AturRuangSesiController::class, 'sy
 // Fase 3.4: Bank Soal & Soal
 Route::resource('bank-soal', BankSoalController::class);
 Route::prefix('bank-soal/{bank}')->name('bank-soal.')->group(function () {
-    Route::resource('soal', SoalController::class);
+    Route::get('soal/import', [SoalController::class, 'importForm'])->name('soal.import');
+    Route::post('soal/import', [SoalController::class, 'import']);
+    Route::post('soal/import/confirm', [SoalController::class, 'confirmImport'])->name('soal.import.confirm');
+    Route::get('soal/import/template', [SoalController::class, 'downloadTemplate'])->name('soal.import.template');
+    Route::resource('soal', SoalController::class)->except(['show']);
 });
 Route::post('soal/upload-image', [SoalController::class, 'uploadImage'])->name('soal.upload-image');
 
@@ -78,6 +82,8 @@ Route::middleware(['role:superadmin|operator|proktor|kepsek'])->prefix('monitori
     Route::get('/{jadwal}/status', [ProctorController::class, 'statusSiswa'])->name('status');
     Route::post('/durasi/{durasi}/reset', [ProctorController::class, 'resetLogin'])->name('reset');
     Route::post('/durasi/{durasi}/force-selesai', [ProctorController::class, 'forceSelesai'])->name('force-selesai');
+    Route::post('/durasi/{durasi}/ulang', [ProctorController::class, 'ulang'])->name('ulang');
+    Route::post('/bulk-action', [ProctorController::class, 'bulkAction'])->name('bulk-action');
 });
 
 // Fase 5: Grading (Koreksi Essai)

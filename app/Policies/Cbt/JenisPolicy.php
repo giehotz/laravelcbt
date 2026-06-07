@@ -28,7 +28,7 @@ class JenisPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -36,7 +36,7 @@ class JenisPolicy
      */
     public function update(User $user, Jenis $jenis): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -44,6 +44,6 @@ class JenisPolicy
      */
     public function delete(User $user, Jenis $jenis): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 }

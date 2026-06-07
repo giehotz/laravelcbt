@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Cbt;
 
+use App\Actions\Cbt\GenerateNomorPesertaAction;
 use App\Http\Controllers\Controller;
 use App\Models\Cbt\NomorPeserta;
 use App\Models\Master\Kelas;
-use App\Models\TahunPelajaran;
 use App\Models\Semester;
-use App\Actions\Cbt\GenerateNomorPesertaAction;
+use App\Models\TahunPelajaran;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class NomorPesertaController extends Controller
 {
@@ -23,22 +23,23 @@ class NomorPesertaController extends Controller
         $tpAktif = TahunPelajaran::where('active', true)->firstOrFail();
         $smtAktif = Semester::where('active', true)->firstOrFail();
 
-        $query = NomorPeserta::with(['siswa', 'siswa.kelasSiswa' => function($q) use ($tpAktif, $smtAktif) {
+        $query = NomorPeserta::with(['siswa', 'siswa.kelasSiswa' => function ($q) use ($tpAktif, $smtAktif) {
             $q->where('tahun_pelajaran_id', $tpAktif->id)->where('semester_id', $smtAktif->id)->with('kelas');
         }])
-        ->where('tp_id', $tpAktif->id)
-        ->where('smt_id', $smtAktif->id);
+            ->where('tp_id', $tpAktif->id)
+            ->where('smt_id', $smtAktif->id);
 
         if ($request->kelas_id) {
             $query->whereHas('siswa.kelasSiswa', function ($q) use ($request, $tpAktif, $smtAktif) {
                 $q->where('kelas_id', $request->kelas_id)
-                  ->where('tahun_pelajaran_id', $tpAktif->id)
-                  ->where('semester_id', $smtAktif->id);
+                    ->where('tahun_pelajaran_id', $tpAktif->id)
+                    ->where('semester_id', $smtAktif->id);
             });
         }
 
         $peserta = $query->paginate(50)->through(function ($item) {
             $kelasSiswa = $item->siswa->kelasSiswa->first();
+
             return [
                 'id' => $item->id,
                 'nomor_peserta' => $item->nomor_peserta,
@@ -72,6 +73,7 @@ class NomorPesertaController extends Controller
 
         try {
             $action->execute($tpAktif, $smtAktif);
+
             return redirect()->back()->with('success', 'Nomor Peserta berhasil digenerate secara otomatis.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

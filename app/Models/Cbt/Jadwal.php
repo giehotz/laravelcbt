@@ -84,15 +84,19 @@ class Jadwal extends Model
     // Accessor to get actual pengawas models if needed
     public function getPengawasModelsAttribute()
     {
-        if (empty($this->pengawas)) return [];
+        if (empty($this->pengawas)) {
+            return [];
+        }
+
         return Guru::whereIn('id', $this->pengawas)->get();
     }
 
     public function scopeAktifSekarang($query)
     {
         $now = now()->toDateTimeString();
+
         return $query->where('status', 1)
-                     ->where('tgl_mulai', '<=', $now)
-                     ->where('tgl_selesai', '>=', $now);
+            ->where('tgl_mulai', '<=', $now)
+            ->where('tgl_selesai', '>=', $now);
     }
 }

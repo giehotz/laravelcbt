@@ -2,12 +2,12 @@
 
 namespace App\Actions\Cbt;
 
-use App\Models\TahunPelajaran;
-use App\Models\Semester;
 use App\Models\Cbt\NomorPeserta;
 use App\Models\Master\KelasSiswa;
-use Illuminate\Support\Facades\DB;
+use App\Models\Semester;
+use App\Models\TahunPelajaran;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class GenerateNomorPesertaAction
 {
@@ -16,8 +16,8 @@ class GenerateNomorPesertaAction
         DB::transaction(function () use ($tp, $smt) {
             // 1. Cek tidak ada jadwal aktif/sedang berjalan di TP+SMT ini
             $ujianAktif = DB::table('cbt_jadwal')
-                ->where('tp_id', $tp->id)
-                ->where('smt_id', $smt->id)
+                ->where('tahun_pelajaran_id', $tp->id)
+                ->where('semester_id', $smt->id)
                 ->where('status', 1)
                 ->exists();
 

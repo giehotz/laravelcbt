@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('bobot_pts')->default(30);  // % bobot PTS
             $table->integer('bobot_pas')->default(30);  // % bobot PAS
             $table->timestamps();
-            $table->unique(['tp_id','smt_id','kelas_id','mapel_id']);
+            $table->unique(['tp_id', 'smt_id', 'kelas_id', 'mapel_id']);
         });
     }
 

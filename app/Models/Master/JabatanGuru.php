@@ -2,15 +2,15 @@
 
 namespace App\Models\Master;
 
-use Illuminate\Database\Eloquent\Model;
-
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Semester;
 use App\Models\TahunPelajaran;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JabatanGuru extends Model
 {
     protected $table = 'jabatan_guru';
+
     protected $guarded = ['id'];
 
     public function guru(): BelongsTo
@@ -30,13 +30,13 @@ class JabatanGuru extends Model
 
     public function scopeCurrentPeriod($query, $tpId = null, $smtId = null)
     {
-        if (!$tpId || !$smtId) {
+        if (! $tpId || ! $smtId) {
             $tpId = TahunPelajaran::where('active', true)->first()?->id;
             $smtId = Semester::where('active', true)->first()?->id;
         }
 
         return $query->where('tahun_pelajaran_id', $tpId)
-                     ->where('semester_id', $smtId);
+            ->where('semester_id', $smtId);
     }
 
     public function scopeForGuru($query, $guruId)

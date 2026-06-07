@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cbt\Jenis;
 use App\Http\Requests\Cbt\StoreJenisRequest;
 use App\Http\Requests\Cbt\UpdateJenisRequest;
 use App\Http\Resources\Cbt\JenisResource;
+use App\Models\Cbt\Jenis;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class JenisUjianController extends Controller
 {
@@ -57,6 +57,7 @@ class JenisUjianController extends Controller
 
         try {
             $jenis->delete();
+
             return redirect()->back()->with('success', 'Jenis Ujian berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Jenis Ujian tidak dapat dihapus karena sedang digunakan.');

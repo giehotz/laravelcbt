@@ -21,6 +21,7 @@ class UpdateSesiRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route('sesi') ? $this->route('sesi')->id : null;
+
         return [
             'nama_sesi' => ['required', 'string', 'max:80'],
             'kode_sesi' => ['required', 'string', 'max:15', Rule::unique('cbt_sesi', 'kode_sesi')->ignore($id)],

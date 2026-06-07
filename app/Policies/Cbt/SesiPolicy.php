@@ -28,7 +28,7 @@ class SesiPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -36,7 +36,7 @@ class SesiPolicy
      */
     public function update(User $user, Sesi $sesi): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 
     /**
@@ -44,6 +44,6 @@ class SesiPolicy
      */
     public function delete(User $user, Sesi $sesi): bool
     {
-        return $user->hasAnyRole(['superadmin', 'operator']);
+        return $user->hasMinRoleLevel(60);
     }
 }

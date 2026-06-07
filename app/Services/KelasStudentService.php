@@ -12,10 +12,6 @@ class KelasStudentService
      * Synchronize class roster for a specific academic year and semester.
      * Throws ValidationException if any student is already enrolled in a different class in the same period.
      *
-     * @param Kelas $kelas
-     * @param array $siswaIds
-     * @param int $tahunPelajaranId
-     * @param int $semesterId
      * @throws ValidationException
      */
     public function syncStudents(Kelas $kelas, array $siswaIds, int $tahunPelajaranId, int $semesterId): void
@@ -59,7 +55,7 @@ class KelasStudentService
             }
 
             // Detach removals
-            if (!empty($toRemove)) {
+            if (! empty($toRemove)) {
                 $kelas->siswa()
                     ->wherePivot('tahun_pelajaran_id', $tahunPelajaranId)
                     ->wherePivot('semester_id', $semesterId)

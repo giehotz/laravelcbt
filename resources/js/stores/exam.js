@@ -11,18 +11,21 @@ export const useExamStore = defineStore('exam', {
         isOnline: navigator.onLine,
         isFlushing: false,
     }),
-    
+
     getters: {
         activeSoal: (state) => {
             if (!state.activeSoalId) return state.soalList[0];
-            return state.soalList.find(s => s.id === state.activeSoalId) || state.soalList[0];
+            return (
+                state.soalList.find((s) => s.id === state.activeSoalId) ||
+                state.soalList[0]
+            );
         },
         unansweredCount: (state) => {
-            return state.soalList.filter(s => !s.jawaban_siswa).length;
+            return state.soalList.filter((s) => !s.jawaban_siswa).length;
         },
         hasOfflineQueue: (state) => {
             return state.offlineQueue.length > 0;
-        }
+        },
     },
 
     actions: {
@@ -53,7 +56,7 @@ export const useExamStore = defineStore('exam', {
 
         async simpanJawaban(soalId, jawaban, raguRagu = false) {
             // Update local state immediately (Optimistic UI)
-            const soalIndex = this.soalList.findIndex(s => s.id === soalId);
+            const soalIndex = this.soalList.findIndex((s) => s.id === soalId);
             if (soalIndex !== -1) {
                 this.soalList[soalIndex].jawaban_siswa = jawaban;
                 this.soalList[soalIndex].ragu_ragu = raguRagu;
@@ -63,8 +66,8 @@ export const useExamStore = defineStore('exam', {
                 soalId,
                 data: {
                     jawaban: jawaban,
-                    ragu_ragu: raguRagu
-                }
+                    ragu_ragu: raguRagu,
+                },
             };
 
             if (this.isOnline) {
@@ -76,7 +79,9 @@ export const useExamStore = defineStore('exam', {
 
         addToQueue(payload) {
             // Replace if already in queue for the same soal
-            const existingIndex = this.offlineQueue.findIndex(q => q.soalId === payload.soalId);
+            const existingIndex = this.offlineQueue.findIndex(
+                (q) => q.soalId === payload.soalId,
+            );
             if (existingIndex !== -1) {
                 this.offlineQueue[existingIndex] = payload;
             } else {
@@ -92,14 +97,20 @@ export const useExamStore = defineStore('exam', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content'),
+                        Accept: 'application/json',
                     },
-                    body: JSON.stringify(payload.data)
+                    body: JSON.stringify(payload.data),
                 });
 
                 if (!response.ok) {
-                    if (response.status === 401 || response.status === 403 || response.status === 419) {
+                    if (
+                        response.status === 401 ||
+                        response.status === 403 ||
+                        response.status === 419
+                    ) {
                         // Jangan push ke offline queue jika session expired
                         console.error('Session expired or forbidden', response);
                     } else {
@@ -107,13 +118,21 @@ export const useExamStore = defineStore('exam', {
                     }
                 }
             } catch (error) {
-                console.error('Failed to save to server, moving to queue', error);
+                console.error(
+                    'Failed to save to server, moving to queue',
+                    error,
+                );
                 this.addToQueue(payload);
             }
         },
 
         async flushOfflineQueue() {
-            if (this.isFlushing || this.offlineQueue.length === 0 || !this.isOnline) return;
+            if (
+                this.isFlushing ||
+                this.offlineQueue.length === 0 ||
+                !this.isOnline
+            )
+                return;
             this.isFlushing = true;
 
             const queueToProcess = [...this.offlineQueue];
@@ -124,6 +143,6 @@ export const useExamStore = defineStore('exam', {
             }
 
             this.isFlushing = false;
-        }
-    }
+        },
+    },
 });

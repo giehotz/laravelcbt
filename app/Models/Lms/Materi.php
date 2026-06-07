@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Lms;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Master\Guru;
 use App\Models\Master\Mapel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Materi extends Model
 {

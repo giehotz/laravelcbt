@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search, Sun, Moon, Monitor, Bell } from 'lucide-vue-next';
+import {
+    LayoutGrid,
+    Menu,
+    Search,
+    Sun,
+    Moon,
+    Monitor,
+    Bell,
+    Calendar,
+    Clock,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
@@ -18,6 +28,18 @@ import { useNotifikasiStore } from '@/stores/notifikasi';
 
 const { appearance, updateAppearance } = useAppearance();
 const notifikasiStore = useNotifikasiStore();
+const page = usePage();
+const tpAktif = computed(
+    () => page.props.tp_aktif as { id: number; tahun: string } | null,
+);
+const smtAktif = computed(
+    () =>
+        page.props.smt_aktif as {
+            id: number;
+            nama_smt: string;
+            smt: string;
+        } | null,
+);
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -52,7 +74,6 @@ const props = withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 
-const page = usePage();
 const auth = computed(() => page.props.auth);
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
@@ -67,18 +88,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const rightNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+const rightNavItems: NavItem[] = [];
 </script>
 
 <template>
@@ -195,16 +205,40 @@ const rightNavItems: NavItem[] = [
                 </div>
 
                 <div class="ml-auto flex items-center space-x-2">
+                    <!-- Active Period Badges -->
+                    <div
+                        v-if="tpAktif || smtAktif"
+                        class="mr-2 hidden items-center gap-2 md:flex"
+                    >
+                        <div
+                            v-if="tpAktif"
+                            class="flex items-center gap-1 rounded-full border border-emerald-200/50 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 transition-all duration-200 hover:scale-105 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        >
+                            <Calendar class="h-3 w-3" />
+                            <span>{{ tpAktif.tahun }}</span>
+                        </div>
+                        <div
+                            v-if="smtAktif"
+                            class="flex items-center gap-1 rounded-full border border-blue-200/50 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 transition-all duration-200 hover:scale-105 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300"
+                        >
+                            <Clock class="h-3 w-3" />
+                            <span>{{ smtAktif.nama_smt }}</span>
+                        </div>
+                    </div>
+
                     <div class="relative flex items-center space-x-1">
                         <Button
                             variant="ghost"
                             size="icon"
-                            class="group h-9 w-9 cursor-pointer relative"
+                            class="group relative h-9 w-9 cursor-pointer"
                         >
                             <Bell
                                 class="size-5 opacity-80 group-hover:opacity-100"
                             />
-                            <span v-if="notifikasiStore.total > 0" class="absolute top-1 right-1 h-3.5 w-3.5 flex items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                            <span
+                                v-if="notifikasiStore.total > 0"
+                                class="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground"
+                            >
                                 {{ notifikasiStore.total }}
                             </span>
                         </Button>
@@ -255,21 +289,36 @@ const rightNavItems: NavItem[] = [
                                 size="icon"
                                 class="h-9 w-9 cursor-pointer"
                             >
-                                <Sun v-if="appearance === 'light'" class="size-5 opacity-80" />
-                                <Moon v-else-if="appearance === 'dark'" class="size-5 opacity-80" />
+                                <Sun
+                                    v-if="appearance === 'light'"
+                                    class="size-5 opacity-80"
+                                />
+                                <Moon
+                                    v-else-if="appearance === 'dark'"
+                                    class="size-5 opacity-80"
+                                />
                                 <Monitor v-else class="size-5 opacity-80" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-36">
-                            <DropdownMenuItem class="cursor-pointer" @click="updateAppearance('light')">
+                            <DropdownMenuItem
+                                class="cursor-pointer"
+                                @click="updateAppearance('light')"
+                            >
                                 <Sun class="mr-2 h-4 w-4" />
                                 <span>Light</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem class="cursor-pointer" @click="updateAppearance('dark')">
+                            <DropdownMenuItem
+                                class="cursor-pointer"
+                                @click="updateAppearance('dark')"
+                            >
                                 <Moon class="mr-2 h-4 w-4" />
                                 <span>Dark</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem class="cursor-pointer" @click="updateAppearance('system')">
+                            <DropdownMenuItem
+                                class="cursor-pointer"
+                                @click="updateAppearance('system')"
+                            >
                                 <Monitor class="mr-2 h-4 w-4" />
                                 <span>System</span>
                             </DropdownMenuItem>

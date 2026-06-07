@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('semester_id')->constrained('semesters');
             $table->string('nama', 255);
             $table->integer('kkm')->default(0);
-            
+
             // Jumlah soal per tipe
             $table->integer('jml_pg')->default(0);
             $table->integer('tampil_pg')->default(0);
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->integer('jml_isian')->default(0);
             $table->integer('tampil_isian')->default(0);
             $table->integer('bobot_isian')->default(0);
-            
+
             $table->integer('opsi')->default(4); // 3=A-C, 4=A-D, 5=A-E
             $table->text('deskripsi')->nullable();
             $table->tinyInteger('status')->default(0); // 0=draft, 1=aktif

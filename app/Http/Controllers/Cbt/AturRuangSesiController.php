@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Cbt;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\Cbt\SyncSesiSiswaJob;
 use App\Models\Cbt\KelasRuang;
-use App\Models\Master\Kelas;
 use App\Models\Cbt\Ruang;
 use App\Models\Cbt\Sesi;
-use App\Models\TahunPelajaran;
+use App\Models\Master\Kelas;
 use App\Models\Semester;
-use App\Jobs\Cbt\SyncSesiSiswaJob;
+use App\Models\TahunPelajaran;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class AturRuangSesiController extends Controller
 {
@@ -29,8 +29,8 @@ class AturRuangSesiController extends Controller
         $kelas = Kelas::whereHas('kelasSiswa', function ($q) use ($tpAktif, $smtAktif) {
             $q->where('tahun_pelajaran_id', $tpAktif->id)->where('semester_id', $smtAktif->id);
         })
-        ->orderBy('nama_kelas')
-        ->get(['id', 'nama_kelas']);
+            ->orderBy('nama_kelas')
+            ->get(['id', 'nama_kelas']);
 
         // Dapatkan mapping KelasRuang saat ini
         $kelasRuang = KelasRuang::where('tp_id', $tpAktif->id)
@@ -41,6 +41,7 @@ class AturRuangSesiController extends Controller
         // Gabungkan kelas dengan status alokasinya
         $data = $kelas->map(function ($k) use ($kelasRuang) {
             $mapping = $kelasRuang->get($k->id);
+
             return [
                 'kelas_id' => $k->id,
                 'nama_kelas' => $k->nama_kelas,

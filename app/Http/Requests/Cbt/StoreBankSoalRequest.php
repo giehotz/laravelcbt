@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\Cbt;
 
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Services\GuruAssignmentService;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBankSoalRequest extends FormRequest
 {
@@ -26,11 +25,12 @@ class StoreBankSoalRequest extends FormRequest
             'kelas' => 'required|array|min:1',
             'mapel_id' => 'required|exists:mapel,id',
             'jurusan_id' => 'nullable|exists:jurusan,id',
+            'guru_id' => 'nullable|exists:guru,id',
             'kkm' => 'required|integer|min:0|max:100',
             'status' => 'required|in:0,1',
             'opsi' => 'required|in:3,4,5',
             'skoring_kompleks' => 'required|in:all_or_nothing,partial',
-            
+
             'tampil_pg' => 'required|integer|min:0',
             'bobot_pg' => 'required|integer|min:0',
             'tampil_esai' => 'required|integer|min:0',
@@ -52,7 +52,7 @@ class StoreBankSoalRequest extends FormRequest
             $user = $this->user();
             if ($user->hasRole('guru')) {
                 $assignmentService = app(GuruAssignmentService::class);
-                if (!$assignmentService->isAllowed($user->guru, $data['mapel_id'], $data['kelas'] ?? [])) {
+                if (! $assignmentService->isAllowed($user->guru, $data['mapel_id'], $data['kelas'] ?? [])) {
                     $validator->errors()->add('mapel_id', 'Anda tidak memiliki akses ke mata pelajaran atau kelas yang dipilih.');
                 }
             }

@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers\Setting;
 
+use App\Actions\CreateGuruAction;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Master\Guru;
 use App\Http\Requests\StoreGuruUserRequest;
 use App\Http\Requests\UpdateGuruUserRequest;
-use App\Actions\CreateGuruAction;
+use App\Models\Master\Guru;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use Illuminate\Database\QueryException;
 
 class GuruUserController extends Controller
 {
@@ -47,7 +48,7 @@ class GuruUserController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Guru');
 
@@ -67,12 +68,12 @@ class GuruUserController extends Controller
             'NUPTK',
             'Jenis PTK',
             'Status Pegawai',
-            'Status Aktif'
+            'Status Aktif',
         ];
 
         foreach ($headers as $colIdx => $header) {
-            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
-            $sheet->setCellValue($colLetter . '1', $header);
+            $colLetter = Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet->setCellValue($colLetter.'1', $header);
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
@@ -82,7 +83,7 @@ class GuruUserController extends Controller
                 'color' => ['rgb' => '000000'],
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => 'E5E7EB'],
             ],
         ];
@@ -104,11 +105,11 @@ class GuruUserController extends Controller
             '1234567890123456',
             'Guru Kelas',
             'PNS',
-            'Aktif'
+            'Aktif',
         ];
         foreach ($example as $colIdx => $val) {
-            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
-            $sheet->setCellValue($colLetter . '2', $val);
+            $colLetter = Coordinate::stringFromColumnIndex($colIdx + 1);
+            $sheet->setCellValue($colLetter.'2', $val);
         }
 
         return new StreamedResponse(function () use ($spreadsheet) {
@@ -163,54 +164,56 @@ class GuruUserController extends Controller
         foreach ($dataRows as $index => $row) {
             $rowNum = $index + 2;
 
-            $nama = isset($row[0]) ? trim(strip_tags((string)$row[0])) : '';
-            $username = isset($row[1]) ? trim(strip_tags((string)$row[1])) : '';
-            $email = isset($row[2]) ? trim(strip_tags((string)$row[2])) : '';
-            $nip = isset($row[3]) ? trim(strip_tags((string)$row[3])) : '';
-            $kode_guru = isset($row[4]) ? trim(strip_tags((string)$row[4])) : '';
-            $no_ktp = isset($row[5]) ? trim(strip_tags((string)$row[5])) : '';
-            $tempat_lahir = isset($row[6]) ? trim(strip_tags((string)$row[6])) : '';
-            $tgl_lahir_raw = isset($row[7]) ? trim(strip_tags((string)$row[7])) : '';
-            $jenis_kelamin = isset($row[8]) ? trim(strip_tags((string)$row[8])) : '';
-            $agama = isset($row[9]) ? trim(strip_tags((string)$row[9])) : '';
-            $no_hp = isset($row[10]) ? trim(strip_tags((string)$row[10])) : '';
-            $alamat = isset($row[11]) ? trim(strip_tags((string)$row[11])) : '';
-            $nuptk = isset($row[12]) ? trim(strip_tags((string)$row[12])) : '';
-            $jenis_ptk = isset($row[13]) ? trim(strip_tags((string)$row[13])) : '';
-            $status_pegawai = isset($row[14]) ? trim(strip_tags((string)$row[14])) : '';
-            $status_aktif = isset($row[15]) ? trim(strip_tags((string)$row[15])) : 'Aktif';
+            $nama = isset($row[0]) ? trim(strip_tags((string) $row[0])) : '';
+            $username = isset($row[1]) ? trim(strip_tags((string) $row[1])) : '';
+            $email = isset($row[2]) ? trim(strip_tags((string) $row[2])) : '';
+            $nip = isset($row[3]) ? trim(strip_tags((string) $row[3])) : '';
+            $kode_guru = isset($row[4]) ? trim(strip_tags((string) $row[4])) : '';
+            $no_ktp = isset($row[5]) ? trim(strip_tags((string) $row[5])) : '';
+            $tempat_lahir = isset($row[6]) ? trim(strip_tags((string) $row[6])) : '';
+            $tgl_lahir_raw = isset($row[7]) ? trim(strip_tags((string) $row[7])) : '';
+            $jenis_kelamin = isset($row[8]) ? trim(strip_tags((string) $row[8])) : '';
+            $agama = isset($row[9]) ? trim(strip_tags((string) $row[9])) : '';
+            $no_hp = isset($row[10]) ? trim(strip_tags((string) $row[10])) : '';
+            $alamat = isset($row[11]) ? trim(strip_tags((string) $row[11])) : '';
+            $nuptk = isset($row[12]) ? trim(strip_tags((string) $row[12])) : '';
+            $jenis_ptk = isset($row[13]) ? trim(strip_tags((string) $row[13])) : '';
+            $status_pegawai = isset($row[14]) ? trim(strip_tags((string) $row[14])) : '';
+            $status_aktif = isset($row[15]) ? trim(strip_tags((string) $row[15])) : 'Aktif';
 
             if (empty($nama)) {
                 $errors[] = "Baris {$rowNum}: Nama Guru tidak boleh kosong.";
+
                 continue;
             }
             if (empty($username)) {
                 $errors[] = "Baris {$rowNum}: Username tidak boleh kosong.";
+
                 continue;
             }
 
-            if (!preg_match("/^[a-zA-Z\s\.,'\(\)]+$/", $nama)) {
+            if (! preg_match("/^[a-zA-Z\s\.,'\(\)]+$/", $nama)) {
                 $errors[] = "Baris {$rowNum}: Nama Guru mengandung karakter tidak valid.";
             }
             if (strlen($nama) > 100) {
                 $errors[] = "Baris {$rowNum}: Nama Guru maksimal 100 karakter.";
             }
 
-            if (!preg_match("/^[a-zA-Z0-9_\-\.]+$/", $username)) {
+            if (! preg_match("/^[a-zA-Z0-9_\-\.]+$/", $username)) {
                 $errors[] = "Baris {$rowNum}: Username hanya boleh mengandung huruf, angka, underscore, strip, dan titik.";
             }
             if (strlen($username) > 50) {
                 $errors[] = "Baris {$rowNum}: Username maksimal 50 karakter.";
             }
 
-            if (!empty($email)) {
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
+            if (! empty($email)) {
+                if (! filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
                     $errors[] = "Baris {$rowNum}: Format email tidak valid.";
                 }
             }
 
             $tgl_lahir = null;
-            if (!empty($tgl_lahir_raw)) {
+            if (! empty($tgl_lahir_raw)) {
                 try {
                     $tgl_lahir = Carbon::createFromFormat('Y-m-d', $tgl_lahir_raw)->format('Y-m-d');
                 } catch (\Exception $e) {
@@ -218,7 +221,7 @@ class GuruUserController extends Controller
                 }
             }
 
-            if (!empty($jenis_kelamin)) {
+            if (! empty($jenis_kelamin)) {
                 $jenis_kelamin = strtoupper($jenis_kelamin);
                 if ($jenis_kelamin !== 'L' && $jenis_kelamin !== 'P') {
                     $errors[] = "Baris {$rowNum}: Jenis kelamin harus 'L' atau 'P'.";
@@ -231,7 +234,7 @@ class GuruUserController extends Controller
                 $excelUsernames[] = $username;
             }
 
-            if (!empty($email)) {
+            if (! empty($email)) {
                 if (in_array($email, $excelEmails)) {
                     $errors[] = "Baris {$rowNum}: Email '{$email}' terduplikat di dalam file.";
                 } else {
@@ -239,7 +242,7 @@ class GuruUserController extends Controller
                 }
             }
 
-            if (!empty($kode_guru)) {
+            if (! empty($kode_guru)) {
                 if (in_array($kode_guru, $excelCodes)) {
                     $errors[] = "Baris {$rowNum}: Kode Guru '{$kode_guru}' terduplikat di dalam file.";
                 } else {
@@ -308,7 +311,7 @@ class GuruUserController extends Controller
                 'group_name' => 'User Management',
                 'log_type' => 1,
                 'log_desc' => json_encode([
-                    'message' => 'Imported ' . count($importedUsernames) . ' guru accounts.',
+                    'message' => 'Imported '.count($importedUsernames).' guru accounts.',
                     'file' => $file->getClientOriginalName(),
                     'count' => count($importedUsernames),
                     'usernames' => array_slice($importedUsernames, 0, 5),
@@ -324,16 +327,18 @@ class GuruUserController extends Controller
         } catch (QueryException $e) {
             DB::rollBack();
             if ($e->getCode() == '23000') {
-                return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan duplikasi data di database: ' . $e->getMessage()]);
+                return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan duplikasi data di database: '.$e->getMessage()]);
             }
-            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan database: ' . $e->getMessage()]);
+
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan database: '.$e->getMessage()]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses data: ' . $e->getMessage()]);
+
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat memproses data: '.$e->getMessage()]);
         }
 
         return redirect()->route('setting.user.guru.index')
-            ->with('success', 'Berhasil mengimpor ' . count($importedUsernames) . ' guru.')
+            ->with('success', 'Berhasil mengimpor '.count($importedUsernames).' guru.')
             ->with('imported_users', $validatedData);
     }
 
@@ -366,7 +371,7 @@ class GuruUserController extends Controller
             $user->email = $data['email'] ?? null;
             $user->username = $data['username'];
 
-            if (!empty($data['password'])) {
+            if (! empty($data['password'])) {
                 $user->password = Hash::make($data['password']);
             }
 

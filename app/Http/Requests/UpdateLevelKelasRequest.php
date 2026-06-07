@@ -17,7 +17,7 @@ class UpdateLevelKelasRequest extends FormRequest
         $id = is_object($levelKelas) ? $levelKelas->id : $levelKelas;
 
         return [
-            'level' => 'required|string|max:5|unique:level_kelas,level,' . $id,
+            'level' => 'required|string|max:5|unique:level_kelas,level,'.$id,
         ];
     }
 }

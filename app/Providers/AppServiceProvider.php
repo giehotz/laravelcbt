@@ -2,13 +2,22 @@
 
 namespace App\Providers;
 
+use App\Models\Master\Ekstra;
+use App\Models\Master\Jurusan;
+use App\Models\Master\Kelas;
+use App\Models\Master\LevelKelas;
+use App\Models\Master\Mapel;
+use App\Policies\EkstraPolicy;
+use App\Policies\JurusanPolicy;
+use App\Policies\KelasPolicy;
+use App\Policies\LevelKelasPolicy;
+use App\Policies\MapelPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-
-use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,11 +37,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         // Register Master Policies explicitly
-        Gate::policy(\App\Models\Master\LevelKelas::class, \App\Policies\LevelKelasPolicy::class);
-        Gate::policy(\App\Models\Master\Jurusan::class, \App\Policies\JurusanPolicy::class);
-        Gate::policy(\App\Models\Master\Mapel::class, \App\Policies\MapelPolicy::class);
-        Gate::policy(\App\Models\Master\Kelas::class, \App\Policies\KelasPolicy::class);
-        Gate::policy(\App\Models\Master\Ekstra::class, \App\Policies\EkstraPolicy::class);
+        Gate::policy(LevelKelas::class, LevelKelasPolicy::class);
+        Gate::policy(Jurusan::class, JurusanPolicy::class);
+        Gate::policy(Mapel::class, MapelPolicy::class);
+        Gate::policy(Kelas::class, KelasPolicy::class);
+        Gate::policy(Ekstra::class, EkstraPolicy::class);
     }
 
     /**

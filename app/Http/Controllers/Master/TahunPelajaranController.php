@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Master;
 
+use App\Actions\ActivateTahunPelajaranAction;
 use App\Http\Controllers\Controller;
-use App\Models\TahunPelajaran;
 use App\Http\Requests\StoreTahunPelajaranRequest;
 use App\Http\Requests\UpdateTahunPelajaranRequest;
-use App\Actions\ActivateTahunPelajaranAction;
+use App\Models\Semester;
+use App\Models\TahunPelajaran;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,7 +18,7 @@ class TahunPelajaranController extends Controller
     public function index(): Response
     {
         $years = TahunPelajaran::latest()->get();
-        $semesters = \App\Models\Semester::latest()->get();
+        $semesters = Semester::latest()->get();
 
         return Inertia::render('Master/TahunPelajaran/Index', [
             'years' => $years,
@@ -47,8 +49,8 @@ class TahunPelajaranController extends Controller
         $tahunPelajaran->update($request->validated());
 
         if ($tahunPelajaran->active) {
-            \Illuminate\Support\Facades\Cache::forget('tp_active');
-            \Illuminate\Support\Facades\Cache::forget('tp_active_array');
+            Cache::forget('tp_active');
+            Cache::forget('tp_active_array');
         }
 
         return redirect()->route('master.tahun-pelajaran.index')

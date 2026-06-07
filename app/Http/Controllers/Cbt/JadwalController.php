@@ -8,8 +8,9 @@ use App\Http\Requests\Cbt\UpdateJadwalRequest;
 use App\Models\Cbt\BankSoal;
 use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\Jenis;
-use App\Models\TahunPelajaran;
 use App\Models\Semester;
+use App\Models\TahunPelajaran;
+use App\Services\GuruAssignmentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,7 +21,7 @@ class JadwalController extends Controller
         $tpAktif = TahunPelajaran::where('active', true)->first();
         $smtAktif = Semester::where('active', true)->first();
 
-        if (!$tpAktif || !$smtAktif) {
+        if (! $tpAktif || ! $smtAktif) {
             return Inertia::render('Cbt/Jadwal/Index', [
                 'jadwals' => [],
                 'bankSoals' => [],
@@ -32,9 +33,9 @@ class JadwalController extends Controller
             ->where('tahun_pelajaran_id', $tpAktif->id)
             ->where('semester_id', $smtAktif->id);
 
-        if ($request->user()->hasRole('guru') && !$request->user()->hasRole(['superadmin', 'operator'])) {
+        if ($request->user()->hasRole('guru') && ! $request->user()->hasRole(['superadmin', 'operator'])) {
             $guruId = $request->user()->guru?->id;
-            $assignmentService = app(\App\Services\GuruAssignmentService::class);
+            $assignmentService = app(GuruAssignmentService::class);
             $allowedMapels = $assignmentService->allowedMapels($request->user()->guru)->pluck('id');
 
             $query->whereHas('bankSoal', function ($q) use ($guruId, $allowedMapels) {
@@ -57,9 +58,9 @@ class JadwalController extends Controller
         $bankSoalQuery = BankSoal::where('status', 1)
             ->where('tahun_pelajaran_id', $tpAktif->id)
             ->where('semester_id', $smtAktif->id);
-            
-        if ($request->user()->hasRole('guru') && !$request->user()->hasRole(['superadmin', 'operator'])) {
-            $assignmentService = app(\App\Services\GuruAssignmentService::class);
+
+        if ($request->user()->hasRole('guru') && ! $request->user()->hasRole(['superadmin', 'operator'])) {
+            $assignmentService = app(GuruAssignmentService::class);
             $allowedMapels = $assignmentService->allowedMapels($request->user()->guru)->pluck('id');
             $bankSoalQuery->where('guru_id', $request->user()->guru?->id)->whereIn('mapel_id', $allowedMapels);
         }
@@ -81,13 +82,13 @@ class JadwalController extends Controller
         $data = $request->validated();
         $data['tahun_pelajaran_id'] = $tpAktif->id;
         $data['semester_id'] = $smtAktif->id;
-        
+
         // Append default times since user only inputs date
         if (isset($data['tgl_mulai'])) {
-            $data['tgl_mulai'] = $data['tgl_mulai'] . ' 00:00:00';
+            $data['tgl_mulai'] = $data['tgl_mulai'].' 00:00:00';
         }
         if (isset($data['tgl_selesai'])) {
-            $data['tgl_selesai'] = $data['tgl_selesai'] . ' 23:59:59';
+            $data['tgl_selesai'] = $data['tgl_selesai'].' 23:59:59';
         }
 
         Jadwal::create($data);
@@ -102,9 +103,9 @@ class JadwalController extends Controller
 
         $bankSoalQuery = BankSoal::where('tahun_pelajaran_id', $tpAktif->id)
             ->where('semester_id', $smtAktif->id);
-            
-        if ($request->user()->hasRole('guru') && !$request->user()->hasRole(['superadmin', 'operator'])) {
-            $assignmentService = app(\App\Services\GuruAssignmentService::class);
+
+        if ($request->user()->hasRole('guru') && ! $request->user()->hasRole(['superadmin', 'operator'])) {
+            $assignmentService = app(GuruAssignmentService::class);
             $allowedMapels = $assignmentService->allowedMapels($request->user()->guru)->pluck('id');
             $bankSoalQuery->where('guru_id', $request->user()->guru?->id)->whereIn('mapel_id', $allowedMapels);
         }
@@ -122,13 +123,13 @@ class JadwalController extends Controller
     public function update(UpdateJadwalRequest $request, Jadwal $jadwal)
     {
         $data = $request->validated();
-        
+
         // Append default times since user only inputs date
-        if (isset($data['tgl_mulai']) && !str_contains($data['tgl_mulai'], ' ')) {
-            $data['tgl_mulai'] = $data['tgl_mulai'] . ' 00:00:00';
+        if (isset($data['tgl_mulai']) && ! str_contains($data['tgl_mulai'], ' ')) {
+            $data['tgl_mulai'] = $data['tgl_mulai'].' 00:00:00';
         }
-        if (isset($data['tgl_selesai']) && !str_contains($data['tgl_selesai'], ' ')) {
-            $data['tgl_selesai'] = $data['tgl_selesai'] . ' 23:59:59';
+        if (isset($data['tgl_selesai']) && ! str_contains($data['tgl_selesai'], ' ')) {
+            $data['tgl_selesai'] = $data['tgl_selesai'].' 23:59:59';
         }
 
         $jadwal->update($data);
@@ -139,13 +140,14 @@ class JadwalController extends Controller
     public function destroy(Jadwal $jadwal)
     {
         $jadwal->delete();
+
         return back()->with('success', 'Jadwal ujian berhasil dihapus.');
     }
 
     public function toggleStatus(Jadwal $jadwal)
     {
         $jadwal->update([
-            'status' => $jadwal->status == 1 ? 0 : 1
+            'status' => $jadwal->status == 1 ? 0 : 1,
         ]);
 
         return back()->with('success', 'Status jadwal ujian berhasil diubah.');

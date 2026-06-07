@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Master\TahunPelajaranController;
 use App\Http\Controllers\Master\SemesterController;
+use App\Http\Controllers\Master\TahunPelajaranController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('tahun-pelajaran', [TahunPelajaranController::class, 'index'])->name('tahun-pelajaran.index');
@@ -16,12 +16,13 @@ Route::put('semester/{semester}', [SemesterController::class, 'update'])->name('
 Route::post('semester/{semester}/activate', [SemesterController::class, 'activate'])->name('semester.activate');
 Route::delete('semester/{semester}', [SemesterController::class, 'destroy'])->name('semester.destroy');
 
-use App\Http\Controllers\Master\LevelKelasController;
-use App\Http\Controllers\Master\JurusanController;
-use App\Http\Controllers\Master\MapelController;
-use App\Http\Controllers\Master\EkstraController;
-use App\Http\Controllers\Master\KelasController;
 use App\Http\Controllers\Master\BukuIndukController;
+use App\Http\Controllers\Master\EkstraController;
+use App\Http\Controllers\Master\JurusanController;
+use App\Http\Controllers\Master\KelasController;
+use App\Http\Controllers\Master\LevelKelasController;
+use App\Http\Controllers\Master\MapelController;
+
 Route::post('level-kelas/generate', [LevelKelasController::class, 'generate'])->name('level-kelas.generate');
 Route::resource('level-kelas', LevelKelasController::class)
     ->parameters(['level-kelas' => 'levelKelas'])

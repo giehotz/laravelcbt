@@ -2,10 +2,11 @@
 
 namespace Database\Factories\Cbt;
 
+use App\Models\Cbt\Sesi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cbt\Sesi>
+ * @extends Factory<Sesi>
  */
 class SesiFactory extends Factory
 {
@@ -17,8 +18,8 @@ class SesiFactory extends Factory
     public function definition(): array
     {
         return [
-            'nama_sesi' => 'Sesi ' . $this->faker->unique()->numberBetween(1, 100),
-            'kode_sesi' => 'S' . $this->faker->unique()->numberBetween(1, 100),
+            'nama_sesi' => 'Sesi '.$this->faker->unique()->numberBetween(1, 100),
+            'kode_sesi' => 'S'.$this->faker->unique()->numberBetween(1, 100),
             'waktu_mulai' => '07:30:00',
             'waktu_akhir' => '09:30:00',
             'aktif' => true,

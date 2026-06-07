@@ -2,8 +2,9 @@
 
 namespace App\Actions;
 
-use App\Models\TahunPelajaran;
 use App\Events\TahunPelajaranActivated;
+use App\Models\TahunPelajaran;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ActivateTahunPelajaranAction
@@ -21,8 +22,8 @@ class ActivateTahunPelajaranAction
             $tahunPelajaran->update(['active' => true]);
 
             // Clear cache
-            \Illuminate\Support\Facades\Cache::forget('tp_active');
-            \Illuminate\Support\Facades\Cache::forget('tp_active_array');
+            Cache::forget('tp_active');
+            Cache::forget('tp_active_array');
 
             // Dispatch event
             event(new TahunPelajaranActivated($tahunPelajaran));

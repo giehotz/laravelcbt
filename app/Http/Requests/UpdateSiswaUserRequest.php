@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Master\Siswa;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSiswaUserRequest extends FormRequest
@@ -13,19 +14,20 @@ class UpdateSiswaUserRequest extends FormRequest
 
     public function rules(): array
     {
-        $siswaId = $this->route('siswa');
-        $userId = null;
-        if ($siswaId) {
-            $siswa = \App\Models\Master\Siswa::find($siswaId);
-            $userId = $siswa?->user_id;
-        }
+        $siswaParam = $this->route('siswa');
+        $siswa = $siswaParam instanceof Siswa
+            ? $siswaParam
+            : Siswa::find($siswaParam);
+
+        $siswaId = $siswa?->id;
+        $userId = $siswa?->user_id;
 
         return [
             'nama' => 'required|string|max:100',
-            'nisn' => 'required|string|max:12|unique:siswa,nisn,' . $siswaId,
-            'nis' => 'required|string|max:20|unique:siswa,nis,' . $siswaId,
+            'nisn' => 'required|string|max:12|unique:siswa,nisn,'.$siswaId,
+            'nis' => 'required|string|max:20|unique:siswa,nis,'.$siswaId,
             'jenis_kelamin' => 'nullable|string|max:1',
-            'username' => 'required|string|max:50|unique:users,username,' . $userId,
+            'username' => 'required|string|max:50|unique:users,username,'.$userId,
             'password' => 'nullable|string|min:8',
             'tahun_masuk' => 'nullable|string|max:10',
             'sekolah_asal' => 'nullable|string|max:100',
@@ -33,7 +35,7 @@ class UpdateSiswaUserRequest extends FormRequest
             'tanggal_lahir' => 'nullable|string|max:30',
             'agama' => 'nullable|string|max:15',
             'hp' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:254|unique:users,email,' . $userId,
+            'email' => 'nullable|email|max:254|unique:users,email,'.$userId,
             'anak_ke' => 'nullable|integer',
             'status_keluarga' => 'nullable|string|max:1',
             'alamat' => 'nullable|string',
@@ -65,7 +67,7 @@ class UpdateSiswaUserRequest extends FormRequest
             'alamat_wali' => 'nullable|string',
             'nik' => 'nullable|string|max:30',
             'warga_negara' => 'sometimes|string|max:20',
-            'uid' => 'nullable|string|max:255|unique:siswa,uid,' . $siswaId,
+            'uid' => 'nullable|string|max:255|unique:siswa,uid,'.$siswaId,
         ];
     }
 }

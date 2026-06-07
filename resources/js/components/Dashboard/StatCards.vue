@@ -21,7 +21,11 @@ defineProps<{
                 <CardTitle class="text-sm font-medium text-muted-foreground">
                     {{ card.label }}
                 </CardTitle>
-                <component :is="card.icon" class="h-4 w-4" :class="card.colorClass || 'text-muted-foreground'" />
+                <component
+                    :is="card.icon"
+                    class="h-4 w-4"
+                    :class="card.colorClass || 'text-muted-foreground'"
+                />
             </CardHeader>
             <CardContent>
                 <div class="text-2xl font-bold">{{ card.value }}</div>
