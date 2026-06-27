@@ -49,6 +49,27 @@ class CheckExamSession
 
                 return redirect()->route('dashboard')->with('error', 'Waktu ujian telah habis atau ujian ditutup.');
             }
+
+            // 3. Memvalidasi bahwa siswa terdaftar di salah satu kelas target ujian (IDOR prevention)
+            if ($user && $user->siswa) {
+                $bankSoal = $jadwal->bankSoal;
+                if ($bankSoal) {
+                    $allowedKelasIds = is_array($bankSoal->kelas) ? $bankSoal->kelas : (json_decode($bankSoal->kelas, true) ?: []);
+
+                    $isRegistered = DB::table('kelas_siswa')
+                        ->where('siswa_id', $user->siswa->id)
+                        ->whereIn('kelas_id', $allowedKelasIds)
+                        ->exists();
+
+                    if (! $isRegistered) {
+                        if ($request->expectsJson()) {
+                            return response()->json(['message' => 'Anda tidak terdaftar di kelas yang diizinkan untuk mengikuti ujian ini.'], 403);
+                        }
+
+                        return redirect()->route('dashboard')->with('error', 'Anda tidak terdaftar di kelas yang diizinkan untuk mengikuti ujian ini.');
+                    }
+                }
+            }
         }
 
         return $next($request);

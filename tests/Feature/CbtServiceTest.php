@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Cbt\DurasiStatus;
 use App\Models\Cbt\BankSoal;
+use App\Models\Cbt\DurasiSiswa;
 use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\Nilai;
 use App\Models\Cbt\Soal;
@@ -30,6 +32,14 @@ class CbtServiceTest extends TestCase
         DB::table('cbt_jenis')->insert(['id' => 1, 'nama_jenis' => 'UH', 'kode_jenis' => 'UH']);
         DB::table('tahun_pelajaran')->insert(['id' => 1, 'tahun' => '2025/2026', 'active' => true]);
         DB::table('semesters')->insert(['id' => 1, 'smt' => '1', 'nama_smt' => 'Ganjil', 'active' => true]);
+        DB::table('level_kelas')->insert(['id' => 1, 'level' => 'X']);
+        DB::table('kelas')->insert([
+            'id' => 10,
+            'tahun_pelajaran_id' => 1,
+            'semester_id' => 1,
+            'level_id' => 1,
+            'nama_kelas' => 'X-IPA-1',
+        ]);
     }
 
     public function test_distribusi_soal_acak_dan_alias_opsi()
@@ -45,12 +55,20 @@ class CbtServiceTest extends TestCase
             'jenis_id' => 1,
             'kode' => 'B01',
             'level' => '1',
-            'kelas' => '[]',
+            'kelas' => json_encode([10]),
             'tahun_pelajaran_id' => 1,
             'semester_id' => 1,
             'jml_pg' => 2,
             'bobot_pg' => 50,
             'jml_esai' => 0,
+        ]);
+
+        // Hubungkan siswa ke kelas target
+        DB::table('kelas_siswa')->insert([
+            'tahun_pelajaran_id' => 1,
+            'semester_id' => 1,
+            'siswa_id' => $siswa->id,
+            'kelas_id' => 10,
         ]);
 
         $soal1 = Soal::forceCreate([
@@ -181,5 +199,125 @@ class CbtServiceTest extends TestCase
         $this->assertEquals(50.00, (float) $nilai->pg_nilai);
         $this->assertEquals(0.00, (float) $nilai->esai_nilai);
         $this->assertFalse($nilai->dikoreksi);
+    }
+
+    public function test_simpan_jawaban_berhasil()
+    {
+        $siswa = Siswa::forceCreate([
+            'nisn' => '333',
+            'nis' => '333',
+            'nama' => 'Test Siswa 3',
+        ]);
+
+        $bank = BankSoal::forceCreate([
+            'nama' => 'Bank 3',
+            'jenis_id' => 1,
+            'kode' => 'B03',
+            'level' => '1',
+            'kelas' => '[]',
+            'tahun_pelajaran_id' => 1,
+            'semester_id' => 1,
+        ]);
+
+        $jadwal = Jadwal::forceCreate([
+            'bank_id' => $bank->id,
+            'tahun_pelajaran_id' => 1,
+            'semester_id' => 1,
+            'tgl_mulai' => now()->subHour()->toISOString(),
+            'tgl_selesai' => now()->addHour()->toISOString(),
+            'durasi_ujian' => 120,
+        ]);
+
+        Soal::forceCreate([
+            'id' => 1,
+            'bank_id' => $bank->id,
+            'jenis' => 1,
+        ]);
+
+        $soalSiswa = SoalSiswa::forceCreate([
+            'id' => 'u3',
+            'bank_id' => $bank->id,
+            'jadwal_id' => $jadwal->id,
+            'siswa_id' => $siswa->id,
+            'soal_id' => 1,
+            'jenis_soal' => 1,
+            'no_soal_alias' => 1,
+        ]);
+
+        $durasi = new DurasiSiswa([
+            'siswa_id' => $siswa->id,
+            'jadwal_id' => $jadwal->id,
+            'mulai' => now()->toTimeString(),
+        ]);
+        $durasi->status = DurasiStatus::SEDANG;
+        $durasi->save();
+
+        $service = new CbtService;
+        $service->simpanJawaban($soalSiswa, 'A', false, $siswa);
+
+        $soalSiswa->refresh();
+        $this->assertEquals('A', $soalSiswa->jawaban_siswa);
+        $this->assertFalse($soalSiswa->ragu_ragu);
+    }
+
+    public function test_simpan_jawaban_menolak_jika_waktu_habis()
+    {
+        $siswa = Siswa::forceCreate([
+            'nisn' => '444',
+            'nis' => '444',
+            'nama' => 'Test Siswa 4',
+        ]);
+
+        $bank = BankSoal::forceCreate([
+            'nama' => 'Bank 4',
+            'jenis_id' => 1,
+            'kode' => 'B04',
+            'level' => '1',
+            'kelas' => '[]',
+            'tahun_pelajaran_id' => 1,
+            'semester_id' => 1,
+            'jml_pg' => 1,
+        ]);
+
+        $jadwal = Jadwal::forceCreate([
+            'bank_id' => $bank->id,
+            'tahun_pelajaran_id' => 1,
+            'semester_id' => 1,
+            'tgl_mulai' => now()->subHours(2)->toISOString(),
+            'tgl_selesai' => now()->addHour()->toISOString(),
+            'durasi_ujian' => 60, // 60 menit
+        ]);
+
+        Soal::forceCreate([
+            'id' => 10,
+            'bank_id' => $bank->id,
+            'jenis' => 1,
+        ]);
+
+        $soalSiswa = SoalSiswa::forceCreate([
+            'id' => 'u4',
+            'bank_id' => $bank->id,
+            'jadwal_id' => $jadwal->id,
+            'siswa_id' => $siswa->id,
+            'soal_id' => 10,
+            'jenis_soal' => 1,
+            'no_soal_alias' => 1,
+        ]);
+
+        // Sesi mulai 90 menit lalu (melebihi durasi ujian 60 menit)
+        $durasi = new DurasiSiswa([
+            'siswa_id' => $siswa->id,
+            'jadwal_id' => $jadwal->id,
+            'mulai' => now()->subMinutes(90)->toTimeString(),
+        ]);
+        $durasi->status = DurasiStatus::SEDANG;
+        $durasi->save();
+
+        $service = new CbtService;
+
+        $this->expectException(\DomainException::class);
+        $this->expectExceptionMessage('Waktu pengerjaan ujian Anda sudah habis.');
+
+        $service->simpanJawaban($soalSiswa, 'A', false, $siswa);
     }
 }

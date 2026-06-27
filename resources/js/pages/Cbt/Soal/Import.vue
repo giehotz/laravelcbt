@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/composables/useToast';
 import { importMethod } from '@/routes/cbt/bank-soal/soal';
 import { confirm, template } from '@/routes/cbt/bank-soal/soal/import';
 import {
@@ -45,6 +46,7 @@ const props = defineProps<{
     cache_key?: string | null;
 }>();
 
+const { addToast } = useToast();
 const form = useForm({ file: null as File | null });
 const confirmProcessing = ref(false);
 const activeSheet = ref<string | null>(null);
@@ -100,6 +102,12 @@ const confirmImport = () => {
         { cache_key: props.cache_key },
         {
             preserveScroll: true,
+            onSuccess: () => {
+                addToast('Import berhasil!', 'success');
+            },
+            onError: () => {
+                addToast('Import gagal. Silakan coba lagi.', 'error');
+            },
             onFinish: () => {
                 confirmProcessing.value = false;
             },

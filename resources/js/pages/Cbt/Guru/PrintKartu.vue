@@ -1,150 +1,117 @@
 <template>
-    <div
-        class="flex min-h-screen justify-center bg-gray-100 p-4 print:bg-white print:p-0"
-    >
-        <div class="w-full max-w-5xl bg-white shadow-md print:shadow-none">
-            <div
-                class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 print:grid-cols-2 print:p-0"
-            >
+    <div class="min-h-screen bg-gray-100 p-4 print:bg-white print:p-0 flex justify-center font-sans">
+        <div class="w-full max-w-[210mm] bg-white shadow-md print:shadow-none print:max-w-none">
+            <!-- 2 columns grid for A4 paper -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 print:grid-cols-2 print:p-0 print:gap-3">
                 <div
                     v-for="(siswa, index) in siswas"
                     :key="siswa.id"
-                    class="break-inside-avoid border-2 border-black p-4 print:mb-4"
+                    class="break-inside-avoid border-[1.5px] border-black p-3 relative bg-white"
                 >
-                    <!-- Kop -->
-                    <div
-                        class="mb-4 flex items-center justify-between border-b-2 border-black pb-3"
-                    >
-                        <div v-if="kop?.logo_kiri" class="h-16 w-16">
-                            <img
-                                :src="kop.logo_kiri"
-                                class="h-full w-full object-contain"
-                            />
-                        </div>
-                        <div
-                            v-else
-                            class="flex h-16 w-16 items-center justify-center bg-gray-100 text-xs text-gray-400"
-                        >
-                            Logo
+                    <!-- Header Kartu -->
+                    <div class="flex items-center justify-between border-b-[1.5px] border-black pb-2 mb-2">
+                        <!-- Logo Kiri -->
+                        <div class="h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 flex items-center justify-center">
+                            <img v-if="kop?.logo_kiri" :src="kop.logo_kiri" class="h-full w-full object-contain" />
+                            <div v-else class="h-10 w-10 bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 border border-gray-200">Logo</div>
                         </div>
 
-                        <div class="flex-1 px-2 text-center">
-                            <div class="text-sm font-bold">
-                                {{ kop?.header_1 || 'PEMERINTAH PROVINSI' }}
-                            </div>
-                            <div class="text-sm font-bold">
-                                {{ kop?.header_2 || 'DINAS PENDIDIKAN' }}
-                            </div>
-                            <div class="text-base font-bold uppercase">
-                                {{ kop?.header_3 || 'NAMA SEKOLAH' }}
-                            </div>
-                            <div class="text-xs">
-                                {{ kop?.header_4 || 'Alamat Sekolah' }}
-                            </div>
+                        <!-- Header Text -->
+                        <div class="flex-1 px-1 text-center flex flex-col justify-center leading-snug">
+                            <div class="text-xs sm:text-[13px] font-bold" v-html="kop?.header_1 || '<b>KARTU PESERTA</b>'"></div>
+                            <div class="text-[11px] sm:text-xs font-bold uppercase" v-html="kop?.header_2 || 'ASESMEN AKHIR SEMESTER GENAP'"></div>
+                            <div class="text-[11px] sm:text-xs font-bold uppercase" v-html="kop?.header_3 || 'MIN 2 TANGGAMUS'"></div>
+                            <div class="text-[9px] sm:text-[10px]" v-html="kop?.header_4 || 'TAHUN PELAJARAN 2025/2026'"></div>
                         </div>
 
-                        <div v-if="kop?.logo_kanan" class="h-16 w-16">
-                            <img
-                                :src="kop.logo_kanan"
-                                class="h-full w-full object-contain"
-                            />
+                        <!-- Logo Kanan -->
+                        <div class="h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 flex items-center justify-center">
+                            <img v-if="kop?.logo_kanan" :src="kop.logo_kanan" class="h-full w-full object-contain" />
+                            <div v-else class="h-10 w-10 bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 border border-gray-200">Logo</div>
                         </div>
-                        <div v-else class="h-16 w-16 bg-white"></div>
                     </div>
 
-                    <div
-                        class="mb-4 text-center text-lg font-bold uppercase underline"
-                    >
-                        KARTU PESERTA UJIAN
-                    </div>
-
-                    <div class="flex gap-4">
-                        <!-- Foto (Placeholder) -->
-                        <div
-                            class="flex h-32 w-24 items-center justify-center border-2 border-gray-300 bg-gray-50 text-sm text-gray-400"
-                        >
-                            Foto 3x4
+                    <!-- Body Kartu -->
+                    <div class="flex gap-3">
+                        <!-- Foto -->
+                        <div class="flex flex-col gap-1 w-[2.2cm] sm:w-[2.5cm]">
+                            <div class="h-[2.9cm] sm:h-[3.33cm] w-full border border-gray-400 bg-gray-50 flex items-center justify-center text-[10px] sm:text-xs text-gray-400 overflow-hidden shrink-0">
+                                <img v-if="siswa.foto" :src="siswa.foto" class="h-full w-full object-cover" />
+                                <span v-else>Foto 3x4</span>
+                            </div>
                         </div>
 
-                        <!-- Data Siswa -->
-                        <div class="flex-1">
-                            <table class="w-full text-sm font-medium">
+                        <!-- Data -->
+                        <div class="flex-1 flex flex-col justify-between">
+                            <table class="w-full text-[10px] sm:text-[11px] font-medium leading-tight">
                                 <tbody>
                                     <tr>
-                                        <td class="w-32 py-1">Nomor Peserta</td>
-                                        <td class="w-2 py-1">:</td>
-                                        <td class="py-1 font-bold">
-                                            {{ siswa.nomor_peserta || '-' }}
-                                        </td>
+                                        <td class="w-[75px] sm:w-[85px] py-[1.5px] align-top">Nomor Peserta</td>
+                                        <td class="w-2 py-[1.5px] align-top">:</td>
+                                        <td class="py-[1.5px] align-top font-bold">{{ siswa.nomor_peserta || '-' }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-1">Nama Siswa</td>
-                                        <td class="py-1">:</td>
-                                        <td class="py-1 font-bold">
-                                            {{ siswa.nama }}
-                                        </td>
+                                        <td class="py-[1.5px] align-top">Nama</td>
+                                        <td class="py-[1.5px] align-top">:</td>
+                                        <td class="py-[1.5px] align-top font-bold line-clamp-2 leading-tight">{{ siswa.nama }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-1">NIS / NISN</td>
-                                        <td class="py-1">:</td>
-                                        <td class="py-1">
-                                            {{ siswa.nis || '-' }} /
-                                            {{ siswa.nisn || '-' }}
-                                        </td>
+                                        <td class="py-[1.5px] align-top">NIS-NISN</td>
+                                        <td class="py-[1.5px] align-top">:</td>
+                                        <td class="py-[1.5px] align-top">{{ siswa.nis || '-' }} - {{ siswa.nisn || '-' }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-1">Password</td>
-                                        <td class="py-1">:</td>
-                                        <td
-                                            class="py-1 font-bold tracking-wider text-red-600"
-                                        >
-                                            {{ siswa.password_cbt || '******' }}
-                                        </td>
+                                        <td class="py-[1.5px] align-top">Kelas</td>
+                                        <td class="py-[1.5px] align-top">:</td>
+                                        <td class="py-[1.5px] align-top">{{ siswa.nama_kelas || '-' }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-1">Jadwal Ujian</td>
-                                        <td class="py-1">:</td>
-                                        <td class="py-1">
-                                            {{ jadwal.bank_soal?.nama }}
-                                        </td>
+                                        <td class="py-[1.5px] align-top">Ruang/Sesi</td>
+                                        <td class="py-[1.5px] align-top">:</td>
+                                        <td class="py-[1.5px] align-top">{{ siswa.nama_ruang || '-' }} / {{ siswa.nama_sesi || '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-[1.5px] align-top pt-1.5">Username</td>
+                                        <td class="py-[1.5px] align-top pt-1.5">:</td>
+                                        <td class="py-[1.5px] align-top pt-1.5 font-bold">{{ siswa.username || '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-[1.5px] align-top">Password</td>
+                                        <td class="py-[1.5px] align-top">:</td>
+                                        <td class="py-[1.5px] align-top font-bold">{{ siswa.password_cbt || '******' }}</td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
 
-                    <div class="mt-4 flex items-end justify-between text-sm">
-                        <div>
-                            <div
-                                class="inline-block border border-black px-4 py-2 font-bold"
-                            >
-                                RUANG: {{ siswa.ruang_nama || '...' }}
+                            <!-- TTD -->
+                            <div class="flex justify-end mt-1">
+                                <div class="text-[9px] sm:text-[10px] text-center leading-tight">
+                                    <p>{{ kop?.tanggal || 'Tanggamus, 01 Juni 2026' }}</p>
+                                    <p>Kepala Madrasah</p>
+                                    <div class="h-8 sm:h-10 relative">
+                                        <!-- Placeholder for signature or stamp if any -->
+                                    </div>
+                                    <p class="font-bold underline">Kepala Sekolah</p>
+                                    <p>NIP. -</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="w-40 text-center">
-                            <p>Kepala Sekolah,</p>
-                            <br /><br /><br />
-                            <p
-                                class="w-full border-b border-black font-bold"
-                            ></p>
-                            <p class="mt-1 text-xs">NIP.</p>
                         </div>
                     </div>
                 </div>
 
                 <div
                     v-if="!siswas.length"
-                    class="col-span-2 border-2 border-dashed border-gray-300 p-12 text-center font-bold text-gray-500"
+                    class="col-span-1 sm:col-span-2 border-2 border-dashed border-gray-300 p-12 text-center font-bold text-gray-500"
                 >
                     Belum ada data siswa untuk jadwal ini.
                 </div>
             </div>
 
             <!-- Print Button -->
-            <div class="fixed right-8 bottom-8 print:hidden">
+            <div class="fixed right-8 bottom-8 print:hidden z-50">
                 <button
                     onclick="window.print()"
-                    class="flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700"
+                    class="flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                     <svg
                         class="h-5 w-5"
@@ -168,19 +135,31 @@
 
 <script setup>
 const props = defineProps({
-    siswas: Array,
-    kop: Object,
-    jadwal: Object,
+    siswas: {
+        type: Array,
+        default: () => [],
+    },
+    kop: {
+        type: Object,
+        default: () => ({}),
+    },
+    jadwal: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 </script>
 
 <style>
 @media print {
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
     body {
         background-color: white;
-    }
-    @page {
-        margin: 0.5cm;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }
 </style>

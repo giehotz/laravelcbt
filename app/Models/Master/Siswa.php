@@ -21,6 +21,7 @@ class Siswa extends Model
         'nis',
         'nama',
         'jenis_kelamin',
+        'kelas_awal',
         'tahun_masuk',
         'sekolah_asal',
         'tempat_lahir',

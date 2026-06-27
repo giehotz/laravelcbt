@@ -7,8 +7,6 @@ use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\Nilai;
 use App\Models\CbtKopAbsensi;
 use App\Models\CbtKopBerita;
-use App\Models\CbtKopKartu;
-use App\Models\Master\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -28,33 +26,6 @@ class ReportController extends Controller
     }
 
     /**
-     * Cetak Kartu Peserta Ujian
-     */
-    public function cetakKartu(Request $request)
-    {
-        $jadwalId = $request->query('jadwal_id');
-        $jadwal = Jadwal::find($jadwalId);
-
-        // Ambil data siswa yang terhubung dengan jadwal ini melalui kelas_ruang
-        $siswas = DB::table('cbt_sesi_siswa')
-            ->join('siswa', 'siswa.id', '=', 'cbt_sesi_siswa.siswa_id')
-            ->whereIn('cbt_sesi_siswa.kelas_ruang_id', function ($query) use ($jadwalId) {
-                $query->select('id')->from('cbt_kelas_ruang')->where('jadwal_id', $jadwalId);
-            })
-            ->select('siswa.*')
-            ->get();
-
-        $kop = CbtKopKartu::first();
-
-        // Mengembalikan view cetak statis atau Inertia page khusus cetak
-        return Inertia::render('Cbt/Guru/PrintKartu', [
-            'siswas' => $siswas,
-            'kop' => $kop,
-            'jadwal' => $jadwal,
-        ]);
-    }
-
-    /**
      * Cetak Daftar Hadir
      */
     public function cetakDaftarHadir(Request $request)
@@ -62,12 +33,19 @@ class ReportController extends Controller
         $jadwalId = $request->query('jadwal_id');
         $jadwal = Jadwal::with('bankSoal')->find($jadwalId);
 
+        if (! $jadwal) {
+            abort(404, 'Jadwal Ujian tidak ditemukan atau belum dipilih.');
+        }
+
+        $kelasIds = $jadwal->bankSoal->kelas ?? [];
+
         $siswas = DB::table('cbt_sesi_siswa')
             ->join('siswa', 'siswa.id', '=', 'cbt_sesi_siswa.siswa_id')
-            ->leftJoin('cbt_kelas_ruang', 'cbt_kelas_ruang.id', '=', 'cbt_sesi_siswa.kelas_ruang_id')
-            ->leftJoin('cbt_ruang', 'cbt_ruang.id', '=', 'cbt_kelas_ruang.ruang_id')
-            ->leftJoin('cbt_sesi', 'cbt_sesi.id', '=', 'cbt_kelas_ruang.sesi_id')
-            ->where('cbt_kelas_ruang.jadwal_id', $jadwalId)
+            ->leftJoin('cbt_ruang', 'cbt_ruang.id', '=', 'cbt_sesi_siswa.ruang_id')
+            ->leftJoin('cbt_sesi', 'cbt_sesi.id', '=', 'cbt_sesi_siswa.sesi_id')
+            ->whereIn('cbt_sesi_siswa.kelas_id', $kelasIds)
+            ->where('cbt_sesi_siswa.tp_id', $jadwal->tahun_pelajaran_id)
+            ->where('cbt_sesi_siswa.smt_id', $jadwal->semester_id)
             ->select('siswa.*', 'cbt_ruang.nama_ruang', 'cbt_sesi.nama_sesi')
             ->orderBy('cbt_ruang.nama_ruang')
             ->orderBy('siswa.nama')
@@ -90,21 +68,42 @@ class ReportController extends Controller
         $jadwalId = $request->query('jadwal_id');
         $jadwal = Jadwal::with('bankSoal')->find($jadwalId);
 
-        $ruangSesiList = DB::table('cbt_kelas_ruang')
-            ->join('cbt_ruang', 'cbt_ruang.id', '=', 'cbt_kelas_ruang.ruang_id')
-            ->join('cbt_sesi', 'cbt_sesi.id', '=', 'cbt_kelas_ruang.sesi_id')
-            ->where('cbt_kelas_ruang.jadwal_id', $jadwalId)
-            ->select('cbt_kelas_ruang.id', 'cbt_ruang.nama_ruang', 'cbt_sesi.nama_sesi')
+        if (! $jadwal) {
+            abort(404, 'Jadwal Ujian tidak ditemukan atau belum dipilih.');
+        }
+
+        $kelasIds = $jadwal->bankSoal->kelas ?? [];
+
+        $ruangSesiList = DB::table('cbt_sesi_siswa')
+            ->join('cbt_ruang', 'cbt_ruang.id', '=', 'cbt_sesi_siswa.ruang_id')
+            ->join('cbt_sesi', 'cbt_sesi.id', '=', 'cbt_sesi_siswa.sesi_id')
+            ->whereIn('cbt_sesi_siswa.kelas_id', $kelasIds)
+            ->where('cbt_sesi_siswa.tp_id', $jadwal->tahun_pelajaran_id)
+            ->where('cbt_sesi_siswa.smt_id', $jadwal->semester_id)
+            ->select('cbt_sesi_siswa.ruang_id', 'cbt_sesi_siswa.sesi_id', 'cbt_ruang.nama_ruang', 'cbt_sesi.nama_sesi')
+            ->distinct()
             ->get();
 
         // Dalam implementasi nyata, kita hitung jumlah peserta, hadir, tidak hadir
         foreach ($ruangSesiList as $rs) {
-            $rs->peserta = DB::table('cbt_sesi_siswa')->where('kelas_ruang_id', $rs->id)->count();
+            $rs->peserta = DB::table('cbt_sesi_siswa')
+                ->where('ruang_id', $rs->ruang_id)
+                ->where('sesi_id', $rs->sesi_id)
+                ->whereIn('kelas_id', $kelasIds)
+                ->where('tp_id', $jadwal->tahun_pelajaran_id)
+                ->where('smt_id', $jadwal->semester_id)
+                ->count();
             // Estimasi hadir bisa dari durasi_siswa yang statusnya > 0
             $rs->hadir = DB::table('cbt_durasi_siswa')
                 ->where('jadwal_id', $jadwalId)
-                ->whereIn('siswa_id', function ($query) use ($rs) {
-                    $query->select('siswa_id')->from('cbt_sesi_siswa')->where('kelas_ruang_id', $rs->id);
+                ->whereIn('siswa_id', function ($query) use ($rs, $kelasIds, $jadwal) {
+                    $query->select('siswa_id')
+                        ->from('cbt_sesi_siswa')
+                        ->where('ruang_id', $rs->ruang_id)
+                        ->where('sesi_id', $rs->sesi_id)
+                        ->whereIn('kelas_id', $kelasIds)
+                        ->where('tp_id', $jadwal->tahun_pelajaran_id)
+                        ->where('smt_id', $jadwal->semester_id);
                 })->count();
             $rs->absen = $rs->peserta - $rs->hadir;
         }
@@ -125,6 +124,10 @@ class ReportController extends Controller
     {
         $jadwalId = $request->query('jadwal_id');
         $jadwal = Jadwal::with('bankSoal')->find($jadwalId);
+
+        if (! $jadwal) {
+            abort(404, 'Jadwal Ujian tidak ditemukan atau belum dipilih.');
+        }
 
         $nilais = DB::table('cbt_nilai')
             ->join('siswa', 'siswa.id', '=', 'cbt_nilai.siswa_id')

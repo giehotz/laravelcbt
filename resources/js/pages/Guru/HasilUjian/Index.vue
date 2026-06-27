@@ -39,7 +39,7 @@ async function fetchDataSiswa() {
     if (!selectedJadwalId.value) return;
     isLoading.value = true;
     try {
-        const res = await fetch(dataSiswa({ jadwal: selectedJadwalId.value }).url, {
+        const res = await fetch(dataSiswa({ jadwal: parseInt(selectedJadwalId.value) }).url, {
             headers: { Accept: 'application/json' },
         });
         const json = await res.json();
@@ -198,7 +198,7 @@ function onTabChange(tab: Tab) {
                                 </td>
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
                                     <a
-                                        :href="koreksiSiswa({ jadwal: selectedJadwalId, siswa: siswa.id }).url"
+                                        :href="koreksiSiswa({ jadwal: parseInt(selectedJadwalId), siswa: siswa.id }).url"
                                         class="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
                                     >
                                         <ExternalLink class="h-3.5 w-3.5" />

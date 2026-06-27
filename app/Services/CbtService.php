@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
+use App\Enums\Cbt\DurasiStatus;
 use App\Models\Cbt\DurasiSiswa;
 use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\Nilai;
 use App\Models\Cbt\SoalSiswa;
 use App\Models\Master\Siswa;
+use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -19,139 +23,160 @@ class CbtService
      */
     public function distribusiSoal(Siswa $siswa, Jadwal $jadwal): void
     {
-        DB::transaction(function () use ($siswa, $jadwal) {
-            // 1. Dapatkan atau buat sesi durasi siswa dengan pessimistic lock
-            // Ini akan mengunci baris (atau proses create) sehingga request konkuren akan menunggu.
-            $durasi = DurasiSiswa::where('siswa_id', $siswa->id)
-                ->where('jadwal_id', $jadwal->id)
-                ->lockForUpdate()
-                ->first();
+        $lock = Cache::lock("distribusi:{$jadwal->id}:{$siswa->id}", 10);
 
-            if (! $durasi) {
-                $durasi = DurasiSiswa::create([
-                    'siswa_id' => $siswa->id,
-                    'jadwal_id' => $jadwal->id,
-                    'status' => 0,
-                    'reset' => 0,
-                ]);
-            }
-
-            // 2. Cek apakah distribusi sudah pernah dilakukan (mencegah duplikasi soal jika reset=2 atau reload)
-            $sudahDistribusi = SoalSiswa::where('siswa_id', $siswa->id)
-                ->where('jadwal_id', $jadwal->id)
-                ->exists();
-
-            if ($sudahDistribusi) {
-                return; // Sudah didistribusi, tidak perlu re-distribusi
-            }
-
-            // 3. Ambil soal dari bank soal
-            $soals = $jadwal->bankSoal->soals()->get();
-
-            if ($soals->isEmpty()) {
-                return; // Bank soal kosong
-            }
-
-            // Pisahkan berdasarkan jenis soal agar bisa diacak per kelompok (jika acak_soal aktif)
-            // Jenis: 1=PG, 2=Ganda Kompleks, 3=Menjodohkan, 4=Isian Singkat, 5=Uraian/Esai
-            $groupedSoals = $soals->groupBy('jenis');
-
-            $nomorUrut = 1;
-            $soalSiswaInsertData = [];
-
-            foreach ($groupedSoals as $jenis => $soalsPerJenis) {
-                // Acak soal jika disetting di jadwal
-                if ($jadwal->acak_soal) {
-                    $soalsPerJenis = $soalsPerJenis->shuffle();
+        $lock->block(5, function () use ($siswa, $jadwal) {
+            DB::transaction(function () use ($siswa, $jadwal) {
+                // 1. Validasi: Apakah siswa terdaftar di salah satu kelas target ujian (W-05/C-07)
+                $bankSoal = $jadwal->bankSoal;
+                $kelas = $bankSoal->kelas;
+                $allowedKelasIds = is_array($kelas) ? $kelas : json_decode($kelas, true);
+                if (! is_array($allowedKelasIds)) {
+                    $allowedKelasIds = [];
                 }
 
-                foreach ($soalsPerJenis as $index => $soal) {
-                    // Acak Opsi (hanya berlaku untuk PG dan sejenisnya yang punya opsi A-E)
-                    // Kita mapping A=>C, B=>A, C=>D, D=>B, E=>E
-                    $opsiAlias = ['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D', 'E' => 'E'];
+                $isRegistered = DB::table('kelas_siswa')
+                    ->where('siswa_id', $siswa->id)
+                    ->whereIn('kelas_id', $allowedKelasIds)
+                    ->exists();
 
-                    if ($jadwal->acak_opsi && in_array($jenis, [1, 2])) {
-                        // Opsi yang ada dari soal asli (misal soal punya sampai opsi E, atau cuma D)
-                        $availableOpsis = [];
-                        if ($soal->opsi_a || $soal->fileA) {
-                            $availableOpsis[] = 'A';
-                        }
-                        if ($soal->opsi_b || $soal->fileB) {
-                            $availableOpsis[] = 'B';
-                        }
-                        if ($soal->opsi_c || $soal->fileC) {
-                            $availableOpsis[] = 'C';
-                        }
-                        if ($soal->opsi_d || $soal->fileD) {
-                            $availableOpsis[] = 'D';
-                        }
-                        if ($soal->opsi_e || $soal->fileE) {
-                            $availableOpsis[] = 'E';
-                        }
+                if (! $isRegistered) {
+                    throw new AuthorizationException('Siswa tidak terdaftar di kelas yang diperbolehkan mengikuti ujian ini.');
+                }
 
-                        if (count($availableOpsis) > 0) {
-                            $shuffled = collect($availableOpsis)->shuffle()->toArray();
-                            // Mapping original => shuffled (alias)
-                            foreach ($availableOpsis as $i => $originalOpsi) {
-                                $opsiAlias[$originalOpsi] = $shuffled[$i];
-                            }
-                        }
-                    }
+                // 2. Dapatkan atau buat sesi durasi siswa dengan pessimistic lock
+                $durasi = DurasiSiswa::where('siswa_id', $siswa->id)
+                    ->where('jadwal_id', $jadwal->id)
+                    ->lockForUpdate()
+                    ->first();
 
-                    // Tentukan jawaban benar setelah dialias (jika soal PG murni / PG Kompleks)
-                    $jawabanAlias = null;
-                    if ($jenis == 1 && $soal->jawaban) {
-                        $jawabanAlias = $opsiAlias[$soal->jawaban] ?? $soal->jawaban;
-                    } elseif ($jenis == 2 && $soal->jawaban) {
-                        $jawabanArr = is_array($soal->jawaban) ? $soal->jawaban : json_decode($soal->jawaban, true);
-                        if (is_array($jawabanArr)) {
-                            $mapped = [];
-                            foreach ($jawabanArr as $opt) {
-                                $mapped[] = $opsiAlias[$opt] ?? $opt;
-                            }
-                            sort($mapped);
-                            $jawabanAlias = json_encode($mapped);
-                        }
-                    }
-
-                    // Untuk Kompleks/Jodohkan/Isian, logika alias bisa lebih kompleks,
-                    // tapi standarnya kita tetapkan mapping $opsiAlias ke field
-
-                    $isLast = false;
-                    // Nanti kita set soal_end = true untuk soal terakhir dari seluruh distribusi.
-                    // Di sini kita catat dulu.
-
-                    $soalSiswaInsertData[] = [
-                        'id' => (string) Str::ulid(),
-                        'bank_id' => $jadwal->bank_id,
-                        'jadwal_id' => $jadwal->id,
-                        'soal_id' => $soal->id,
+                if (! $durasi) {
+                    $durasi = new DurasiSiswa([
                         'siswa_id' => $siswa->id,
-                        'jenis_soal' => $jenis,
-                        'no_soal_alias' => $nomorUrut++,
-                        'opsi_alias_a' => $opsiAlias['A'] ?? null,
-                        'opsi_alias_b' => $opsiAlias['B'] ?? null,
-                        'opsi_alias_c' => $opsiAlias['C'] ?? null,
-                        'opsi_alias_d' => $opsiAlias['D'] ?? null,
-                        'opsi_alias_e' => $opsiAlias['E'] ?? null,
-                        'jawaban_benar' => is_array($soal->jawaban) ? json_encode($soal->jawaban) : $soal->jawaban, // Cache jawaban benar ori (tetap tersembunyi)
-                        'jawaban_alias' => $jawabanAlias, // Jawaban benar versi sudah ter-alias
-                        'soal_end' => false,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                        'jadwal_id' => $jadwal->id,
+                        'reset' => 0,
+                    ]);
+                    $durasi->status = DurasiStatus::BELUM_UJIAN;
+                    $durasi->save();
                 }
-            }
 
-            if (! empty($soalSiswaInsertData)) {
-                // Tandai soal terakhir
-                $lastIndex = count($soalSiswaInsertData) - 1;
-                $soalSiswaInsertData[$lastIndex]['soal_end'] = true;
+                // 3. Cek apakah distribusi sudah pernah dilakukan (mencegah duplikasi soal jika reset=2 atau reload)
+                $sudahDistribusi = SoalSiswa::where('siswa_id', $siswa->id)
+                    ->where('jadwal_id', $jadwal->id)
+                    ->exists();
 
-                // Bulk insert
-                // Gunakan chunk jika bank soal sangat besar, tapi biasanya maksimal ~100 soal per mapel
-                SoalSiswa::insert($soalSiswaInsertData);
-            }
+                if ($sudahDistribusi) {
+                    return; // Sudah didistribusi, tidak perlu re-distribusi
+                }
+
+                // 4. Ambil soal dari bank soal
+                $soals = $jadwal->bankSoal->soals()->get();
+
+                if ($soals->isEmpty()) {
+                    return; // Bank soal kosong
+                }
+
+                // Pisahkan berdasarkan jenis soal agar bisa diacak per kelompok (jika acak_soal aktif)
+                // Jenis: 1=PG, 2=Ganda Kompleks, 3=Menjodohkan, 4=Isian Singkat, 5=Uraian/Esai
+                $groupedSoals = $soals->groupBy('jenis');
+
+                $nomorUrut = 1;
+                $soalSiswaInsertData = [];
+
+                foreach ($groupedSoals as $jenis => $soalsPerJenis) {
+                    // Acak soal jika disetting di jadwal
+                    if ($jadwal->acak_soal) {
+                        $soalsPerJenis = $soalsPerJenis->shuffle();
+                    }
+
+                    foreach ($soalsPerJenis as $index => $soal) {
+                        // Acak Opsi (hanya berlaku untuk PG dan sejenisnya yang punya opsi A-E)
+                        // Kita mapping A=>C, B=>A, C=>D, D=>B, E=>E
+                        $opsiAlias = ['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D', 'E' => 'E'];
+
+                        if ($jadwal->acak_opsi && in_array($jenis, [1, 2])) {
+                            // Opsi yang ada dari soal asli (misal soal punya sampai opsi E, atau cuma D)
+                            $availableOpsis = [];
+                            if ($soal->opsi_a || $soal->fileA) {
+                                $availableOpsis[] = 'A';
+                            }
+                            if ($soal->opsi_b || $soal->fileB) {
+                                $availableOpsis[] = 'B';
+                            }
+                            if ($soal->opsi_c || $soal->fileC) {
+                                $availableOpsis[] = 'C';
+                            }
+                            if ($soal->opsi_d || $soal->fileD) {
+                                $availableOpsis[] = 'D';
+                            }
+                            if ($soal->opsi_e || $soal->fileE) {
+                                $availableOpsis[] = 'E';
+                            }
+
+                            if (count($availableOpsis) > 0) {
+                                $shuffled = collect($availableOpsis)->shuffle()->toArray();
+                                // Mapping original => shuffled (alias)
+                                foreach ($availableOpsis as $i => $originalOpsi) {
+                                    $opsiAlias[$originalOpsi] = $shuffled[$i];
+                                }
+                            }
+                        }
+
+                        // Tentukan jawaban benar setelah dialias (jika soal PG murni / PG Kompleks)
+                        $jawabanAlias = null;
+                        if ($jenis == 1 && $soal->jawaban) {
+                            $jawabanAlias = $opsiAlias[$soal->jawaban] ?? $soal->jawaban;
+                        } elseif ($jenis == 2 && $soal->jawaban) {
+                            $jawabanArr = is_array($soal->jawaban) ? $soal->jawaban : json_decode($soal->jawaban, true);
+                            if (is_array($jawabanArr)) {
+                                $mapped = [];
+                                foreach ($jawabanArr as $opt) {
+                                    $mapped[] = $opsiAlias[$opt] ?? $opt;
+                                }
+                                sort($mapped);
+                                $jawabanAlias = json_encode($mapped);
+                            }
+                        }
+
+                        // Untuk Kompleks/Jodohkan/Isian, logika alias bisa lebih kompleks,
+                        // tapi standarnya kita tetapkan mapping $opsiAlias ke field
+
+                        $isLast = false;
+                        // Nanti kita set soal_end = true untuk soal terakhir dari seluruh distribusi.
+                        // Di sini kita catat dulu.
+
+                        $soalSiswaInsertData[] = [
+                            'id' => (string) Str::ulid(),
+                            'bank_id' => $jadwal->bank_id,
+                            'jadwal_id' => $jadwal->id,
+                            'soal_id' => $soal->id,
+                            'siswa_id' => $siswa->id,
+                            'jenis_soal' => $jenis,
+                            'no_soal_alias' => $nomorUrut++,
+                            'opsi_alias_a' => $opsiAlias['A'] ?? null,
+                            'opsi_alias_b' => $opsiAlias['B'] ?? null,
+                            'opsi_alias_c' => $opsiAlias['C'] ?? null,
+                            'opsi_alias_d' => $opsiAlias['D'] ?? null,
+                            'opsi_alias_e' => $opsiAlias['E'] ?? null,
+                            'jawaban_benar' => is_array($soal->jawaban) ? json_encode($soal->jawaban) : $soal->jawaban, // Cache jawaban benar ori (tetap tersembunyi)
+                            'jawaban_alias' => $jawabanAlias, // Jawaban benar versi sudah ter-alias
+                            'soal_end' => false,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                if (! empty($soalSiswaInsertData)) {
+                    // Tandai soal terakhir
+                    $lastIndex = count($soalSiswaInsertData) - 1;
+                    $soalSiswaInsertData[$lastIndex]['soal_end'] = true;
+
+                    // Bulk insert
+                    // Gunakan chunk jika bank soal sangat besar, tapi biasanya maksimal ~100 soal per mapel
+                    SoalSiswa::insert($soalSiswaInsertData);
+                }
+            });
         });
     }
 
@@ -281,5 +306,54 @@ class CbtService
                 ]
             );
         });
+    }
+
+    /**
+     * Menyimpan jawaban siswa dengan validasi backend time enforcement (C-05, W-06)
+     */
+    public function simpanJawaban(SoalSiswa $soalSiswa, ?string $jawaban, bool $ragu_ragu, Siswa $siswa): void
+    {
+        // 1. Pastikan kepemilikan soal
+        if ($soalSiswa->siswa_id !== $siswa->id) {
+            throw new AuthorizationException('Akses ditolak.');
+        }
+
+        // 2. Validasi durasi & status ujian siswa
+        $durasi = DurasiSiswa::where('siswa_id', $siswa->id)
+            ->where('jadwal_id', $soalSiswa->jadwal_id)
+            ->first();
+
+        if (! $durasi || $durasi->status !== DurasiStatus::SEDANG) {
+            throw new \DomainException('Waktu ujian telah habis atau belum dimulai.');
+        }
+
+        // 3. Validasi sisa waktu ujian (W-06) - Backend Time Enforcement
+        $jadwal = Jadwal::find($soalSiswa->jadwal_id);
+        $startTime = Carbon::parse($durasi->mulai);
+        $endTime = $startTime->copy()->addMinutes($jadwal->durasi_ujian);
+
+        if (now()->greaterThan($endTime)) {
+            // Selesaikan sesi ujian siswa secara otomatis
+            $durasi->status = DurasiStatus::SELESAI;
+            $durasi->selesai = now()->toTimeString();
+            $durasi->save();
+
+            // Hitung nilai akhir otomatis
+            $this->hitungNilai($siswa, $jadwal);
+
+            throw new \DomainException('Waktu pengerjaan ujian Anda sudah habis.');
+        }
+
+        // 4. Validasi batas akhir jadwal ujian
+        $now = now()->toISOString();
+        if ($now > $jadwal->tgl_selesai) {
+            throw new \DomainException('Jadwal ujian sudah ditutup.');
+        }
+
+        // 5. Update jawaban
+        $soalSiswa->update([
+            'jawaban_siswa' => $jawaban,
+            'ragu_ragu' => $ragu_ragu,
+        ]);
     }
 }

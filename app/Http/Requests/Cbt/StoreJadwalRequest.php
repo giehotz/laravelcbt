@@ -33,4 +33,17 @@ class StoreJadwalRequest extends FormRequest
             'pengawas.*' => 'exists:guru,id',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'acak_soal' => $this->boolean('acak_soal'),
+            'acak_opsi' => $this->boolean('acak_opsi'),
+            'hasil_tampil' => $this->boolean('hasil_tampil'),
+            'token' => $this->boolean('token'),
+            'ulang' => $this->boolean('ulang'),
+            'reset_login' => $this->boolean('reset_login'),
+            'rekap' => $this->boolean('rekap'),
+        ]);
+    }
 }

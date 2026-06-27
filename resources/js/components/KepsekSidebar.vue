@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Activity, Printer } from 'lucide-vue-next';
+import { LayoutGrid, Activity, Printer, IdCard } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -17,6 +17,7 @@ import {
 import { dashboard } from '@/routes';
 import { index as cbtMonitoringIndex } from '@/routes/cbt/monitoring';
 import { index as cbtReportIndex } from '@/routes/cbt/report';
+import { index as cbtCetakKartuIndex } from '@/routes/cbt/cetak-kartu';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 
 const { isCurrentUrl } = useCurrentUrl();
@@ -81,6 +82,20 @@ const { isCurrentUrl } = useCurrentUrl();
                             <Link :href="cbtMonitoringIndex.url()">
                                 <Activity class="h-4 w-4" />
                                 <span>Monitoring Ujian</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            as-child
+                            :is-active="$page.url.startsWith('/cbt/cetak-kartu')"
+                            tooltip="Cetak Kartu"
+                            class="transition-all duration-200"
+                        >
+                            <Link :href="cbtCetakKartuIndex.url()">
+                                <IdCard class="h-4 w-4" />
+                                <span>Cetak Kartu</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

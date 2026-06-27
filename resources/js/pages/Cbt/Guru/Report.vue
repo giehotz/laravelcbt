@@ -65,9 +65,8 @@
                 class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
             >
                 <!-- Cetak Kartu -->
-                <a
-                    :href="cetakKartu({ jadwal_id: selectedJadwalId }).url"
-                    target="_blank"
+                <Link
+                    :href="cbtCetakKartuIndex.url()"
                     class="group flex flex-col items-center rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm transition-all hover:border-indigo-500 hover:shadow-md"
                 >
                     <div
@@ -93,10 +92,9 @@
                         Kartu Peserta
                     </h3>
                     <p class="mt-2 text-sm text-gray-500">
-                        Cetak kartu ujian untuk siswa yang terdaftar di jadwal
-                        ini.
+                        Buka halaman khusus untuk mengatur dan mencetak kartu peserta.
                     </p>
-                </a>
+                </Link>
 
                 <!-- Cetak Daftar Hadir -->
                 <a
@@ -233,12 +231,13 @@
 
 <script setup>
 import { ref } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import {
-    cetakKartu,
     cetakDaftarHadir,
     cetakBeritaAcara,
     rekapNilai,
 } from '@/routes/cbt/report';
+import { index as cbtCetakKartuIndex } from '@/routes/cbt/cetak-kartu';
 
 const props = defineProps({
     jadwals: Array,

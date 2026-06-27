@@ -1,29 +1,79 @@
 import { defineStore } from 'pinia';
 import { simpan } from '@/routes/ujian';
 
+export interface SoalSiswa {
+    id: string;
+    jenis_soal: number;
+    no_soal_alias: number;
+    opsi_alias_a?: string | null;
+    opsi_alias_b?: string | null;
+    opsi_alias_c?: string | null;
+    opsi_alias_d?: string | null;
+    opsi_alias_e?: string | null;
+    jawaban_siswa?: string | null;
+    ragu_ragu: boolean;
+    soal_end: boolean;
+    opsi?: number;
+    soal?: {
+        soal?: string;
+        opsi_a?: string;
+        opsi_b?: string;
+        opsi_c?: string;
+        opsi_d?: string;
+        opsi_e?: string;
+        file1?: string;
+        fileA?: string;
+        fileB?: string;
+        fileC?: string;
+        fileD?: string;
+        fileE?: string;
+        matching_left?: Array<{ id: number; text: string }>;
+        matching_right?: Array<{ id: number; text: string }>;
+    } | null;
+}
+
+export interface Jadwal {
+    id: number;
+    bank_soal?: {
+        nama: string;
+        mapel?: {
+            nama_mapel: string;
+        };
+    };
+}
+
+export interface OfflinePayload {
+    soalId: string;
+    data: {
+        jawaban: string | null;
+        ragu_ragu: boolean;
+    };
+}
+
 export const useExamStore = defineStore('exam', {
     state: () => ({
-        soalList: [],
-        jadwal: null,
-        durasi: null,
-        activeSoalId: null,
-        offlineQueue: [],
-        isOnline: navigator.onLine,
+        soalList: [] as SoalSiswa[],
+        jadwal: null as Jadwal | null,
+        durasi: null as number | null,
+        activeSoalId: null as string | null,
+        offlineQueue: [] as OfflinePayload[],
+        isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
         isFlushing: false,
     }),
 
     getters: {
-        activeSoal: (state) => {
+        activeSoal: (state): SoalSiswa | null => {
+            if (state.soalList.length === 0) return null;
             if (!state.activeSoalId) return state.soalList[0];
             return (
                 state.soalList.find((s) => s.id === state.activeSoalId) ||
                 state.soalList[0]
             );
         },
-        unansweredCount: (state) => {
+        unansweredCount: (state): number => {
             return state.soalList.filter((s) => !s.jawaban_siswa).length;
         },
-        hasOfflineQueue: (state) => {
+        hasOfflineQueue: (state): boolean => {
             return state.offlineQueue.length > 0;
         },
     },
@@ -39,22 +89,22 @@ export const useExamStore = defineStore('exam', {
             });
         },
 
-        setSoalList(list) {
+        setSoalList(list: SoalSiswa[]) {
             this.soalList = list;
             if (this.soalList.length > 0 && !this.activeSoalId) {
                 this.activeSoalId = this.soalList[0].id;
             }
         },
 
-        setActiveSoal(id) {
+        setActiveSoal(id: string) {
             this.activeSoalId = id;
         },
 
-        setJadwal(jadwal) {
+        setJadwal(jadwal: Jadwal) {
             this.jadwal = jadwal;
         },
 
-        async simpanJawaban(soalId, jawaban, raguRagu = false) {
+        async simpanJawaban(soalId: string, jawaban: string | null, raguRagu: boolean = false) {
             // Update local state immediately (Optimistic UI)
             const soalIndex = this.soalList.findIndex((s) => s.id === soalId);
             if (soalIndex !== -1) {
@@ -62,7 +112,7 @@ export const useExamStore = defineStore('exam', {
                 this.soalList[soalIndex].ragu_ragu = raguRagu;
             }
 
-            const payload = {
+            const payload: OfflinePayload = {
                 soalId,
                 data: {
                     jawaban: jawaban,
@@ -77,7 +127,7 @@ export const useExamStore = defineStore('exam', {
             }
         },
 
-        addToQueue(payload) {
+        addToQueue(payload: OfflinePayload) {
             // Replace if already in queue for the same soal
             const existingIndex = this.offlineQueue.findIndex(
                 (q) => q.soalId === payload.soalId,
@@ -89,17 +139,17 @@ export const useExamStore = defineStore('exam', {
             }
         },
 
-        async sendToServer(payload) {
+        async sendToServer(payload: OfflinePayload) {
             try {
                 // Gunakan wayfinder endpoint `ujian.simpan`
                 const url = simpan({ soalSiswa: payload.soalId });
+                const tokenElement = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = tokenElement ? tokenElement.getAttribute('content') : '';
                 const response = await fetch(url.url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document
-                            .querySelector('meta[name="csrf-token"]')
-                            .getAttribute('content'),
+                        'X-CSRF-TOKEN': csrfToken || '',
                         Accept: 'application/json',
                     },
                     body: JSON.stringify(payload.data),

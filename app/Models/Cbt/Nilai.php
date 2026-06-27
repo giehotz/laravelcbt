@@ -10,7 +10,16 @@ class Nilai extends Model
 {
     protected $table = 'cbt_nilai';
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'siswa_id',
+        'jadwal_id',
+        'pg_benar',
+        'pg_nilai',
+        'esai_nilai',
+        'kompleks_nilai',
+        'jodohkan_nilai',
+        'isian_nilai',
+    ];
 
     protected $casts = [
         'dikoreksi' => 'boolean',

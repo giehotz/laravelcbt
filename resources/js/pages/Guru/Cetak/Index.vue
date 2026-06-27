@@ -65,7 +65,7 @@ const docs = [
 ] as const;
 
 function docUrl(doc: (typeof docs)[number]): string {
-    return doc.href({ jadwal_id: selectedJadwalId.value }).url;
+    return doc.href({ query: { jadwal_id: selectedJadwalId.value } }).url;
 }
 
 function iconBg(color: string): string {

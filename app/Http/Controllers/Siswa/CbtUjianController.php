@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Siswa;
 
+use App\Enums\Cbt\DurasiStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\SoalSiswaResource;
+use App\Http\Resources\SoalUjianResource;
 use App\Models\Cbt\DurasiSiswa;
 use App\Models\Cbt\Jadwal;
 use App\Models\Cbt\SoalSiswa;
+use App\Models\Cbt\Token;
 use App\Services\CbtService;
+use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 
 class CbtUjianController extends Controller
@@ -28,8 +33,28 @@ class CbtUjianController extends Controller
         // Load proper relation for Jadwal
         $jadwal->load('bankSoal.mapel');
 
+        $siswa = auth()->user()->siswa;
+
+        $durasi = DurasiSiswa::where('siswa_id', $siswa->id)
+            ->where('jadwal_id', $jadwal->id)
+            ->first();
+
+        $sisaWaktu = (int) $jadwal->durasi_ujian * 60;
+
+        if ($durasi && $durasi->status === DurasiStatus::SEDANG) {
+            $startTime = Carbon::parse($durasi->mulai);
+            $endTime = $startTime->copy()->addMinutes($jadwal->durasi_ujian);
+            $timeLeft = now()->diffInSeconds($endTime, false);
+
+            $scheduleEndTime = Carbon::parse($jadwal->tgl_selesai);
+            $scheduleTimeLeft = now()->diffInSeconds($scheduleEndTime, false);
+
+            $sisaWaktu = max(0, min($timeLeft, $scheduleTimeLeft));
+        }
+
         return Inertia::render('Cbt/Siswa/Ujian', [
             'jadwal' => $jadwal,
+            'sisa_waktu' => $sisaWaktu,
         ]);
     }
 
@@ -44,19 +69,47 @@ class CbtUjianController extends Controller
             return response()->json(['message' => 'Akses ditolak.'], 403);
         }
 
+        // Validasi token jika diperlukan oleh jadwal (C-06, C-08)
+        if ($jadwal->token) {
+            $request->validate([
+                'token' => 'required|string',
+            ]);
+
+            $lockKey = "token_lock:{$siswa->id}:{$jadwal->id}";
+            if (RateLimiter::tooManyAttempts($lockKey, 5)) {
+                $seconds = RateLimiter::availableIn($lockKey);
+
+                return response()->json(['message' => "Terlalu banyak percobaan token salah. Coba lagi dalam {$seconds} detik."], 429);
+            }
+
+            // Ambil token aktif
+            $activeToken = Token::first();
+            if (! $activeToken || strtoupper($request->token) !== strtoupper($activeToken->token)) {
+                RateLimiter::hit($lockKey, 900); // 15 menit lockout
+
+                return response()->json(['message' => 'Token ujian tidak valid atau salah.'], 422);
+            }
+
+            // Sukses, bersihkan lockout counter
+            RateLimiter::clear($lockKey);
+        }
+
         // Distribusikan soal (CbtService menghandle pessimistic lock dan duplikasi)
-        $this->cbtService->distribusiSoal($siswa, $jadwal);
+        try {
+            $this->cbtService->distribusiSoal($siswa, $jadwal);
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => $e->getMessage()], 403);
+        }
 
         // Catat waktu mulai di CbtDurasiSiswa
         $durasi = DurasiSiswa::where('siswa_id', $siswa->id)
             ->where('jadwal_id', $jadwal->id)
             ->first();
 
-        if ($durasi && $durasi->status == 0) {
-            $durasi->update([
-                'status' => 1,
-                'mulai' => now()->toTimeString(),
-            ]);
+        if ($durasi && $durasi->status === DurasiStatus::BELUM_UJIAN) {
+            $durasi->status = DurasiStatus::SEDANG;
+            $durasi->mulai = now()->toTimeString();
+            $durasi->save();
         }
 
         return response()->json(['message' => 'Ujian dimulai']);
@@ -69,13 +122,13 @@ class CbtUjianController extends Controller
     {
         $siswa = auth()->user()->siswa;
 
-        $soalSiswas = SoalSiswa::with(['soal.pairs', 'jadwal'])
+        $soalSiswas = SoalSiswa::with(['soal.pairs', 'jadwal', 'bankSoal'])
             ->where('siswa_id', $siswa->id)
             ->where('jadwal_id', $jadwal->id)
             ->orderBy('no_soal_alias', 'asc')
             ->get();
 
-        return SoalSiswaResource::collection($soalSiswas);
+        return SoalUjianResource::collection($soalSiswas);
     }
 
     /**
@@ -90,34 +143,15 @@ class CbtUjianController extends Controller
 
         $siswa = auth()->user()->siswa;
 
-        // Pastikan milik siswa yang sedang login
-        if ($soalSiswa->siswa_id !== $siswa->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        try {
+            $this->cbtService->simpanJawaban($soalSiswa, $request->jawaban, $request->ragu_ragu, $siswa);
+
+            return response()->json(['message' => 'Tersimpan']);
+        } catch (AuthorizationException $e) {
+            return response()->json(['message' => $e->getMessage()], 403);
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 403);
         }
-
-        // Validasi waktu ujian dari durasi
-        $durasi = DurasiSiswa::where('siswa_id', $siswa->id)
-            ->where('jadwal_id', $soalSiswa->jadwal_id)
-            ->first();
-
-        if (! $durasi || $durasi->status !== 1) {
-            return response()->json(['message' => 'Waktu ujian telah habis atau belum dimulai.'], 403);
-        }
-
-        // Validasi tambahan: jika waktu jadwal terlewati dengan toleransi latency misal 1 menit
-        $jadwal = Jadwal::find($soalSiswa->jadwal_id);
-        $now = now()->toISOString();
-        if ($now > $jadwal->tgl_selesai) {
-            return response()->json(['message' => 'Jadwal ujian sudah ditutup.'], 403);
-        }
-
-        $soalSiswa->update([
-            'jawaban_siswa' => $request->jawaban,
-            'ragu_ragu' => $request->ragu_ragu,
-            'updated_at' => now(), // Auto updated by Eloquent
-        ]);
-
-        return response()->json(['message' => 'Tersimpan']);
     }
 
     /**
@@ -131,11 +165,15 @@ class CbtUjianController extends Controller
             ->where('jadwal_id', $jadwal->id)
             ->first();
 
-        if ($durasi && $durasi->status == 1) {
-            $durasi->update([
-                'status' => 2,
-                'selesai' => now()->toTimeString(),
-            ]);
+        // Cek jika ujian sudah diselesaikan sebelumnya (idempotensi)
+        if ($durasi && $durasi->status === DurasiStatus::SELESAI) {
+            return response()->json(['message' => 'Ujian sudah diselesaikan sebelumnya.']);
+        }
+
+        if ($durasi && $durasi->status === DurasiStatus::SEDANG) {
+            $durasi->status = DurasiStatus::SELESAI;
+            $durasi->selesai = now()->toTimeString();
+            $durasi->save();
 
             // Hitung nilai via CbtService
             $this->cbtService->hitungNilai($siswa, $jadwal);

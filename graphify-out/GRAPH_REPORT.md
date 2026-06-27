@@ -1,16 +1,16 @@
-# Graph Report - my-app  (2026-06-06)
+# Graph Report - my-app  (2026-06-10)
 
 ## Corpus Check
-- 565 files · ~148,319 words
+- 602 files · ~185,776 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2869 nodes · 2619 edges · 565 communities (405 shown, 160 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 114 edges (avg confidence: 0.8)
+- 3104 nodes · 2876 edges · 601 communities (428 shown, 173 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 147 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2170a2bc`
+- Built from commit: `f928dcae`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -250,6 +250,7 @@
 - [[_COMMUNITY_Community 528|Community 528]]
 - [[_COMMUNITY_Community 529|Community 529]]
 - [[_COMMUNITY_Community 530|Community 530]]
+- [[_COMMUNITY_Community 538|Community 538]]
 - [[_COMMUNITY_Community 539|Community 539]]
 - [[_COMMUNITY_Community 540|Community 540]]
 - [[_COMMUNITY_Community 541|Community 541]]
@@ -274,15 +275,32 @@
 - [[_COMMUNITY_Community 561|Community 561]]
 - [[_COMMUNITY_Community 562|Community 562]]
 - [[_COMMUNITY_Community 564|Community 564]]
+- [[_COMMUNITY_Community 565|Community 565]]
+- [[_COMMUNITY_Community 566|Community 566]]
+- [[_COMMUNITY_Community 567|Community 567]]
+- [[_COMMUNITY_Community 568|Community 568]]
+- [[_COMMUNITY_Community 569|Community 569]]
+- [[_COMMUNITY_Community 570|Community 570]]
+- [[_COMMUNITY_Community 572|Community 572]]
+- [[_COMMUNITY_Community 573|Community 573]]
+- [[_COMMUNITY_Community 592|Community 592]]
+- [[_COMMUNITY_Community 593|Community 593]]
+- [[_COMMUNITY_Community 594|Community 594]]
+- [[_COMMUNITY_Community 595|Community 595]]
+- [[_COMMUNITY_Community 596|Community 596]]
+- [[_COMMUNITY_Community 597|Community 597]]
+- [[_COMMUNITY_Community 598|Community 598]]
+- [[_COMMUNITY_Community 599|Community 599]]
+- [[_COMMUNITY_Community 600|Community 600]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `GuruImportTest` - 36 edges
-2. `dependencies` - 33 edges
-3. `SiswaImportTest` - 33 edges
-4. `devDependencies` - 20 edges
-5. `Quick Reference` - 20 edges
-6. `compilerOptions` - 19 edges
-7. `Auth` - 15 edges
+1. `Auth` - 39 edges
+2. `GuruImportTest` - 36 edges
+3. `dependencies` - 33 edges
+4. `SiswaImportTest` - 33 edges
+5. `devDependencies` - 20 edges
+6. `Quick Reference` - 20 edges
+7. `compilerOptions` - 19 edges
 8. `Skill: GarudaCBT — Laravel + Vue 3 + Inertia.js` - 14 edges
 9. `Skill: GarudaCBT — Laravel + Vue 3 + Inertia.js` - 14 edges
 10. `require` - 13 edges
@@ -290,10 +308,12 @@
 ## Surprising Connections (you probably didn't know these)
 - `cn()` --calls--> `clsx`  [INFERRED]
   resources/js/lib/utils.ts → package.json
+- `handleSelesai()` --calls--> `selesai`  [INFERRED]
+  resources/js/pages/Cbt/Siswa/Ujian.vue → resources/js/components/Dashboard/NotifikasiPanel.vue
 - `confirmSelesai()` --calls--> `selesai`  [INFERRED]
   resources/js/pages/Cbt/Siswa/Ujian.vue → resources/js/components/Dashboard/NotifikasiPanel.vue
 
-## Communities (565 total, 160 thin omitted)
+## Communities (601 total, 173 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.04
@@ -399,10 +419,6 @@ Nodes (13): Always Queue Notifications, code:php (class OrderShipped implements 
 Cohesion: 0.14
 Nodes (13): Always Use `validated()`, Array vs. String Notation for Rules, code:php (public function store(Request $request)), code:php (public function store(StorePostRequest $request)), code:php (// Preferred for new code), code:php (Post::create($request->all());), code:php (Post::create($request->validated());), code:php ('company_name' => [) (+5 more)
 
-### Community 26 - "Community 26"
-Cohesion: 0.17
-Nodes (4): CheckExamSession, SoalSiswaResource, CbtUjianController, Auth
-
 ### Community 27 - "Community 27"
 Cohesion: 0.15
 Nodes (12): files, code, document, image, paper, video, graphifyignore_patterns, needs_graph (+4 more)
@@ -499,9 +515,13 @@ Nodes (3): emailRules(), nameRules(), profileRules()
 Cohesion: 0.25
 Nodes (7): agents, cloud, guidelines, mcp, nightwatch, sail, skills
 
+### Community 62 - "Community 62"
+Cohesion: 0.04
+Nodes (45): 10. Mobile-First Design Rules, 11. Flaws & Limitations (Akses Siswa), 12. Verifikasi, 1. Arsitektur & Routing, 2. Controller, 3. Layout Siswa (Mobile-First), 4. Halaman Dashboard Siswa, 5. 7 Menu Utama (+37 more)
+
 ### Community 69 - "Community 69"
-Cohesion: 0.16
-Nodes (3): RoleHierarchy, HandleAppearance, UserPolicy
+Cohesion: 0.1
+Nodes (4): RoleHierarchy, HandleAppearance, User, UserPolicy
 
 ### Community 113 - "Community 113"
 Cohesion: 0.33
@@ -628,36 +648,40 @@ Cohesion: 0.13
 Nodes (3): Materi, MateriController, Materi
 
 ### Community 468 - "Community 468"
-Cohesion: 0.15
-Nodes (4): ReportController, CbtKopAbsensi, CbtKopBerita, CbtKopKartu
+Cohesion: 0.12
+Nodes (5): ReportController, GuruCetakController, CbtKopAbsensi, CbtKopBerita, CbtKopKartu
+
+### Community 472 - "Community 472"
+Cohesion: 0.17
+Nodes (3): PengumumanController, SiswaDashboardTest, Post
 
 ### Community 479 - "Community 479"
-Cohesion: 0.25
-Nodes (5): kiri, list, matchIdx, observer, pairs
+Cohesion: 0.13
+Nodes (11): kiri, leftEl, leftRect, list, matchIdx, observer, pairs, rightEl (+3 more)
 
 ### Community 483 - "Community 483"
 Cohesion: 0.05
-Nodes (35): mulai, selesai, choices, compiledMatrix, confirmSelesai(), connectedChoice, csrfToken, h (+27 more)
+Nodes (38): mulai, selesai, choices, compiledMatrix, confirmSelesai(), connectedChoice, csrfToken, h (+30 more)
 
 ### Community 497 - "Community 497"
 Cohesion: 0.14
 Nodes (11): dbMax, existingMax, leftEl, leftId, leftRect, lKey, newMax, rightEl (+3 more)
 
+### Community 500 - "Community 500"
+Cohesion: 0.33
+Nodes (4): Jadwal, OfflinePayload, SoalSiswa, useExamStore
+
 ### Community 521 - "Community 521"
-Cohesion: 0.17
-Nodes (12): code:php (Schema::create('cbt_jenis', function (Blueprint $table) {), code:php (Schema::create('cbt_bank_soal', function (Blueprint $table) ), code:php (Schema::create('cbt_soal', function (Blueprint $table) {), code:php (Schema::create('cbt_jadwal', function (Blueprint $table) {), code:php (Schema::create('cbt_token', function (Blueprint $table) {), code:php (Schema::create('cbt_soal_siswa', function (Blueprint $table)), code:php (Schema::create('cbt_durasi_siswa', function (Blueprint $tabl), code:php (Schema::create('cbt_nilai', function (Blueprint $table) {) (+4 more)
+Cohesion: 0.05
+Nodes (40): 10. Analisis Soal (`/guru/analisis-soal`), 11. Rekap Nilai (`/guru/rekap-nilai`), 4. Ulangan / Ujian (`/guru/ulangan-ujian`), 7. Cetak (`/guru/cetak`), 8. Status Siswa (`/guru/status-siswa`), 9. Hasil Ujian (`/guru/hasil-ujian`), Alur Data Shared (HandleInertiaRequests), Arsitektur (+32 more)
 
 ### Community 522 - "Community 522"
-Cohesion: 0.25
-Nodes (8): code:php (Schema::create('kelas', function (Blueprint $table) {), code:php (Schema::create('kelas_siswa', function (Blueprint $table) {), code:php (Schema::create('mapel', function (Blueprint $table) {), code:php (Schema::create('siswa', function (Blueprint $table) {), code:php (Schema::create('guru', function (Blueprint $table) {), code:php (Schema::create('jurusan', function (Blueprint $table) {), code:php (Schema::create('level_kelas', function (Blueprint $table) {), Tabel Master Data
+Cohesion: 0.22
+Nodes (3): GuruStatusSiswaController, DashboardController, Auth
 
-### Community 545 - "Community 545"
-Cohesion: 0.17
-Nodes (12): code:php (Schema::create('cbt_jenis', function (Blueprint $table) {), code:php (Schema::create('cbt_bank_soal', function (Blueprint $table) ), code:php (Schema::create('cbt_soal', function (Blueprint $table) {), code:php (Schema::create('cbt_jadwal', function (Blueprint $table) {), code:php (Schema::create('cbt_token', function (Blueprint $table) {), code:php (Schema::create('cbt_soal_siswa', function (Blueprint $table)), code:php (Schema::create('cbt_durasi_siswa', function (Blueprint $tabl), code:php (Schema::create('cbt_nilai', function (Blueprint $table) {) (+4 more)
-
-### Community 546 - "Community 546"
-Cohesion: 0.25
-Nodes (8): code:php (Schema::create('kelas', function (Blueprint $table) {), code:php (Schema::create('kelas_siswa', function (Blueprint $table) {), code:php (Schema::create('mapel', function (Blueprint $table) {), code:php (Schema::create('siswa', function (Blueprint $table) {), code:php (Schema::create('guru', function (Blueprint $table) {), code:php (Schema::create('jurusan', function (Blueprint $table) {), code:php (Schema::create('level_kelas', function (Blueprint $table) {), Tabel Master Data
+### Community 538 - "Community 538"
+Cohesion: 0.15
+Nodes (12): 10. Analisis Soal, 11. Rekap Nilai, 1. Beranda, 2. Profile, 3. Pengumuman, 4. Ulangan / Ujian, 5. Bank Soal, 6. Jadwal (+4 more)
 
 ### Community 547 - "Community 547"
 Cohesion: 0.04
@@ -675,10 +699,6 @@ Nodes (30): APIs & Eloquent Resources, Application Structure & Architecture, Art
 Cohesion: 0.06
 Nodes (30): APIs & Eloquent Resources, Application Structure & Architecture, Artisan, Conventions, Deployment, Do Things the Laravel Way, Documentation Files, Foundational Context (+22 more)
 
-### Community 553 - "Community 553"
-Cohesion: 0.22
-Nodes (8): forceSelesai(), isLoading, isRefreshing, loadStatusSiswa(), props, resetLogin(), selectedJadwalId, siswaList
-
 ### Community 558 - "Community 558"
 Cohesion: 0.25
 Nodes (6): Passkey, User, ComponentCustomProperties, ImportMeta, ImportMetaEnv, InertiaConfig
@@ -691,25 +711,45 @@ Nodes (6): command, enabled, type, mcp, laravel-boost, $schema
 Cohesion: 0.33
 Nodes (5): 1. Bug: Highlight jawaban benar tidak berfungsi untuk Ganda Kompleks ✅ Diperbaiki, 2. Import tidak terpakai ✅ Diperbaiki, 3. Dark mode tidak konsisten ✅ Diperbaiki, 4. Kelas Tailwind non-standar (tidak ada efek) ✅ Diperbaiki, Catatan Error & Issues — Folder Soal
 
+### Community 565 - "Community 565"
+Cohesion: 0.17
+Nodes (12): code:php (Schema::create('cbt_jenis', function (Blueprint $table) {), code:php (Schema::create('cbt_bank_soal', function (Blueprint $table) ), code:php (Schema::create('cbt_soal', function (Blueprint $table) {), code:php (Schema::create('cbt_jadwal', function (Blueprint $table) {), code:php (Schema::create('cbt_token', function (Blueprint $table) {), code:php (Schema::create('cbt_soal_siswa', function (Blueprint $table)), code:php (Schema::create('cbt_durasi_siswa', function (Blueprint $tabl), code:php (Schema::create('cbt_nilai', function (Blueprint $table) {) (+4 more)
+
+### Community 593 - "Community 593"
+Cohesion: 0.17
+Nodes (12): code:php (Schema::create('cbt_jenis', function (Blueprint $table) {), code:php (Schema::create('cbt_bank_soal', function (Blueprint $table) ), code:php (Schema::create('cbt_soal', function (Blueprint $table) {), code:php (Schema::create('cbt_jadwal', function (Blueprint $table) {), code:php (Schema::create('cbt_token', function (Blueprint $table) {), code:php (Schema::create('cbt_soal_siswa', function (Blueprint $table)), code:php (Schema::create('cbt_durasi_siswa', function (Blueprint $tabl), code:php (Schema::create('cbt_nilai', function (Blueprint $table) {) (+4 more)
+
+### Community 594 - "Community 594"
+Cohesion: 0.25
+Nodes (8): code:php (Schema::create('kelas', function (Blueprint $table) {), code:php (Schema::create('kelas_siswa', function (Blueprint $table) {), code:php (Schema::create('mapel', function (Blueprint $table) {), code:php (Schema::create('siswa', function (Blueprint $table) {), code:php (Schema::create('guru', function (Blueprint $table) {), code:php (Schema::create('jurusan', function (Blueprint $table) {), code:php (Schema::create('level_kelas', function (Blueprint $table) {), Tabel Master Data
+
+### Community 595 - "Community 595"
+Cohesion: 0.2
+Nodes (9): forceSelesai(), isLoading, isRefreshing, loadStatusSiswa(), props, query, resetLogin(), selectedJadwalId (+1 more)
+
+### Community 597 - "Community 597"
+Cohesion: 0.25
+Nodes (8): code:php (Schema::create('kelas', function (Blueprint $table) {), code:php (Schema::create('kelas_siswa', function (Blueprint $table) {), code:php (Schema::create('mapel', function (Blueprint $table) {), code:php (Schema::create('siswa', function (Blueprint $table) {), code:php (Schema::create('guru', function (Blueprint $table) {), code:php (Schema::create('jurusan', function (Blueprint $table) {), code:php (Schema::create('level_kelas', function (Blueprint $table) {), Tabel Master Data
+
 ## Knowledge Gaps
-- **875 isolated node(s):** `agents`, `cloud`, `guidelines`, `mcp`, `nightwatch` (+870 more)
+- **951 isolated node(s):** `agents`, `cloud`, `guidelines`, `mcp`, `nightwatch` (+946 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **160 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **173 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Auth` connect `Community 26` to `Community 355`, `Community 554`, `Community 556`, `Community 557`, `Community 558`, `Community 561`?**
+- **Why does `Auth` connect `Community 522` to `Community 352`, `Community 546`, `Community 355`, `Community 552`, `Community 553`, `Community 554`, `Community 555`, `Community 556`, `Community 557`, `Community 558`, `Community 561`, `Community 468`, `Community 567`, `Community 568`, `Community 26`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `Skill: GarudaCBT — Laravel + Vue 3 + Inertia.js` connect `Community 275` to `Community 271`, `Community 272`, `Community 274`, `Community 276`, `Community 277`, `Community 278`, `Community 279`, `Community 280`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
+- **Are the 37 inferred relationships involving `Auth` (e.g. with `.resetLogin()` and `.forceSelesai()`) actually correct?**
+  _`Auth` has 37 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `agents`, `cloud`, `guidelines` to the rest of the system?**
-  _875 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _951 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.04 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.13 - nodes in this community are weakly interconnected._
-- **Should `Community 4` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._

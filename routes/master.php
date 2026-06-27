@@ -36,6 +36,8 @@ Route::resource('kelas', KelasController::class)
 
 Route::get('kelas/{kelas}/students', [KelasController::class, 'editStudents'])->name('kelas.students.edit');
 Route::put('kelas/{kelas}/students', [KelasController::class, 'updateStudents'])->name('kelas.students.update');
+Route::get('kelas/{kelas}/students/template', [KelasController::class, 'downloadStudentsTemplate'])->name('kelas.students.template');
+Route::post('kelas/{kelas}/students/import', [KelasController::class, 'importStudents'])->name('kelas.students.import');
 
 Route::resource('buku-induk', BukuIndukController::class)
     ->parameters(['buku-induk' => 'buku_induk'])

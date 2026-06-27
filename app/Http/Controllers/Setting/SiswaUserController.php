@@ -14,7 +14,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -35,6 +34,15 @@ class SiswaUserController extends Controller
 
         $siswas = Siswa::with('user')->latest()->paginate(10);
 
+        // Make password visible for frontend display
+        $siswas->getCollection()->transform(function ($siswa) {
+            if ($siswa->user) {
+                $siswa->user->makeVisible('password');
+            }
+
+            return $siswa;
+        });
+
         return Inertia::render('Setting/User/SiswaIndex', [
             'siswas' => $siswas,
             'imported_users' => session('imported_users'),
@@ -53,20 +61,30 @@ class SiswaUserController extends Controller
         $sheet->setTitle('Template Siswa');
 
         $headers = [
-            'Nama Siswa*',
-            'NISN*',
-            'NIS*',
-            'Username*',
-            'Email',
-            'Jenis Kelamin (L/P)',
-            'Tahun Masuk',
-            'Sekolah Asal',
+            'No',
+            'Nis Lokal',
+            'NISN',
+            'NAMA',
+            'JENIS KELAMIN',
             'Tempat Lahir',
-            'Tanggal Lahir (YYYY-MM-DD)',
+            'Tgl Lahir (dd-mm-yyyy)',
+            'Password',
+            'Alamat Siswa',
             'Agama',
-            'No HP',
-            'NIK',
-            'Warga Negara',
+            'Status Keluarga',
+            'Anak Ke',
+            'Nomor HP',
+            'Sekolah Asal',
+            'Tgl Terima',
+            'Tingkat Awal',
+            'Nama Ayah',
+            'Nama Ibu',
+            'Pekerjaan Ayah',
+            'Pekerjaan Ibu',
+            'Alamat Orang Tua',
+            'Nama Wali',
+            'Pekerjaan Wali',
+            'Alamat Wali',
         ];
 
         foreach ($headers as $colIdx => $header) {
@@ -85,23 +103,33 @@ class SiswaUserController extends Controller
                 'startColor' => ['rgb' => 'E5E7EB'],
             ],
         ];
-        $sheet->getStyle('A1:N1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:X1')->applyFromArray($headerStyle);
 
         $example = [
-            'Budi Santoso',
-            '0081234567',
+            '1',
             '10245',
-            'budisantoso',
-            'budi@school.sch.id',
+            '0081234567',
+            'Budi Santoso',
             'L',
-            '2025',
-            'SMPN 1 Jakarta',
             'Jakarta',
-            '2010-08-15',
+            '15-08-2010',
+            'password123',
+            'Jl. Merdeka No 1',
             'Islam',
+            'K',
+            '2',
             '085678901234',
-            '3201021508100001',
-            'WNI',
+            'SMPN 1 Jakarta',
+            '2025',
+            '10',
+            'Ayah Budi',
+            'Ibu Budi',
+            'Wiraswasta',
+            'Ibu Rumah Tangga',
+            'Jl. Merdeka No 1',
+            '',
+            '',
+            '',
         ];
         foreach ($example as $colIdx => $val) {
             $colLetter = Coordinate::stringFromColumnIndex($colIdx + 1);
@@ -161,20 +189,34 @@ class SiswaUserController extends Controller
         foreach ($dataRows as $index => $row) {
             $rowNum = $index + 2;
 
-            $nama = isset($row[0]) ? trim(strip_tags((string) $row[0])) : '';
-            $nisn = isset($row[1]) ? trim(strip_tags((string) $row[1])) : '';
-            $nis = isset($row[2]) ? trim(strip_tags((string) $row[2])) : '';
-            $username = isset($row[3]) ? trim(strip_tags((string) $row[3])) : '';
-            $email = isset($row[4]) ? trim(strip_tags((string) $row[4])) : '';
-            $jenis_kelamin = isset($row[5]) ? trim(strip_tags((string) $row[5])) : '';
-            $tahun_masuk = isset($row[6]) ? trim(strip_tags((string) $row[6])) : '';
-            $sekolah_asal = isset($row[7]) ? trim(strip_tags((string) $row[7])) : '';
-            $tempat_lahir = isset($row[8]) ? trim(strip_tags((string) $row[8])) : '';
-            $tanggal_lahir_raw = isset($row[9]) ? trim(strip_tags((string) $row[9])) : '';
-            $agama = isset($row[10]) ? trim(strip_tags((string) $row[10])) : '';
-            $hp = isset($row[11]) ? trim(strip_tags((string) $row[11])) : '';
-            $nik = isset($row[12]) ? trim(strip_tags((string) $row[12])) : '';
-            $warga_negara = isset($row[13]) ? trim(strip_tags((string) $row[13])) : 'WNI';
+            $nis = isset($row[1]) ? trim(strip_tags((string) $row[1])) : '';
+            $nisn = isset($row[2]) ? trim(strip_tags((string) $row[2])) : '';
+            $nama = isset($row[3]) ? trim(strip_tags((string) $row[3])) : '';
+            $jenis_kelamin = isset($row[4]) ? trim(strip_tags((string) $row[4])) : '';
+            $tempat_lahir = isset($row[5]) ? trim(strip_tags((string) $row[5])) : '';
+            $tanggal_lahir_raw = isset($row[6]) ? trim(strip_tags((string) $row[6])) : '';
+            $password = isset($row[7]) ? trim(strip_tags((string) $row[7])) : '';
+            $alamat = isset($row[8]) ? trim(strip_tags((string) $row[8])) : '';
+            $agama = isset($row[9]) ? trim(strip_tags((string) $row[9])) : '';
+            $status_keluarga = isset($row[10]) ? trim(strip_tags((string) $row[10])) : '';
+            $anak_ke_raw = isset($row[11]) ? trim(strip_tags((string) $row[11])) : '';
+            $hp = isset($row[12]) ? trim(strip_tags((string) $row[12])) : '';
+            $sekolah_asal = isset($row[13]) ? trim(strip_tags((string) $row[13])) : '';
+            $tahun_masuk = isset($row[14]) ? trim(strip_tags((string) $row[14])) : '';
+            $kelas_awal_raw = isset($row[15]) ? trim(strip_tags((string) $row[15])) : '';
+            $nama_ayah = isset($row[16]) ? trim(strip_tags((string) $row[16])) : '';
+            $nama_ibu = isset($row[17]) ? trim(strip_tags((string) $row[17])) : '';
+            $pekerjaan_ayah = isset($row[18]) ? trim(strip_tags((string) $row[18])) : '';
+            $pekerjaan_ibu = isset($row[19]) ? trim(strip_tags((string) $row[19])) : '';
+            $alamat_ortu = isset($row[20]) ? trim(strip_tags((string) $row[20])) : '';
+            $nama_wali = isset($row[21]) ? trim(strip_tags((string) $row[21])) : '';
+            $pekerjaan_wali = isset($row[22]) ? trim(strip_tags((string) $row[22])) : '';
+            $alamat_wali = isset($row[23]) ? trim(strip_tags((string) $row[23])) : '';
+
+            $anak_ke = is_numeric($anak_ke_raw) ? (int) $anak_ke_raw : null;
+            $kelas_awal = is_numeric($kelas_awal_raw) ? (int) $kelas_awal_raw : null;
+            $username = $nis;
+            $email = $username ? "{$username}@sch.id" : null;
 
             if (empty($nama)) {
                 $errors[] = "Baris {$rowNum}: Nama Siswa tidak boleh kosong.";
@@ -231,9 +273,13 @@ class SiswaUserController extends Controller
             $tanggal_lahir = null;
             if (! empty($tanggal_lahir_raw)) {
                 try {
-                    $tanggal_lahir = Carbon::createFromFormat('Y-m-d', $tanggal_lahir_raw)->format('Y-m-d');
+                    $tanggal_lahir = Carbon::createFromFormat('d-m-Y', $tanggal_lahir_raw)->format('Y-m-d');
                 } catch (\Exception $e) {
-                    $errors[] = "Baris {$rowNum}: Format tanggal lahir harus YYYY-MM-DD.";
+                    try {
+                        $tanggal_lahir = Carbon::parse($tanggal_lahir_raw)->format('Y-m-d');
+                    } catch (\Exception $e2) {
+                        $errors[] = "Baris {$rowNum}: Format tanggal lahir harus DD-MM-YYYY.";
+                    }
                 }
             }
 
@@ -283,9 +329,22 @@ class SiswaUserController extends Controller
                 'tanggal_lahir' => $tanggal_lahir,
                 'agama' => empty($agama) ? null : $agama,
                 'hp' => empty($hp) ? null : $hp,
-                'nik' => empty($nik) ? null : $nik,
-                'warga_negara' => empty($warga_negara) ? 'WNI' : $warga_negara,
-                'password' => 'password',
+                'alamat' => empty($alamat) ? null : $alamat,
+                'status_keluarga' => empty($status_keluarga) ? null : $status_keluarga,
+                'anak_ke' => $anak_ke,
+                'kelas_awal' => $kelas_awal,
+                'nama_ayah' => empty($nama_ayah) ? null : $nama_ayah,
+                'nama_ibu' => empty($nama_ibu) ? null : $nama_ibu,
+                'pekerjaan_ayah' => empty($pekerjaan_ayah) ? null : $pekerjaan_ayah,
+                'pekerjaan_ibu' => empty($pekerjaan_ibu) ? null : $pekerjaan_ibu,
+                'alamat_ayah' => empty($alamat_ortu) ? null : $alamat_ortu,
+                'alamat_ibu' => empty($alamat_ortu) ? null : $alamat_ortu,
+                'nama_wali' => empty($nama_wali) ? null : $nama_wali,
+                'pekerjaan_wali' => empty($pekerjaan_wali) ? null : $pekerjaan_wali,
+                'alamat_wali' => empty($alamat_wali) ? null : $alamat_wali,
+                'nik' => null,
+                'warga_negara' => 'WNI',
+                'password' => empty($password) ? 'password' : $password,
                 'rowNum' => $rowNum,
             ];
         }
@@ -394,7 +453,7 @@ class SiswaUserController extends Controller
             $user->username = $data['username'];
 
             if (! empty($data['password'])) {
-                $user->password = Hash::make($data['password']);
+                $user->password = $data['password'];
             }
 
             $user->save();

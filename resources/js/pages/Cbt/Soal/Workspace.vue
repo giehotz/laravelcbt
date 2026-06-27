@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -86,7 +86,7 @@ watch(
             );
         }
     },
-    { immediate: true, deep: true },
+    { immediate: true },
 );
 
 // Ref to matching editor to call validation
@@ -94,9 +94,11 @@ const menjodohkanEditorRef = ref<InstanceType<typeof MenjodohkanEditor> | null>(
     null,
 );
 
-const currentTab = computed(
-    () => jenisTabs.find((t) => t.id === activeJenis.value)!,
-);
+const currentTab = computed(() => {
+    const found = jenisTabs.find((t) => t.id === activeJenis.value);
+    if (!found) return { id: activeJenis.value, key: 'unknown', label: 'Unknown' };
+    return found;
+});
 
 const targetJml = computed(() => {
     return props.bank[`tampil_${currentTab.value.key}`] || 0;
@@ -181,19 +183,19 @@ const loadForm = (nomor: number) => {
     form.clearErrors();
 };
 
-const switchTab = (jenisId: number) => {
-    activeJenis.value = jenisId;
-    // Find the first empty number, or 1 if full
-    let firstEmpty = 1;
-    for (let i = 1; i <= targetJml.value; i++) {
-        if (
-            !props.soals.find((s) => s.jenis === jenisId && s.nomor_soal === i)
-        ) {
-            firstEmpty = i;
-            break;
+const firstEmptyNomor = (jenisId: number): number => {
+    const target = targetJml.value;
+    for (let i = 1; i <= target; i++) {
+        if (!props.soals.find((s) => s.jenis === jenisId && s.nomor_soal === i)) {
+            return i;
         }
     }
-    loadForm(firstEmpty);
+    return Math.max(1, target + 1);
+};
+
+const switchTab = (jenisId: number) => {
+    activeJenis.value = jenisId;
+    loadForm(firstEmptyNomor(jenisId));
 };
 
 const submitForm = () => {
@@ -219,7 +221,7 @@ const submitForm = () => {
             preserveState: true,
             onSuccess: () => {
                 addToast('Soal berhasil disimpan!', 'success');
-                loadForm(activeNomor.value); // Reload to get ID and switch mode to edit
+                nextTick(() => loadForm(activeNomor.value));
             },
         });
     }
@@ -280,18 +282,7 @@ if (props.active_soal_id) {
     }
 } else {
     // If it's a new create, find next empty for the active jenis
-    let firstEmpty = 1;
-    for (let i = 1; i <= targetJml.value; i++) {
-        if (
-            !props.soals.find(
-                (s) => s.jenis === activeJenis.value && s.nomor_soal === i,
-            )
-        ) {
-            firstEmpty = i;
-            break;
-        }
-    }
-    loadForm(firstEmpty);
+    loadForm(firstEmptyNomor(activeJenis.value));
 }
 </script>
 

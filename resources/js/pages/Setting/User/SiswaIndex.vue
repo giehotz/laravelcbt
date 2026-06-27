@@ -452,6 +452,7 @@ const downloadTemplate = () => {
                             <th class="px-6 py-4">NIS / NISN</th>
                             <th class="px-6 py-4">L/P</th>
                             <th class="px-6 py-4">Username Login</th>
+                            <th class="px-6 py-4">Password</th>
                             <th class="px-6 py-4">UID Kartu</th>
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
@@ -506,6 +507,11 @@ const downloadTemplate = () => {
                                 class="px-6 py-4 text-neutral-600 dark:text-neutral-400"
                             >
                                 {{ siswa.user?.username || '-' }}
+                            </td>
+                            <td
+                                class="px-6 py-4 text-neutral-600 dark:text-neutral-400 font-mono"
+                            >
+                                {{ siswa.user?.password || '-' }}
                             </td>
                             <td
                                 class="px-6 py-4 font-mono text-xs text-neutral-600 dark:text-neutral-400"

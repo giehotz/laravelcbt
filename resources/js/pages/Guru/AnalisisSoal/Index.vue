@@ -116,7 +116,7 @@ async function fetchData() {
                             <td class="px-4 py-3 text-sm text-center whitespace-nowrap text-muted-foreground">{{ s.nomor }}</td>
                             <td class="max-w-xs truncate px-4 py-3 text-sm text-card-foreground">{{ s.teks || '—' }}</td>
                             <td class="px-4 py-3 text-sm text-center whitespace-nowrap">
-                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium">{{ { 0: 'PG', 1: 'Esai' }[s.jenis] ?? '?' }}</span>
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium">{{ ({ 0: 'PG', 1: 'Esai' } as Record<number | string, string>)[s.jenis] ?? '?' }}</span>
                             </td>
                             <td class="px-4 py-3 text-sm text-center whitespace-nowrap text-muted-foreground">{{ s.total_siswa }}</td>
                             <td class="px-4 py-3 text-sm text-center whitespace-nowrap text-muted-foreground">{{ s.benar }}</td>

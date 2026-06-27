@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cbt\DurasiSiswa;
 use App\Models\Cbt\Jadwal;
 use App\Models\Master\KelasSiswa;
-use App\Models\Pengumuman;
+use App\Models\Post;
 use App\Models\Semester;
 use App\Models\TahunPelajaran;
 use Illuminate\Http\JsonResponse;
@@ -85,13 +85,40 @@ class DashboardController extends Controller
 
     public function pengumuman(): JsonResponse
     {
-        $pengumuman = Pengumuman::latest()->take(5)->get();
+        $siswa = auth()->user()->siswa;
+        abort_unless($siswa, 403);
+
+        $tp = TahunPelajaran::where('active', true)->first();
+        $smt = Semester::where('active', true)->first();
+
+        $kelasSiswa = KelasSiswa::where('siswa_id', $siswa->id)
+            ->when($tp, fn ($q) => $q->where('tahun_pelajaran_id', $tp->id))
+            ->when($smt, fn ($q) => $q->where('semester_id', $smt->id))
+            ->first();
+
+        $kelasId = $kelasSiswa?->kelas_id;
+
+        $query = Post::with('user');
+
+        $query->where(function ($q) use ($kelasId) {
+            $q->whereJsonContains('kepada->type', 'all')
+                ->orWhereJsonContains('kepada->type', 'siswa');
+
+            if ($kelasId) {
+                $q->orWhere(function ($sub) use ($kelasId) {
+                    $sub->whereJsonContains('kepada->type', 'kelas')
+                        ->whereJsonContains('kepada->ids', (int) $kelasId);
+                });
+            }
+        });
+
+        $pengumuman = $query->latest()->take(5)->get();
 
         return response()->json([
             'data' => $pengumuman->map(fn ($p) => [
                 'id' => $p->id,
-                'judul' => $p->judul,
-                'isi' => $p->isi,
+                'judul' => 'Dari: '.($p->user?->name ?? 'Sistem'),
+                'isi' => strip_tags($p->text),
                 'created_at' => $p->created_at?->diffForHumans(),
             ]),
         ]);

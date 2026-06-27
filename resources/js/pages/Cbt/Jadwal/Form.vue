@@ -216,10 +216,7 @@ const submit = () => {
                                 </p>
                             </div>
                             <Switch
-                                :checked="form.acak_soal"
-                                @update:checked="
-                                    (v: boolean) => (form.acak_soal = v)
-                                "
+                                v-model="form.acak_soal"
                             />
                         </div>
                         <div class="flex items-center justify-between">
@@ -230,10 +227,7 @@ const submit = () => {
                                 </p>
                             </div>
                             <Switch
-                                :checked="form.acak_opsi"
-                                @update:checked="
-                                    (v: boolean) => (form.acak_opsi = v)
-                                "
+                                v-model="form.acak_opsi"
                             />
                         </div>
                         <div class="flex items-center justify-between">
@@ -244,10 +238,7 @@ const submit = () => {
                                 </p>
                             </div>
                             <Switch
-                                :checked="form.token"
-                                @update:checked="
-                                    (v: boolean) => (form.token = v)
-                                "
+                                v-model="form.token"
                             />
                         </div>
                         <div class="flex items-center justify-between">
@@ -258,10 +249,7 @@ const submit = () => {
                                 </p>
                             </div>
                             <Switch
-                                :checked="form.hasil_tampil"
-                                @update:checked="
-                                    (v: boolean) => (form.hasil_tampil = v)
-                                "
+                                v-model="form.hasil_tampil"
                             />
                         </div>
                         <div class="flex items-center justify-between">
@@ -272,10 +260,7 @@ const submit = () => {
                                 </p>
                             </div>
                             <Switch
-                                :checked="form.ulang"
-                                @update:checked="
-                                    (v: boolean) => (form.ulang = v)
-                                "
+                                v-model="form.ulang"
                             />
                         </div>
                         <div class="flex items-center justify-between">
@@ -286,10 +271,7 @@ const submit = () => {
                                 </p>
                             </div>
                             <Switch
-                                :checked="form.reset_login"
-                                @update:checked="
-                                    (v: boolean) => (form.reset_login = v)
-                                "
+                                v-model="form.reset_login"
                             />
                         </div>
                     </div>

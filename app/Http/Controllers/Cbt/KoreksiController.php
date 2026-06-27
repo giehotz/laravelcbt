@@ -39,6 +39,8 @@ class KoreksiController extends Controller
      */
     public function dataSiswa(Request $request, Jadwal $jadwal)
     {
+        $this->authorize('correctEssay', $jadwal);
+
         // Ambil semua siswa yang telah selesai ujian (status durasi = 2)
         $siswaUjian = DB::table('cbt_durasi_siswa')
             ->join('siswa', 'siswa.id', '=', 'cbt_durasi_siswa.siswa_id')
@@ -68,6 +70,8 @@ class KoreksiController extends Controller
      */
     public function koreksiSiswa(Request $request, Jadwal $jadwal, Siswa $siswa)
     {
+        $this->authorize('correctEssay', $jadwal);
+
         $soalSiswas = SoalSiswa::with('soal')
             ->where('jadwal_id', $jadwal->id)
             ->where('siswa_id', $siswa->id)
@@ -92,6 +96,8 @@ class KoreksiController extends Controller
      */
     public function simpanKoreksi(Request $request, Jadwal $jadwal, Siswa $siswa, CbtService $cbtService)
     {
+        $this->authorize('correctEssay', $jadwal);
+
         $request->validate([
             'koreksi' => 'required|array',
             'koreksi.*.id' => 'required|string',

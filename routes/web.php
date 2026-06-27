@@ -30,7 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Master routes (Academic periods)
-Route::middleware(['auth', 'verified', 'role:superadmin|operator'])
+Route::middleware(['auth', 'verified', 'role:superadmin|operator|guru|kepsek|proktor'])
     ->prefix('master')->name('master.')
     ->group(base_path('routes/master.php'));
 

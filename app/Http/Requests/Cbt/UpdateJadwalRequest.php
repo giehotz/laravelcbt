@@ -37,13 +37,13 @@ class UpdateJadwalRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'acak_soal' => filter_var($this->acak_soal, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
-            'acak_opsi' => filter_var($this->acak_opsi, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
-            'hasil_tampil' => filter_var($this->hasil_tampil, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
-            'token' => filter_var($this->token, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
-            'ulang' => filter_var($this->ulang, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
-            'reset_login' => filter_var($this->reset_login, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
-            'rekap' => filter_var($this->rekap, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'acak_soal' => $this->boolean('acak_soal'),
+            'acak_opsi' => $this->boolean('acak_opsi'),
+            'hasil_tampil' => $this->boolean('hasil_tampil'),
+            'token' => $this->boolean('token'),
+            'ulang' => $this->boolean('ulang'),
+            'reset_login' => $this->boolean('reset_login'),
+            'rekap' => $this->boolean('rekap'),
         ]);
     }
 }

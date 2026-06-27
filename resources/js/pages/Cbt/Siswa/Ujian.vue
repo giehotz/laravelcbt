@@ -1,8 +1,8 @@
 <template>
-    <div class="flex min-h-screen flex-col bg-gray-50">
+    <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-zinc-950">
         <!-- Header Ujian -->
         <header
-            class="sticky top-0 z-10 flex flex-col items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:flex-row sm:px-6 lg:px-8"
+            class="sticky top-0 z-10 flex flex-col items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-4 sm:flex-row sm:px-6 lg:px-8 dark:border-zinc-800 dark:bg-zinc-900"
         >
             <div class="flex items-center gap-4">
                 <div class="rounded-lg bg-blue-600 p-2">
@@ -21,13 +21,13 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-gray-900">
-                        {{ jadwal.bank_soal?.mapel?.nama_mapel || 'Ujian' }}
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-zinc-100">
+                        {{ jadwal?.bank_soal?.mapel?.nama_mapel || 'Ujian' }}
                     </h1>
-                    <p class="text-sm text-gray-500">
-                        {{ jadwal.bank_soal?.nama }}
+                    <p class="text-sm text-gray-500 dark:text-zinc-400">
+                        {{ jadwal?.bank_soal?.nama }}
                     </p>
-                    <p class="text-xs text-gray-400">
+                    <p class="text-xs text-gray-400 dark:text-zinc-500">
                         Soal {{ currentQuestionPosition }} / {{ totalQuestionCount }}
                     </p>
                 </div>
@@ -35,7 +35,7 @@
 
             <div class="flex items-center gap-4">
                 <div
-                    v-if="!examStore.isOnline"
+                    v-show="!examStore.isOnline"
                     class="flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm text-red-700"
                 >
                     <div
@@ -44,7 +44,7 @@
                     Offline (Menunggu Koneksi)
                 </div>
                 <div
-                    v-if="examStore.hasOfflineQueue"
+                    v-show="examStore.hasOfflineQueue"
                     class="text-sm font-medium text-amber-600"
                 >
                     Menyimpan...
@@ -52,7 +52,7 @@
 
                 <button
                     @click="showNavigationModal = true"
-                    class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-400"
+                    class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700/80"
                 >
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -73,7 +73,7 @@
         >
             <!-- Area Soal -->
             <div
-                class="flex min-h-[500px] flex-1 flex-col rounded-xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8"
+                class="flex min-h-[500px] flex-1 flex-col rounded-xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-800 dark:bg-zinc-900"
             >
                 <div
                     v-if="isLoading"
@@ -85,28 +85,28 @@
                 </div>
                 <div v-else-if="activeSoal" class="flex flex-1 flex-col">
                     <div
-                        class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4"
+                        class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4 dark:border-zinc-800"
                     >
-                        <span class="text-lg font-bold text-gray-800"
+                        <span class="text-lg font-bold text-gray-800 dark:text-zinc-100"
                             >Soal Nomor {{ activeSoal.no_soal_alias }}</span
                         >
                         <label
-                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5"
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 dark:border-amber-900/30 dark:bg-amber-950/20"
                         >
                             <input
                                 type="checkbox"
                                 v-model="isRaguRagu"
                                 @change="saveAnswer"
-                                class="rounded border-amber-300 text-amber-500 focus:ring-amber-500"
+                                class="rounded border-amber-300 text-amber-500 focus:ring-amber-500 dark:border-amber-900 dark:bg-zinc-900"
                             />
-                            <span class="text-sm font-medium text-amber-700"
+                            <span class="text-sm font-medium text-amber-700 dark:text-amber-400"
                                 >Ragu-ragu</span
                             >
                         </label>
                     </div>
 
                     <div
-                        class="prose mb-8 max-w-none flex-1 text-gray-800"
+                        class="prose dark:prose-invert mb-8 max-w-none flex-1 text-gray-800 dark:text-zinc-200"
                         v-html="activeSoal.soal?.soal || ''"
                     ></div>
 
@@ -120,11 +120,11 @@
                                 aliasOpsi, originalOpsi
                             ) in pgOptionsMapping"
                             :key="originalOpsi"
-                            class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all hover:bg-gray-50"
+                            class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800/40"
                             :class="
                                 activeSoal.jawaban_siswa === aliasOpsi
-                                    ? 'border-blue-500 bg-blue-50 hover:bg-blue-50'
-                                    : 'border-gray-100'
+                                    ? 'border-blue-500 bg-blue-50 hover:bg-blue-50 dark:border-blue-900/30 dark:bg-blue-950/20'
+                                    : 'border-gray-100 dark:border-zinc-800'
                             "
                         >
                             <div class="pt-1">
@@ -136,11 +136,11 @@
                                     class="mt-0.5 h-5 w-5 border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                             </div>
-                            <div class="min-w-[24px] text-lg font-medium">
+                            <div class="min-w-[24px] text-lg font-medium text-gray-900 dark:text-zinc-100">
                                 {{ aliasOpsi }}.
                             </div>
                             <div
-                                class="prose max-w-none flex-1 text-gray-700"
+                                class="prose dark:prose-invert max-w-none flex-1 text-gray-700 dark:text-zinc-300"
                                 v-html="getOptionHtml(originalOpsi)"
                             ></div>
                         </label>
@@ -156,11 +156,11 @@
                                 aliasOpsi, originalOpsi
                             ) in pgOptionsMapping"
                             :key="originalOpsi"
-                            class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all hover:bg-gray-50"
+                            class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all hover:bg-gray-50 dark:hover:bg-zinc-800/40"
                             :class="
                                 selectedComplexAnswers.includes(aliasOpsi)
-                                    ? 'border-blue-500 bg-blue-50 hover:bg-blue-50'
-                                    : 'border-gray-100'
+                                    ? 'border-blue-500 bg-blue-50 hover:bg-blue-50 dark:border-blue-900/30 dark:bg-blue-950/20'
+                                    : 'border-gray-100 dark:border-zinc-800'
                             "
                         >
                             <div class="pt-1">
@@ -178,11 +178,11 @@
                                     class="mt-0.5 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                             </div>
-                            <div class="min-w-[24px] text-lg font-medium">
+                            <div class="min-w-[24px] text-lg font-medium text-gray-900 dark:text-zinc-100">
                                 {{ aliasOpsi }}.
                             </div>
                             <div
-                                class="prose max-w-none flex-1 text-gray-700"
+                                class="prose dark:prose-invert max-w-none flex-1 text-gray-700 dark:text-zinc-300"
                                 v-html="getOptionHtml(originalOpsi)"
                             ></div>
                         </label>
@@ -194,7 +194,7 @@
                         class="mt-auto"
                     >
                         <p
-                            class="mb-6 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm font-semibold text-blue-600"
+                            class="mb-6 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm font-semibold text-blue-600 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400"
                         >
                             <span
                                 class="h-2 w-2 animate-ping rounded-full bg-blue-500"
@@ -205,7 +205,7 @@
 
                         <div
                             ref="studentContainerRef"
-                            class="relative grid grid-cols-12 gap-8 rounded-xl border border-gray-100 bg-gray-50/50 p-4"
+                            class="relative grid grid-cols-12 gap-2 sm:gap-8 rounded-xl border border-gray-100 bg-gray-50/50 p-2 sm:p-4 dark:border-zinc-800 dark:bg-zinc-950/40"
                         >
                             <!-- Connecting SVG Overlay -->
                             <svg
@@ -254,25 +254,25 @@
                                     v-for="(item, idx) in matchingLeftItems"
                                     :key="'left-' + item.id"
                                     @click="handleLeftItemClick(item.id)"
-                                    class="relative flex min-h-[50px] cursor-pointer items-center justify-between rounded-lg border-2 bg-white p-4 shadow-sm transition-all hover:shadow-md"
+                                    class="relative flex min-h-[50px] cursor-pointer items-center justify-between rounded-lg border-2 bg-white p-2 sm:p-4 shadow-sm transition-all hover:shadow-md dark:bg-zinc-900"
                                     :class="[
                                         selectedLeftId === item.id
-                                            ? 'border-blue-500 bg-blue-50/30 ring-2 ring-blue-100'
-                                            : 'border-gray-200',
+                                            ? 'border-blue-500 bg-blue-50/30 ring-2 ring-blue-100 dark:border-blue-600 dark:bg-blue-950/20 dark:ring-blue-900/40'
+                                            : 'border-gray-200 dark:border-zinc-800',
                                         studentConnections[item.id] !==
                                         undefined
-                                            ? 'border-emerald-200 bg-emerald-50/10'
+                                            ? 'border-emerald-200 bg-emerald-50/10 dark:border-emerald-800/40 dark:bg-emerald-950/10'
                                             : '',
                                     ]"
                                 >
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
                                         <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-blue-100 bg-blue-50 text-xs font-bold text-blue-600"
+                                            class="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded border border-blue-100 bg-blue-50 text-[10px] sm:text-xs font-bold text-blue-600 dark:border-blue-900/30 dark:bg-blue-950/20 dark:text-blue-400"
                                         >
                                             {{ idx + 1 }}
                                         </span>
                                         <div
-                                            class="prose max-w-none text-sm leading-relaxed font-medium text-gray-700"
+                                            class="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed font-medium text-gray-700 dark:text-zinc-300"
                                             v-html="item.text"
                                         ></div>
                                     </div>
@@ -323,17 +323,17 @@
                                 >
                                     Kolom Kanan
                                 </div>
-                                <div
+                                 <div
                                     v-for="(item, idx) in matchingRightItems"
                                     :key="'right-' + item.id"
                                     @click="handleRightItemClick(item.id)"
-                                    class="relative flex min-h-[50px] cursor-pointer items-center rounded-lg border-2 bg-white p-4 shadow-sm transition-all hover:shadow-md"
+                                    class="relative flex min-h-[50px] cursor-pointer items-center rounded-lg border-2 bg-white p-2 sm:p-4 shadow-sm transition-all hover:shadow-md dark:bg-zinc-900"
                                     :class="[
                                         selectedLeftId !== null
-                                            ? 'border-blue-200 hover:border-blue-400'
-                                            : 'border-gray-200',
+                                            ? 'border-blue-200 hover:border-blue-400 dark:border-blue-800/60 dark:hover:border-blue-600'
+                                            : 'border-gray-200 dark:border-zinc-800',
                                     ]"
-                                >
+                                 >
                                     <!-- Connector Dot -->
                                     <div
                                         :class="[
@@ -341,14 +341,14 @@
                                         ]"
                                         class="absolute top-1/2 -left-[7px] h-3.5 w-3.5 -translate-y-1/2 cursor-pointer rounded-full border-2 border-white bg-emerald-500 shadow-md transition-transform hover:scale-110"
                                     ></div>
-                                    <div class="flex items-center gap-3 pl-3">
+                                    <div class="flex items-center gap-1.5 sm:gap-3 pl-1 sm:pl-3 min-w-0">
                                         <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-emerald-100 bg-emerald-50 text-xs font-bold text-emerald-600"
+                                            class="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded border border-emerald-100 bg-emerald-50 text-[10px] sm:text-xs font-bold text-emerald-600 dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-400"
                                         >
                                             {{ String.fromCharCode(65 + idx) }}
                                         </span>
                                         <div
-                                            class="prose max-w-none text-sm leading-relaxed font-medium text-gray-700"
+                                            class="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed font-medium text-gray-700 dark:text-zinc-300"
                                             v-html="item.text"
                                         ></div>
                                     </div>
@@ -359,11 +359,11 @@
                 </div>
 
                 <!-- Navigation Buttons -->
-                <div class="mt-8 flex gap-3 border-t border-gray-100 pt-6">
+                <div class="mt-8 flex gap-3 border-t border-gray-100 pt-6 dark:border-zinc-800">
                     <button
                         @click="goToPreviousQuestion"
                         :disabled="isFirstQuestion"
-                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-gray-200 px-4 py-3 font-bold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-400"
+                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-gray-200 px-4 py-3 font-bold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:disabled:border-zinc-805 dark:disabled:bg-zinc-900/45 dark:disabled:text-zinc-600"
                     >
                         <svg
                             class="h-5 w-5"
@@ -381,9 +381,9 @@
                         Sebelumnya
                     </button>
                     <button
+                        v-if="!isLastQuestion"
                         @click="goToNextQuestion"
-                        :disabled="isLastQuestion"
-                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-blue-600 bg-blue-600 px-4 py-3 font-bold text-white transition-all hover:border-blue-700 hover:bg-blue-700 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-200 disabled:text-gray-400"
+                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-blue-600 bg-blue-600 px-4 py-3 font-bold text-white transition-all hover:border-blue-700 hover:bg-blue-700"
                     >
                         Selanjutnya
                         <svg
@@ -397,6 +397,26 @@
                                 stroke-linejoin="round"
                                 stroke-width="2"
                                 d="M9 5l7 7-7 7"
+                            ></path>
+                        </svg>
+                    </button>
+                    <button
+                        v-else
+                        @click="confirmSelesai"
+                        class="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-red-600 bg-red-600 px-4 py-3 font-bold text-white transition-all hover:border-red-700 hover:bg-red-700"
+                    >
+                        Selesai
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
                             ></path>
                         </svg>
                     </button>
@@ -426,13 +446,13 @@
                         class="relative flex aspect-square items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors"
                         :class="[
                             soal.id === examStore.activeSoalId
-                                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                : 'border-gray-200 text-gray-600 hover:border-gray-300',
+                                ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400'
+                                : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-700',
                             soal.jawaban_siswa && !soal.ragu_ragu
-                                ? 'border-blue-600 bg-blue-600 text-white'
+                                ? 'border-blue-600 bg-blue-600 text-white dark:border-blue-600 dark:bg-blue-600'
                                 : '',
                             soal.jawaban_siswa && soal.ragu_ragu
-                                ? 'border-amber-400 bg-amber-400 text-white'
+                                ? 'border-amber-400 bg-amber-400 text-white dark:border-amber-500 dark:bg-amber-500'
                                 : '',
                         ]"
                     >
@@ -444,9 +464,9 @@
                     </button>
                 </div>
 
-                <div class="border-t border-gray-100 pt-6">
+                <div class="border-t border-gray-100 pt-6 dark:border-zinc-850">
                     <button
-                        @click="confirmSelesai; showNavigationModal = false"
+                        @click="confirmSelesai(); showNavigationModal = false"
                         class="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 font-bold text-white shadow-sm transition-all hover:bg-red-700"
                     >
                         <svg
@@ -469,7 +489,7 @@
 
             <DialogFooter>
                 <DialogClose as-child>
-                    <button class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <button class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700/80">
                         Tutup
                     </button>
                 </DialogClose>
@@ -487,12 +507,13 @@
             <DialogFooter>
                 <DialogClose as-child>
                     <button
-                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700/80"
                     >
                         Batal
                     </button>
                 </DialogClose>
                 <button
+                    v-if="unansweredNumbers.length === 0"
                     @click="handleSelesai"
                     class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                 >
@@ -516,16 +537,18 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { mulai, soal, selesai } from '@/routes/ujian';
-import { useExamStore } from '@/stores/exam';
+import { dashboard } from '@/routes';
+import { useExamStore, type SoalSiswa, type Jadwal } from '@/stores/exam';
 
-const props = defineProps({
-    jadwal: Object,
-});
+const props = defineProps<{
+    jadwal?: Jadwal;
+    sisa_waktu?: number;
+}>();
 
 const examStore = useExamStore();
 const isLoading = ref(true);
-const selectedAnswer = ref(null);
-const selectedComplexAnswers = ref([]);
+const selectedAnswer = ref<string | null>(null);
+const selectedComplexAnswers = ref<string[]>([]);
 const isRaguRagu = ref(false);
 const showConfirmDialog = ref(false);
 const confirmMessage = ref('');
@@ -533,10 +556,10 @@ const showNavigationModal = ref(false);
 
 const remainingTimeDisplay = ref('00:00:00');
 
-const activeSoal = computed(() => examStore.activeSoal);
+const activeSoal = computed<SoalSiswa | null>(() => examStore.activeSoal);
 
 // Helper to safely parse JSON answers for Ganda Kompleks and Menjodohkan
-const parseJawaban = (raw) => {
+const parseJawaban = (raw: string | null): string[] => {
     if (!raw) {
         return [];
     }
@@ -551,31 +574,32 @@ const parseJawaban = (raw) => {
 };
 
 // Mapping original A,B,C,D,E to what user sees (alias)
-const pgOptionsMapping = computed(() => {
+const pgOptionsMapping = computed<Record<string, string>>(() => {
     if (!activeSoal.value) {
         return {};
     }
 
     const s = activeSoal.value;
-    const map = {};
+    const map: Record<string, string> = {};
+    const limit = s.opsi ?? 5;
 
-    if (s.opsi_alias_a) {
+    if (limit >= 1 && s.opsi_alias_a) {
         map['A'] = s.opsi_alias_a;
     }
 
-    if (s.opsi_alias_b) {
+    if (limit >= 2 && s.opsi_alias_b) {
         map['B'] = s.opsi_alias_b;
     }
 
-    if (s.opsi_alias_c) {
+    if (limit >= 3 && s.opsi_alias_c) {
         map['C'] = s.opsi_alias_c;
     }
 
-    if (s.opsi_alias_d) {
+    if (limit >= 4 && s.opsi_alias_d) {
         map['D'] = s.opsi_alias_d;
     }
 
-    if (s.opsi_alias_e) {
+    if (limit >= 5 && s.opsi_alias_e) {
         map['E'] = s.opsi_alias_e;
     }
 
@@ -585,24 +609,25 @@ const pgOptionsMapping = computed(() => {
 });
 
 const currentQuestionPosition = computed(() => {
-    if (!activeSoal.value || examStore.soalList.length === 0) {
+    const active = activeSoal.value;
+    if (!active || examStore.soalList.length === 0) {
         return 0;
     }
 
     return (
-        examStore.soalList.findIndex((s) => s.id === activeSoal.value.id) + 1
+        examStore.soalList.findIndex((s) => s.id === active.id) + 1
     );
 });
 
 const totalQuestionCount = computed(() => examStore.soalList.length);
 
-const getOptionHtml = (originalOpsi) => {
+const getOptionHtml = (originalOpsi: string): string => {
     if (!activeSoal.value) {
         return '';
     }
 
     const key = originalOpsi.toLowerCase();
-    const soalData = activeSoal.value.soal || {};
+    const soalData = (activeSoal.value.soal || {}) as Record<string, any>;
 
     return (
         soalData[`file_${key}`] ||
@@ -619,19 +644,19 @@ watch(activeSoal, (newSoal) => {
         isRaguRagu.value = newSoal.ragu_ragu;
 
         if (newSoal.jenis_soal === 2) {
-            selectedComplexAnswers.value = parseJawaban(newSoal.jawaban_siswa);
+            selectedComplexAnswers.value = parseJawaban(newSoal.jawaban_siswa ?? null);
             selectedAnswer.value =
                 selectedComplexAnswers.value.length > 0
                     ? JSON.stringify(selectedComplexAnswers.value)
                     : null;
         } else {
-            selectedAnswer.value = newSoal.jawaban_siswa;
+            selectedAnswer.value = newSoal.jawaban_siswa ?? null;
             selectedComplexAnswers.value = [];
         }
     }
 });
 
-const toggleStudentComplexAnswer = (aliasOpsi) => {
+const toggleStudentComplexAnswer = (aliasOpsi: string) => {
     const current = [...selectedComplexAnswers.value];
     const idx = current.indexOf(aliasOpsi);
 
@@ -649,12 +674,17 @@ const toggleStudentComplexAnswer = (aliasOpsi) => {
 };
 
 // Interactive matching (Menjodohkan) state & methods
-const selectedLeftId = ref(null);
-const studentConnections = ref({});
-const studentContainerRef = ref(null);
-const studentLines = ref([]);
+const selectedLeftId = ref<number | null>(null);
+const studentConnections = ref<Record<number, number>>({});
+const studentContainerRef = ref<HTMLDivElement | null>(null);
 
-const matchingLeftItems = computed(() => {
+interface StudentLine {
+    d: string;
+    color: string;
+}
+const studentLines = ref<StudentLine[]>([]);
+
+const matchingLeftItems = computed<Array<{ id: number; text: string }>>(() => {
     if (!activeSoal.value || activeSoal.value.jenis_soal !== 3) {
         return [];
     }
@@ -662,7 +692,7 @@ const matchingLeftItems = computed(() => {
     return activeSoal.value.soal?.matching_left || [];
 });
 
-const matchingRightItems = computed(() => {
+const matchingRightItems = computed<Array<{ id: number; text: string }>>(() => {
     if (!activeSoal.value || activeSoal.value.jenis_soal !== 3) {
         return [];
     }
@@ -709,7 +739,7 @@ const updateStudentLines = () => {
     }
 
     const containerRect = studentContainerRef.value.getBoundingClientRect();
-    const tempLines = [];
+    const tempLines: StudentLine[] = [];
 
     const colors = [
         '#3B82F6', // Blue
@@ -769,7 +799,7 @@ watch(
 );
 
 // Mutation observer for student container to handle size updates
-let studentObserver = null;
+let studentObserver: MutationObserver | null = null;
 watch(studentContainerRef, (newRef) => {
     if (newRef) {
         if (studentObserver) {
@@ -791,7 +821,7 @@ watch(studentContainerRef, (newRef) => {
     }
 });
 
-const handleLeftItemClick = (leftId) => {
+const handleLeftItemClick = (leftId: number) => {
     if (selectedLeftId.value === leftId) {
         selectedLeftId.value = null;
     } else {
@@ -799,7 +829,7 @@ const handleLeftItemClick = (leftId) => {
     }
 };
 
-const handleRightItemClick = (rightId) => {
+const handleRightItemClick = (rightId: number) => {
     if (selectedLeftId.value === null) {
         return;
     }
@@ -811,17 +841,21 @@ const handleRightItemClick = (rightId) => {
     saveMatchingAnswer();
 };
 
-const removeConnection = (leftId) => {
+const removeConnection = (leftId: number) => {
     delete studentConnections.value[leftId];
     saveMatchingAnswer();
 };
 
 const saveMatchingAnswer = () => {
-    const connectionsArray = [];
+    interface MatchingConnection {
+        kiri_id: number;
+        kanan_id: number;
+    }
+    const connectionsArray: MatchingConnection[] = [];
     Object.entries(studentConnections.value).forEach(([kiriId, kananId]) => {
         connectionsArray.push({
             kiri_id: parseInt(kiriId),
-            kanan_id: parseInt(kananId),
+            kanan_id: kananId,
         });
     });
 
@@ -829,7 +863,22 @@ const saveMatchingAnswer = () => {
     saveAnswer();
 };
 
+const enterFullscreen = () => {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(err => {
+            console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+    }
+};
+
 onMounted(async () => {
+    enterFullscreen();
+
+    if (!props.jadwal) {
+        console.error('Jadwal is undefined');
+        return;
+    }
     examStore.setJadwal(props.jadwal);
     examStore.initNetworkListeners();
 
@@ -840,7 +889,7 @@ onMounted(async () => {
         // 1. Mulai ujian (Backend generate soal)
         const csrfToken = document
             .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content');
+            ?.getAttribute('content') || '';
 
         await fetch(mulai({ jadwal: props.jadwal.id }).url, {
             method: 'POST',
@@ -859,8 +908,8 @@ onMounted(async () => {
         examStore.setSoalList(data.data);
         isLoading.value = false;
 
-        // Start timer using available duration from jadwal
-        startTimer(Number(props.jadwal.durasi_ujian || 0) * 60);
+        // Start timer using remaining seconds from server
+        startTimer(Number(props.sisa_waktu || 0));
     } catch (error) {
         console.error('Gagal memuat ujian', error);
         alert('Gagal memuat soal ujian. Harap periksa koneksi internet.');
@@ -884,9 +933,14 @@ const saveAnswer = () => {
     );
 };
 
+const unansweredNumbers = ref<string[]>([]);
 const confirmSelesai = () => {
-    if (examStore.unansweredCount > 0) {
-        confirmMessage.value = `Masih ada ${examStore.unansweredCount} soal yang belum dijawab. Yakin ingin selesai?`;
+    unansweredNumbers.value = examStore.soalList
+        .filter(s => !s.jawaban_siswa)
+        .map(s => String(s.no_soal_alias));
+        
+    if (unansweredNumbers.value.length > 0) {
+        confirmMessage.value = `Masih ada ${unansweredNumbers.value.length} soal yang belum dijawab, yaitu nomor: ${unansweredNumbers.value.join(', ')}. Anda tidak bisa menyelesaikan ujian sebelum semua soal dijawab.`;
     } else {
         confirmMessage.value = 'Apakah Anda yakin ingin menyelesaikan ujian ini?';
     }
@@ -894,12 +948,13 @@ const confirmSelesai = () => {
 };
 
 const goToPreviousQuestion = () => {
-    if (!activeSoal.value || examStore.soalList.length === 0) {
+    const active = activeSoal.value;
+    if (!active || examStore.soalList.length === 0) {
         return;
     }
 
     const currentIndex = examStore.soalList.findIndex(
-        (s) => s.id === activeSoal.value.id,
+        (s) => s.id === active.id,
     );
     if (currentIndex > 0) {
         examStore.setActiveSoal(examStore.soalList[currentIndex - 1].id);
@@ -907,12 +962,13 @@ const goToPreviousQuestion = () => {
 };
 
 const goToNextQuestion = () => {
-    if (!activeSoal.value || examStore.soalList.length === 0) {
+    const active = activeSoal.value;
+    if (!active || examStore.soalList.length === 0) {
         return;
     }
 
     const currentIndex = examStore.soalList.findIndex(
-        (s) => s.id === activeSoal.value.id,
+        (s) => s.id === active.id,
     );
     if (currentIndex < examStore.soalList.length - 1) {
         examStore.setActiveSoal(examStore.soalList[currentIndex + 1].id);
@@ -920,32 +976,37 @@ const goToNextQuestion = () => {
 };
 
 const isFirstQuestion = computed(() => {
-    if (!activeSoal.value || examStore.soalList.length === 0) {
+    const active = activeSoal.value;
+    if (!active || examStore.soalList.length === 0) {
         return true;
     }
 
-    return examStore.soalList[0].id === activeSoal.value.id;
+    return examStore.soalList[0].id === active.id;
 });
 
 const isLastQuestion = computed(() => {
-    if (!activeSoal.value || examStore.soalList.length === 0) {
+    const active = activeSoal.value;
+    if (!active || examStore.soalList.length === 0) {
         return true;
     }
 
     return (
         examStore.soalList[examStore.soalList.length - 1].id ===
-        activeSoal.value.id
+        active.id
     );
 });
 
 const handleSelesai = async () => {
+    if (!props.jadwal) {
+        return;
+    }
     showConfirmDialog.value = false;
 
 
     try {
         const csrfToken = document
             .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content');
+            ?.getAttribute('content') || '';
         const response = await fetch(selesai({ jadwal: props.jadwal.id }).url, {
             method: 'POST',
             headers: {
@@ -955,7 +1016,7 @@ const handleSelesai = async () => {
         });
 
         if (response.ok) {
-            router.visit(route('dashboard'));
+            router.visit(dashboard().url);
         } else {
             const data = await response.json();
             alert(data.message || 'Gagal mengakhiri ujian.');
@@ -965,22 +1026,21 @@ const handleSelesai = async () => {
     }
 };
 
-const startTimer = (durationSeconds) => {
+const startTimer = (durationSeconds: number) => {
     if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
         remainingTimeDisplay.value = '00:00:00';
         return;
     }
 
-
-    let timer = durationSeconds;
+    let timer = Math.floor(durationSeconds);
     setInterval(() => {
-        let h = parseInt(timer / 3600, 10);
-        let m = parseInt((timer % 3600) / 60, 10);
-        let s = parseInt(timer % 60, 10);
+        const hVal = Math.floor(timer / 3600);
+        const mVal = Math.floor((timer % 3600) / 60);
+        const sVal = Math.floor(timer % 60);
 
-        h = h < 10 ? '0' + h : h;
-        m = m < 10 ? '0' + m : m;
-        s = s < 10 ? '0' + s : s;
+        const h = hVal < 10 ? '0' + hVal : String(hVal);
+        const m = mVal < 10 ? '0' + mVal : String(mVal);
+        const s = sVal < 10 ? '0' + sVal : String(sVal);
 
         remainingTimeDisplay.value = `${h}:${m}:${s}`;
 

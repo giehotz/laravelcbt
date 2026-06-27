@@ -59,3 +59,6 @@ test_log.txt
 
 # Utility scripts
 /scripts/
+
+#graphify-out
+/graphify-out/

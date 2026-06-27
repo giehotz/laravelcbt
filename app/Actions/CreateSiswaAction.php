@@ -6,7 +6,6 @@ use App\Models\Master\BukuInduk;
 use App\Models\Master\Siswa;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class CreateSiswaAction
 {
@@ -21,7 +20,7 @@ class CreateSiswaAction
                 'name' => $data['nama'],
                 'email' => ! empty($data['email']) ? $data['email'] : $data['username'].'@sch.id',
                 'username' => $data['username'],
-                'password' => Hash::make($data['password'] ?? 'password'),
+                'password' => $data['password'] ?? 'password',
             ]);
 
             // Assign Siswa role
@@ -34,6 +33,7 @@ class CreateSiswaAction
                 'nis' => $data['nis'] ?? null,
                 'nama' => $data['nama'],
                 'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
+                'kelas_awal' => $data['kelas_awal'] ?? null,
                 'tahun_masuk' => $data['tahun_masuk'] ?? null,
                 'sekolah_asal' => $data['sekolah_asal'] ?? null,
                 'tempat_lahir' => $data['tempat_lahir'] ?? null,
@@ -43,7 +43,7 @@ class CreateSiswaAction
                 'email' => $data['email'] ?? null,
                 'foto' => $data['foto'] ?? 'siswa.png',
                 'anak_ke' => $data['anak_ke'] ?? null,
-                'status_keluarga' => $data['status_keluarga'] ?? null,
+                'status_keluarga' => isset($data['status_keluarga']) ? substr($data['status_keluarga'], 0, 1) : null,
                 'alamat' => $data['alamat'] ?? null,
                 'rt' => $data['rt'] ?? null,
                 'rw' => $data['rw'] ?? null,

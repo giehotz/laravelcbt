@@ -13,11 +13,25 @@ class SoalSiswa extends Model
 
     protected $table = 'cbt_soal_siswa';
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'jawaban_siswa',
+        'ragu_ragu',
+    ];
+
+    protected $hidden = [
+        'jawaban_benar',
+        'jawaban_alias',
+        'opsi_alias_a',
+        'opsi_alias_b',
+        'opsi_alias_c',
+        'opsi_alias_d',
+        'opsi_alias_e',
+    ];
 
     protected $casts = [
         'soal_end' => 'boolean',
         'nilai_otomatis' => 'boolean',
+        'ragu_ragu' => 'boolean',
     ];
 
     public function siswa(): BelongsTo

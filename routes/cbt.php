@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Cbt\AturRuangSesiController;
 use App\Http\Controllers\Cbt\BankSoalController;
+use App\Http\Controllers\Cbt\HasilUjianController;
 use App\Http\Controllers\Cbt\JadwalController;
 use App\Http\Controllers\Cbt\JenisUjianController;
 use App\Http\Controllers\Cbt\KoreksiController;
@@ -97,8 +98,22 @@ Route::middleware(['role:superadmin|guru'])->prefix('koreksi')->name('koreksi.')
 // Fase 6: Reporting & Document Generation
 Route::middleware(['role:superadmin|operator|kepsek'])->prefix('report')->name('report.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('/cetak-kartu', [ReportController::class, 'cetakKartu'])->name('cetak-kartu');
     Route::get('/cetak-daftar-hadir', [ReportController::class, 'cetakDaftarHadir'])->name('cetak-daftar-hadir');
     Route::get('/cetak-berita-acara', [ReportController::class, 'cetakBeritaAcara'])->name('cetak-berita-acara');
     Route::get('/rekap-nilai', [ReportController::class, 'rekapNilai'])->name('rekap-nilai');
+});
+
+// Fase 7: Hasil Ujian
+Route::middleware(['role:superadmin|operator|kepsek|guru'])->prefix('hasil-ujian')->name('hasil-ujian.')->group(function () {
+    Route::get('/', [HasilUjianController::class, 'index'])->name('index');
+    Route::get('/{jadwal}', [HasilUjianController::class, 'show'])->name('show');
+});
+
+// Cetak Kartu Peserta Ujian (By Kelas)
+use App\Http\Controllers\Cbt\CetakKartuController;
+
+Route::middleware(['role:superadmin|operator|proktor|kepsek'])->prefix('cetak-kartu')->name('cetak-kartu.')->group(function () {
+    Route::get('/', [CetakKartuController::class, 'index'])->name('index');
+    Route::post('/', [CetakKartuController::class, 'store'])->name('store');
+    Route::get('/print', [CetakKartuController::class, 'print'])->name('print');
 });

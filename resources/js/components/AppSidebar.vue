@@ -3,27 +3,39 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     LayoutGrid,
     Calendar,
+    CalendarDays,
+    ClipboardList,
     Clock,
+    Database,
+    FileCheck2,
+    GraduationCap,
+    IdCard,
+    LayoutDashboard,
+    MonitorPlay,
+    Printer,
+    Settings,
+    ShieldCheck,
+    Ticket,
+    UserCog,
+    Users,
+    Users2,
+    BarChart3,
     School,
     UserCheck,
-    GraduationCap,
     ShieldAlert,
     Layers,
     Milestone,
     BookOpen,
-    Users,
     Compass,
-    Database,
     Clock4,
-    MonitorPlay,
     Hash,
     Map,
     Library,
     Key,
     Activity,
     CheckSquare,
-    Printer,
 } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -38,33 +50,34 @@ import {
     SidebarGroupLabel,
     useSidebar,
 } from '@/components/ui/sidebar';
-import { index as tpIndex } from '@/routes/master/tahun-pelajaran';
-import { index as levelIndex } from '@/routes/master/level-kelas';
+import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { dashboard } from '@/routes';
+import { index as cbtAlokasiWaktuIndex } from '@/routes/cbt/alokasi-waktu';
+import { index as cbtAturRuangIndex } from '@/routes/cbt/atur-ruang';
+import { index as cbtBankSoalIndex } from '@/routes/cbt/bank-soal';
+import { index as cbtJenisIndex } from '@/routes/cbt/jenis';
+import { index as ekstraIndex } from '@/routes/master/ekstra';
 import { index as jurusanIndex } from '@/routes/master/jurusan';
+import { index as levelIndex } from '@/routes/master/level-kelas';
+import { index as tpIndex } from '@/routes/master/tahun-pelajaran';
 import { index as mapelIndex } from '@/routes/master/mapel';
 import { index as kelasIndex } from '@/routes/master/kelas';
-import { index as ekstraIndex } from '@/routes/master/ekstra';
 import { index as smtIndex } from '@/routes/master/semester';
 import { edit as schoolEdit } from '@/routes/setting/sekolah';
 import { index as adminIndex } from '@/routes/setting/user/admin';
 import { index as guruIndex } from '@/routes/setting/user/guru';
 import { index as siswaIndex } from '@/routes/setting/user/siswa';
-import { index as cbtJenisIndex } from '@/routes/cbt/jenis';
 import { index as cbtSesiIndex } from '@/routes/cbt/sesi';
 import { index as cbtRuangIndex } from '@/routes/cbt/ruang';
 import { index as cbtNomorPesertaIndex } from '@/routes/cbt/nomor-peserta';
-import { index as cbtAturRuangIndex } from '@/routes/cbt/atur-ruang';
-import { index as cbtBankSoalIndex } from '@/routes/cbt/bank-soal';
 import { index as cbtTokenIndex } from '@/routes/cbt/token';
 import { index as cbtJadwalIndex } from '@/routes/cbt/jadwal';
 import { index as cbtPengawasIndex } from '@/routes/cbt/pengawas';
-import { index as cbtAlokasiWaktuIndex } from '@/routes/cbt/alokasi-waktu';
 import { index as cbtMonitoringIndex } from '@/routes/cbt/monitoring';
 import { index as cbtKoreksiIndex } from '@/routes/cbt/koreksi';
 import { index as cbtReportIndex } from '@/routes/cbt/report';
-import { dashboard } from '@/routes';
-import { useCurrentUrl } from '@/composables/useCurrentUrl';
-import { computed } from 'vue';
+import { index as cbtCetakKartuIndex } from '@/routes/cbt/cetak-kartu';
+import { index as cbtHasilUjianIndex } from '@/routes/cbt/hasil-ujian';
 
 const page = usePage();
 const { isCurrentUrl } = useCurrentUrl();
@@ -406,6 +419,33 @@ const canAccessReport = computed(() =>
                             <Link :href="cbtKoreksiIndex.url()">
                                 <CheckSquare class="h-4 w-4" />
                                 <span>Koreksi Essai</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem v-if="canAccessReport">
+                        <SidebarMenuButton
+                            as-child
+                            :is-active="$page.url.startsWith('/cbt/cetak-kartu')"
+                            tooltip="Cetak Kartu"
+                            class="transition-all duration-200"
+                        >
+                            <Link :href="cbtCetakKartuIndex.url()">
+                                <IdCard class="h-4 w-4" />
+                                <span>Cetak Kartu</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem v-if="canAccessReport">
+                        <SidebarMenuButton
+                            as-child
+                            :is-active="$page.url.startsWith('/cbt/hasil-ujian')"
+                            tooltip="Hasil Ujian"
+                            class="transition-all duration-200"
+                        >
+                            <Link :href="cbtHasilUjianIndex.url()">
+                                <BarChart3 class="h-4 w-4" />
+                                <span>Hasil Ujian</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

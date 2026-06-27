@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SoalSiswaResource extends JsonResource
+class SoalKoreksiResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,26 +14,6 @@ class SoalSiswaResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // $this->durasi will be loaded when we fetch the questions
-        // and $this->jadwal will also be loaded
-        $bolehLihatKunci = $this->whenLoaded('jadwal', function () {
-            // Kita butuh tau status ujian siswa. Bisa di-pass lewat parameter request
-            // atau lewat relasi tambahan. Anggap saja kita load relasi durasi jika ini endpoint siswa.
-            // Jika guru yang koreksi, bisa load khusus atau tidak pakai resource ini.
-            $durasi = $this->siswa ? $this->siswa->durasi()->where('jadwal_id', $this->jadwal_id)->first() : null;
-
-            // Aturan kondisional sesuai review user:
-            if ($durasi && $durasi->status === 2 && $this->jadwal->hasil_tampil) {
-                return true;
-            }
-            // Juga jika guru yang koreksi bisa dicek dari role
-            if (auth()->check() && (auth()->user()->hasRole('guru') || auth()->user()->hasRole('superadmin') || auth()->user()->hasRole('admin'))) {
-                return true;
-            }
-
-            return false;
-        }, false);
-
         return [
             'id' => $this->id,
             'jenis_soal' => $this->jenis_soal,
@@ -46,6 +26,8 @@ class SoalSiswaResource extends JsonResource
             'jawaban_siswa' => $this->jawaban_siswa,
             'ragu_ragu' => $this->ragu_ragu ?? false,
             'soal_end' => $this->soal_end,
+            'jawaban_benar' => $this->jawaban_benar,
+            'jawaban_alias' => $this->jawaban_alias,
             'soal' => $this->whenLoaded('soal', function () {
                 $data = [
                     'soal' => $this->soal->soal,
@@ -85,8 +67,6 @@ class SoalSiswaResource extends JsonResource
 
                 return $data;
             }),
-            'jawaban_benar' => $bolehLihatKunci ? $this->jawaban_benar : null,
-            'jawaban_alias' => $bolehLihatKunci ? $this->jawaban_alias : null,
         ];
     }
 }

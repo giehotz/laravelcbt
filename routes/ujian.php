@@ -17,13 +17,17 @@ Route::middleware(['auth', 'verified', 'role:siswa'])->prefix('ujian')->name('uj
         Route::get('/{jadwal}/soal', [CbtUjianController::class, 'getSoal'])->name('soal');
 
         // API untuk menyimpan jawaban tunggal
-        Route::post('/soal-siswa/{soalSiswa}/simpan', [CbtUjianController::class, 'simpanJawaban'])->name('simpan');
+        Route::post('/soal-siswa/{soalSiswa}/simpan', [CbtUjianController::class, 'simpanJawaban'])
+            ->name('simpan')
+            ->middleware(['can:update,soalSiswa', 'throttle:simpan_jawaban']);
 
     });
 
     // Mulai ujian (set start time & distribusi soal jika belum)
     // Tidak diproteksi check.exam.session karena di titik ini durasi belum terbentuk
-    Route::post('/{jadwal}/mulai', [CbtUjianController::class, 'mulaiUjian'])->name('mulai');
+    Route::post('/{jadwal}/mulai', [CbtUjianController::class, 'mulaiUjian'])
+        ->name('mulai')
+        ->middleware('throttle:mulai_ujian');
 
     // Selesai ujian (menutup sesi)
     Route::post('/{jadwal}/selesai', [CbtUjianController::class, 'selesaiUjian'])->name('selesai');

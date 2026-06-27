@@ -161,12 +161,10 @@ const updateJawabanInForm = () => {
     leftItems.value.forEach((lItem) => {
         const rId = editorConnections.value[lItem.id];
         const rItem = rightItems.value.find((r) => r.id === rId);
-        if (rItem) {
-            pairs.push({
-                kiri: lItem.text,
-                kanan: rItem.text,
-            });
-        }
+        pairs.push({
+            kiri: lItem.text,
+            kanan: rItem ? rItem.text : '',
+        });
     });
     props.form.jawaban = pairs as any;
 };
